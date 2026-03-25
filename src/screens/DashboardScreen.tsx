@@ -33,18 +33,24 @@ export default function DashboardScreen() {
 
   const [updateInfo, setUpdateInfo] = React.useState<{
     hasUpdate: boolean;
+    isMandatory: boolean;
+    isAppDisabled: boolean;
+    disabledMessage?: string;
     version?: string;
     changelog?: string;
     link?: string;
-  }>({ hasUpdate: false });
+  }>({ hasUpdate: false, isMandatory: false, isAppDisabled: false });
 
   React.useEffect(() => {
     // Check for updates on mount
     const check = async () => {
       const info = await UpdateService.checkForUpdate();
-      if (info?.hasUpdate) {
+      if (info) {
         setUpdateInfo({
-          hasUpdate: true,
+          hasUpdate: info.hasUpdate,
+          isMandatory: info.isMandatory,
+          isAppDisabled: info.isAppDisabled,
+          disabledMessage: info.disabledMessage,
           version: info.latestVersion,
           changelog: info.changelog,
           link: info.link,
@@ -53,6 +59,45 @@ export default function DashboardScreen() {
     };
     check();
   }, []);
+
+  const renderDisabledApp = () => (
+    <View style={[StyleSheet.absoluteFill, styles.overlayContainer, { zIndex: 9999 }]}>
+      <LinearGradient colors={["#0F172A", "#020617"]} style={StyleSheet.absoluteFill} />
+      <View style={styles.overlayContent}>
+        <View style={[styles.overlayIconBox, { backgroundColor: `${Colors.red}20` }]}>
+          <Ionicons name="construct-outline" size={48} color={Colors.red} />
+        </View>
+        <Text style={styles.overlayTitle}>عذراً، التطبيق متوقف</Text>
+        <Text style={styles.overlayDesc}>{updateInfo.disabledMessage}</Text>
+        <Text style={styles.overlayHint}>يرجى مراجعة صفحاتنا الرسمية أو المحاولة لاحقاً.</Text>
+      </View>
+    </View>
+  );
+
+  const renderMandatoryUpdate = () => (
+    <View style={[StyleSheet.absoluteFill, styles.overlayContainer, { zIndex: 9999 }]}>
+      <LinearGradient colors={[Colors.primary, Colors.primaryDark]} style={StyleSheet.absoluteFill} />
+      <View style={styles.overlayContent}>
+        <View style={styles.overlayIconBoxWhite}>
+          <Ionicons name="cloud-download" size={48} color={Colors.primary} />
+        </View>
+        <Text style={[styles.overlayTitle, { color: "#FFF" }]}>تحديث إلزامي مطلوب</Text>
+        <Text style={[styles.overlayDesc, { color: "rgba(255,255,255,0.8)" }]}>
+          الإصدار الحالي قديم جداً ولم يعد مدعوماً. يرجى التحديث للاستمرار في استخدام الحصون الخمسة.
+        </Text>
+        <Text style={[styles.overlayVersion, { color: "#FFF" }]}>الإصدار الجديد: {updateInfo.version}</Text>
+        <TouchableOpacity 
+          style={styles.overlayUpdateBtn}
+          onPress={() => Linking.openURL(updateInfo.link || "https://github.com/mustafa-ahmad-work/alhousonalkhamsa/releases")}
+        >
+          <Text style={styles.overlayUpdateBtnText}>تحديث الآن</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  if (updateInfo.isAppDisabled) return renderDisabledApp();
+  if (updateInfo.isMandatory) return renderMandatoryUpdate();
 
   const isLoaded = useSelectionStore((state) => state.isLoaded);
   const loadFromStorage = useSelectionStore((state) => state.loadFromStorage);
@@ -192,7 +237,8 @@ export default function DashboardScreen() {
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
-                اهلا {user?.name ?? "أخي"}
+                {new Date().getHours() < 12 ? "صباح الخير" : "مساء الخير"}،{" "}
+                {user?.name ?? "أخي"}
               </Text>
               <Text style={styles.date}>
                 {new Date().toLocaleDateString("ar-EG", {
@@ -598,6 +644,71 @@ const getStyles = (Colors: any) =>
     statDivider: {
       height: 1,
       backgroundColor: Colors.border,
+    },
+
+    // Overlay Styles (Update / Disabled)
+    overlayContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+      padding: Spacing.xl * 2,
+    },
+    overlayContent: {
+      alignItems: "center",
+      width: "100%",
+    },
+    overlayIconBox: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: Spacing.xl,
+    },
+    overlayIconBoxWhite: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: "#FFF",
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: Spacing.xl,
+    },
+    overlayTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+      textAlign: "center",
+      marginBottom: Spacing.md,
+    },
+    overlayDesc: {
+      fontSize: 14,
+      color: Colors.textSecondary,
+      textAlign: "center",
+      lineHeight: 22,
+      marginBottom: Spacing.xl,
+    },
+    overlayVersion: {
+      fontSize: 16,
+      fontWeight: "600",
+      marginBottom: Spacing.xl,
+    },
+    overlayUpdateBtn: {
+      backgroundColor: "#FFF",
+      paddingHorizontal: 40,
+      paddingVertical: 16,
+      borderRadius: 30,
+      ...Shadow.md,
+    },
+    overlayUpdateBtnText: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: Colors.primary,
+    },
+    overlayHint: {
+      fontSize: 12,
+      color: Colors.textTertiary,
+      marginTop: Spacing.xl,
+      textAlign: "center",
     },
 
     // Section
