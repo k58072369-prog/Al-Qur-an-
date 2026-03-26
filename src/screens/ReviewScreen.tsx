@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   ScrollView,
@@ -11,110 +11,87 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Animated, { 
-  FadeInDown, 
-  FadeInUp, 
-  useAnimatedStyle, 
-  useSharedValue, 
-  withRepeat, 
-  withSequence, 
-  withTiming 
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
 } from "react-native-reanimated";
-import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../theme";
-import { toArabicNumerals } from "../utils/helpers";
+import { Shadow, Spacing, useTheme } from "../theme";
 
 const { width } = Dimensions.get("window");
 
-type VirtueItem = {
-  id: string;
-  title: string;
-  desc: string;
-  icon: any;
-  color: string;
-  category: 'akhira' | 'dunya' | 'parent';
-};
-
-const VIRTUES: VirtueItem[] = [
-  {
-    id: "ahlAllah",
-    category: 'akhira',
-    title: "أهل الله وخاصته",
-    desc: "للهِ أهلُونَ منَ النَّاسِ، وقيل من هم يا رسول الله؟ قال: أهلُ القُرآنِ هُم أهلُ اللهِ وخاصَّتُهُ.",
-    icon: "heart",
-    color: "#E91E63",
-  },
-  {
-    id: "crown",
-    category: 'parent',
-    title: "تاج الوقار لوالديك",
-    desc: "يُلبَس والدا حافظ القرآن تاجاً ضوؤه أحسن من ضوء الشمس، ويُقال لصاحبه: اقرأ وارقَ ورتِّل.",
-    icon: "ribbon",
-    color: "#FFD700",
-  },
+const AKHIRA_VIRTUES = [
   {
     id: "elevation",
-    category: 'akhira',
-    title: "منزلك عند آخر آية",
-    desc: "يقال لصاحب القرآن يوم القيامة اقرأ وارتقِ، فإن منزلتك عند آخر آية تقرؤها.",
-    icon: "trending-up",
-    color: "#2196F3",
+    title: "رفع الدرجات يوم القيامة",
+    desc: "عن النبي ﷺ: «اقرؤوا القرآن فإنه يأتي يوم القيامة شفيعاً لأصحابه» (رواه مسلم). التلاوة المتواصلة للقرآن في الدنيا ترفع منزلتك في أعلى الجنان.",
+    icon: "trending-up-outline",
+    color: "#6366F1",
   },
   {
-    id: "shafaa",
-    category: 'akhira',
-    title: "شفاعة لا ترد",
-    desc: "حُلة الكرامة وتاج الكرامة، والشفاعة في الأهل.. كلها بانتظار من أخلص مع كتاب الله.",
-    icon: "shield-checkmark",
-    color: "#4CAF50",
+    id: "intercession",
+    title: "شفاعة القرآن لأصحابه",
+    desc: "قال ﷺ: «يأتي القرآن يوم القيامة شفيعاً لصاحبه» (رواه مسلم). القرآن يكون ناصرك والمحاجج عنك ويشفع لك بين يدي الله عز وجل.",
+    icon: "shield-half-outline",
+    color: "#10B981",
   },
   {
-    id: "memory",
-    category: 'dunya',
-    title: "حدة الذهن والذكاء",
-    desc: "حفظ القرآن يُقوي الذاكرة وينشط خلايا الدماغ ويحمي من أمراض الشيخوخة وفقدان التركيز.",
-    icon: "flash",
-    color: "#FF9800",
+    id: "companions",
+    title: "مع السفرة الكرام البررة",
+    desc: "قال ﷺ: «الماهر بالقرآن مع السفرة الكرام البررة» (رواه البخاري ومسلم). التمكن من تلاوة كتاب الله وحفظه يجعلك في أعظم المنازل مع الملائكة.",
+    icon: "star-outline",
+    color: "#8B5CF6",
+  },
+];
+
+const PARENT_VIRTUE = {
+  title: "تاج البر والوقار لوالديك",
+  desc: "قال ﷺ: «من قرأ القرآن وعلم وعمل به أُلبس والديه يوم القيامة تاج نور».. أعظم بر تقدمه لمن ربيّاك هو أن تكون من حفظة كتاب الله.",
+  icon: "ribbon-outline",
+  color: "#F59E0B",
+};
+
+const DUNYA_VIRTUES = [
+  {
+    id: "intellect",
+    title: "صفاء الذهن وقوة العقل",
+    desc: "عن عبد الله بن مسعود رضي الله عنه: «من قرأ القرآن فحفظه وتدبره فهو أعقل الناس». حفظ الوحي يورث نوراً في العقل وقوة في الفهم.",
+    icon: "flash-outline",
+    color: "#3B82F6",
   },
   {
     id: "peace",
-    category: 'dunya',
-    title: "سكينة القلب ونور الوجه",
-    desc: "«ألا بذكر الله تطمئن القلوب»، والقرآن هو أعظم الذكر، يورث صاحبه وقاراً ونوراً في وجهه.",
-    icon: "sunny",
-    color: "#00BCD4",
+    title: "سكينة القلب وطمأنينة النفس",
+    desc: "قال تعالى: «ألا بذكر الله تطمئن القلوب».. القرآن هو أعظم ذكر الله، وهو الدواء الوحيد للقلق والشتات النفسي في هذا العصر.",
+    icon: "heart-outline",
+    color: "#EC4899",
   },
   {
     id: "barakah",
-    category: 'dunya',
-    title: "بركة الوقت والرزق",
-    desc: "من اشتغل بالقرآن بارك الله له في وقته وعمله، وسخر له من أسباب الخير ما لا يحتسب.",
-    icon: "leaf",
-    color: "#8BC34A",
+    title: "بركة العلم وتيسير العمل",
+    desc: "قال ﷺ: «خيركم من تعلم القرآن وعلمه». الانشغال بالقرآن يبارك لك في حياتك ووقتك ويفتح لك أبواب الخير والرزق من حيث لا تحتسب.",
+    icon: "leaf-outline",
+    color: "#22C55E",
+  },
+];
+
+const SCHOLAR_SAYINGS = [
+  {
+    text: "طلب حفظ القرآن أفضل العلوم وأساس كل علم ديني، وبغيره لا يستقيم لصاحب علم علمه.",
+    author: "ابن تيمية رحمه الله",
   },
   {
-    id: "protection",
-    category: 'dunya',
-    title: "حصن من الهموم",
-    desc: "القرآن أنيس الروح وجلاء الحزن، من تمسك به في شدته وجد مخرجاً وراحة لا توصف.",
-    icon: "umbrella",
-    color: "#607D8B",
+    text: "القلوب أوعية، فاشغلوها بالقرآن منذ الصغر، فإنه نقش في القلب ونور لا يزول بمرور الزمان.",
+    author: "عبد الله بن مسعود رضي الله عنه",
   },
-];
-
-const HADITHS = [
-  { text: "خيركم من تعلم القرآن وعلمه", author: "رسول الله ﷺ" },
-  { text: "إنَّ الذي ليس في جَوْفِهِ شيءٌ من القرآن كَالبيتِ الخَرِبِ", author: "رسول الله ﷺ" },
-  { text: "الماهر بالقرآن مع السفرة الكرام البررة", author: "رسول الله ﷺ" },
-  { text: "اقرؤوا القرآن فإنه يأتي يوم القيامة شفيعاً لأصحابه", author: "رسول الله ﷺ" },
-  { text: "من قرأ حرفاً من كتاب الله فله به حسنة، والحسنة بعشر أمثالها", author: "رسول الله ﷺ" },
-  { text: "إنَّ الله يرفع بهذا الكتاب أقواماً ويضع به آخرين", author: "رسول الله ﷺ" },
-];
-
-const SUCCESS_THOUGHTS = [
-  { text: "حفظ القرآن ليس سباقاً، بل هو صحبة تدوم للأبد.", author: "إشراقة" },
-  { text: "كل صفحة تحفظها اليوم هي حصن لك غداً.", author: "همّة" },
-  { text: "صعوبة المراجعة هي دليل على عظم الأجر، فلا تستسلم.", author: "نصيحة" },
-  { text: "القرآن لا يقبل شريكاً في القلب، فرغ له قلبك يفتح لك كنوزه.", author: "حكمة" },
+  {
+    text: "من داوم على القرآن لم يرد إلى أرذل العمر، ويمتاز بحضور الذهن وسهولة البيان ما دام حياً.",
+    author: "الإمام عكرمة رحمه الله",
+  },
 ];
 
 export default function ReviewScreen() {
@@ -122,149 +99,193 @@ export default function ReviewScreen() {
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
 
   const [tappedIntention, setTappedIntention] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<'all' | 'akhira' | 'dunya' | 'parent'>('all');
-  const [quoteIndex, setQuoteIndex] = useState(0);
-
-  const bounce = useSharedValue(1);
+  const pulse = useSharedValue(1);
 
   useEffect(() => {
-    bounce.value = withRepeat(
-      withSequence(withTiming(1.1, { duration: 1000 }), withTiming(1, { duration: 1000 })),
+    pulse.value = withRepeat(
+      withSequence(
+        withTiming(1.05, { duration: 1500 }),
+        withTiming(1, { duration: 1500 }),
+      ),
       -1,
-      true
+      true,
     );
   }, []);
 
-  const animatedHeart = useAnimatedStyle(() => ({
-    transform: [{ scale: bounce.value }],
+  const animatedIcon = useAnimatedStyle(() => ({
+    transform: [{ scale: pulse.value }],
   }));
-
-  const filteredVirtues = activeCategory === 'all' 
-    ? VIRTUES 
-    : VIRTUES.filter(v => v.category === activeCategory);
 
   const handleRenewIntention = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setTappedIntention(true);
-    setTimeout(() => setTappedIntention(false), 3000);
-  };
-
-  const cycleQuote = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setQuoteIndex((prev) => (prev + 1) % HADITHS.length);
+    setTimeout(() => setTappedIntention(false), 4000);
   };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient colors={[Colors.background, Colors.surface]} style={StyleSheet.absoluteFill} />
+      <LinearGradient
+        colors={[Colors.background, Colors.surface]}
+        style={StyleSheet.absoluteFill}
+      />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Hero Section */}
-        <Animated.View entering={FadeInUp.duration(800)} style={styles.heroSection}>
-          <LinearGradient
-            colors={[Colors.primary, Colors.primaryDark]}
-            style={styles.heroGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <Animated.View style={[styles.heroIconCircle, animatedHeart]}>
-              <Ionicons name="star" size={32} color="#FFD700" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Modern Minimal Header */}
+        <Animated.View
+          entering={FadeInUp.duration(1000)}
+          style={styles.heroSection}
+        >
+          <View style={styles.heroHeader}>
+            <Animated.View style={[styles.heroIconBox, animatedIcon]}>
+              <Ionicons
+                name="bookmark-outline"
+                size={30}
+                color={Colors.primary}
+              />
             </Animated.View>
-            <Text style={styles.heroTitle}>طريقك إلى النور</Text>
-            <Text style={styles.heroSubtitle}>اكتشف كنوز وأجور حفظ كتاب الله لتزداد ثباتاً ويقيناً</Text>
+            <View style={styles.heroTextContent}>
+              <Text style={styles.heroTitle}>فضائل حفظ الوحي</Text>
+              <Text style={styles.heroSubtitle}>
+                حقائق إيمانية موثقة من الكتاب والسنة حول مقام حملة القرآن الكريم
+              </Text>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* Section: Rewards */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>أجور الآخرة والرفعة</Text>
+        </View>
+
+        {AKHIRA_VIRTUES.map((v, i) => (
+          <Animated.View
+            key={v.id}
+            entering={FadeInDown.delay(200 + i * 150)}
+            style={styles.virtueCard}
+          >
+            <View
+              style={[styles.cardIconBox, { backgroundColor: `${v.color}10` }]}
+            >
+              <Ionicons name={v.icon as any} size={24} color={v.color} />
+            </View>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>{v.title}</Text>
+              <Text style={styles.cardDesc}>{v.desc}</Text>
+            </View>
+          </Animated.View>
+        ))}
+
+        {/* Highlight Section for Parents */}
+        <Animated.View
+          entering={FadeInDown.delay(700)}
+          style={styles.parentCard}
+        >
+          <LinearGradient
+            colors={[`${Colors.primary}15`, `${Colors.background}00`]}
+            style={styles.parentContent}
+          >
+            <Ionicons
+              name={PARENT_VIRTUE.icon as any}
+              size={40}
+              color={PARENT_VIRTUE.color}
+              style={styles.parentIcon}
+            />
+            <Text style={styles.parentTitle}>{PARENT_VIRTUE.title}</Text>
+            <Text style={styles.parentDesc}>{PARENT_VIRTUE.desc}</Text>
           </LinearGradient>
         </Animated.View>
 
-        {/* Motivational Quote Card */}
-        <Animated.View entering={FadeInDown.delay(200)} style={styles.quoteCard}>
-          <TouchableOpacity activeOpacity={0.9} onPress={cycleQuote} style={styles.quoteInside}>
-            <View style={styles.quoteHeader}>
-              <Ionicons name="chatbubble-ellipses" size={24} color={Colors.primary} style={{ opacity: 0.2 }} />
-              <Text style={styles.quoteBadge}>نفحة نبوية</Text>
+        {/* Section: Worldly Benefits */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>بركة القرآن في حياتك</Text>
+        </View>
+
+        {DUNYA_VIRTUES.map((v, i) => (
+          <Animated.View
+            key={v.id}
+            entering={FadeInDown.delay(900 + i * 150)}
+            style={styles.virtueCard}
+          >
+            <View
+              style={[styles.cardIconBox, { backgroundColor: `${v.color}10` }]}
+            >
+              <Ionicons name={v.icon as any} size={24} color={v.color} />
             </View>
-            <Text style={styles.quoteText}>"{HADITHS[quoteIndex].text}"</Text>
-            <View style={styles.quoteFooter}>
-              <Text style={styles.quoteAuthor}>{HADITHS[quoteIndex].author}</Text>
-              <View style={styles.nextHint}>
-                <Text style={styles.nextHintText}>اضغط لحديث آخر</Text>
-                <Ionicons name="refresh" size={12} color={Colors.primary} />
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>{v.title}</Text>
+              <Text style={styles.cardDesc}>{v.desc}</Text>
+            </View>
+          </Animated.View>
+        ))}
+
+        {/* Quotes Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>آثار السلف وأقوالهم</Text>
+        </View>
+
+        <View style={styles.quotesWrap}>
+          {SCHOLAR_SAYINGS.map((quote, idx) => (
+            <Animated.View
+              key={idx}
+              entering={FadeInDown.delay(1300 + idx * 200)}
+              style={styles.quoteBox}
+            >
+              <Text style={styles.quoteText}>{quote.text}</Text>
+              <View style={styles.quoteMeta}>
+                <View style={styles.quoteLine} />
+                <Text style={styles.quoteAuthor}>{quote.author}</Text>
+              </View>
+            </Animated.View>
+          ))}
+        </View>
+
+        {/* Bottom Action Card */}
+        <Animated.View
+          entering={FadeInDown.delay(2000)}
+          style={styles.actionSection}
+        >
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              tappedIntention && { borderColor: Colors.success },
+            ]}
+            onPress={handleRenewIntention}
+            activeOpacity={0.8}
+          >
+            <View style={styles.actionInner}>
+              <Ionicons
+                name={
+                  tappedIntention
+                    ? "checkmark-circle"
+                    : "refresh-circle-outline"
+                }
+                size={34}
+                color={tappedIntention ? Colors.success : Colors.primary}
+              />
+              <View style={styles.actionTextWrap}>
+                <Text
+                  style={[
+                    styles.actionTitle,
+                    tappedIntention && { color: Colors.success },
+                  ]}
+                >
+                  {tappedIntention
+                    ? "تم تجديد النية لله"
+                    : "تحديد النية والإخلاص"}
+                </Text>
+                <Text style={styles.actionDesc}>
+                  {tappedIntention
+                    ? "جزاك الله خيراً، استمر على هذا الطريق."
+                    : "اضغط هنا لتذكر نفسك بالإخلاص في حفظك."}
+                </Text>
               </View>
             </View>
           </TouchableOpacity>
         </Animated.View>
-
-        {/* Categories Tab */}
-        <View style={styles.tabsContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
-            <TabItem label="الكل" active={activeCategory === 'all'} onPress={() => setActiveCategory('all')} Colors={Colors} />
-            <TabItem label="أجور الآخرة" active={activeCategory === 'akhira'} onPress={() => setActiveCategory('akhira')} Colors={Colors} />
-            <TabItem label="بركة الدنيا" active={activeCategory === 'dunya'} onPress={() => setActiveCategory('dunya')} Colors={Colors} />
-            <TabItem label="فضل الوالدين" active={activeCategory === 'parent'} onPress={() => setActiveCategory('parent')} Colors={Colors} />
-          </ScrollView>
-        </View>
-
-        {/* Virtues Grid */}
-        <View style={styles.virtueGrid}>
-          {filteredVirtues.map((v, i) => (
-            <Animated.View 
-              key={v.id} 
-              entering={FadeInDown.delay(i * 100)} 
-              style={styles.vcard}
-            >
-              <View style={[styles.viconBox, { backgroundColor: `${v.color}15` }]}>
-                <Ionicons name={v.icon as any} size={22} color={v.color} />
-              </View>
-              <Text style={styles.vtitle}>{v.title}</Text>
-              <Text style={styles.vdesc}>{v.desc}</Text>
-            </Animated.View>
-          ))}
-        </View>
-
-        {/* Intention Renewal Card */}
-        <Animated.View entering={FadeInDown.delay(400)} style={styles.intentionCard}>
-          <LinearGradient
-            colors={tappedIntention ? [Colors.success, Colors.primaryDark] : ["#1F2937", "#111827"]}
-            style={styles.intentionGradient}
-          >
-            <View style={styles.intentionInfo}>
-              <Text style={styles.intentionTitle}>
-                {tappedIntention ? "نية مباركة!" : "جدد عهدك الآن"}
-              </Text>
-              <Text style={styles.intentionDesc}>
-                {tappedIntention 
-                  ? "لقد عقدت العزم مع الله، استعن به ولا تعجز." 
-                  : "الإخلاص هو الوقود الذي لا ينطفئ أبداً في رحلة الحفظ."}
-              </Text>
-            </View>
-            <TouchableOpacity 
-              style={styles.intentionCircle} 
-              onPress={handleRenewIntention}
-              activeOpacity={0.7}
-            >
-              <Ionicons name={tappedIntention ? "checkmark" : "sync-outline"} size={24} color="#FFF" />
-            </TouchableOpacity>
-          </LinearGradient>
-        </Animated.View>
-
-        {/* Wisdom Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>خواطر أهل الهمة</Text>
-        </View>
-        <View style={styles.wisdomContainer}>
-          {SUCCESS_THOUGHTS.map((thought, idx) => (
-            <Animated.View 
-              key={idx} 
-              entering={FadeInDown.delay(500 + (idx * 100))}
-              style={styles.wisdomCard}
-            >
-              <View style={styles.wisdomInfo}>
-                <Text style={styles.wisdomText}>{thought.text}</Text>
-                <Text style={styles.wisdomAuthor}>{thought.author}</Text>
-              </View>
-            </Animated.View>
-          ))}
-        </View>
 
         <View style={{ height: 120 }} />
       </ScrollView>
@@ -272,195 +293,199 @@ export default function ReviewScreen() {
   );
 }
 
-const TabItem = ({ label, active, onPress, Colors }: any) => (
-  <TouchableOpacity
-    onPress={onPress}
-    style={[
-      styles_tab.tab,
-      active && { backgroundColor: Colors.primary },
-      !active && { borderColor: Colors.border, borderWidth: 1 }
-    ]}
-  >
-    <Text style={[styles_tab.text, active ? { color: '#FFF' } : { color: Colors.textSecondary }]}>
-      {label}
-    </Text>
-  </TouchableOpacity>
-);
-
-const styles_tab = StyleSheet.create({
-  tab: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  text: { fontSize: 13, fontWeight: 'bold' },
-});
-
 const getStyles = (Colors: any) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: Colors.background },
-    scrollContent: { paddingBottom: 40 },
+    scrollContent: { paddingBottom: 60 },
 
     heroSection: {
       paddingHorizontal: Spacing.xl,
       paddingTop: 70,
-      marginBottom: Spacing.xl,
+      marginBottom: 30,
     },
-    heroGradient: {
-      padding: Spacing.xl,
-      borderRadius: 32,
-      alignItems: 'center',
-      ...Shadow.lg,
+    heroHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: Colors.glass,
+      padding: 20,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: Colors.glassBorder,
+      ...Shadow.xs,
     },
-    heroIconCircle: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      backgroundColor: 'rgba(255,255,255,0.15)',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 16,
+    heroIconBox: {
+      width: 56,
+      height: 56,
+      borderRadius: 20,
+      backgroundColor: `${Colors.primary}08`,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 16,
     },
+    heroTextContent: { flex: 1, alignItems: "flex-start" },
     heroTitle: {
-      fontSize: 28,
-      fontWeight: 'bold',
-      color: '#FFF',
-      textAlign: 'center',
+      fontSize: 24,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+      textAlign: "left",
     },
     heroSubtitle: {
+      fontSize: 12,
+      color: Colors.textSecondary,
+      marginTop: 4,
+      lineHeight: 18,
+      textAlign: "left",
+    },
+
+    sectionHeader: {
+      paddingHorizontal: Spacing.xl,
+      marginBottom: 16,
+      marginTop: 10,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+      borderLeftWidth: 3,
+      borderLeftColor: Colors.primary,
+      paddingLeft: 10,
+      textAlign: "left",
+    },
+
+    virtueCard: {
+      marginHorizontal: Spacing.xl,
+      backgroundColor: Colors.surface,
+      borderRadius: 20,
+      padding: 20,
+      flexDirection: "row",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: Colors.borderLight,
+      marginBottom: 12,
+      ...Shadow.xs,
+    },
+    cardIconBox: {
+      width: 48,
+      height: 48,
+      borderRadius: 14,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 16,
+    },
+    cardContent: { flex: 1, alignItems: "flex-start" },
+    cardTitle: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+      marginBottom: 6,
+      textAlign: "left",
+    },
+    cardDesc: {
+      fontSize: 13,
+      color: Colors.textSecondary,
+      lineHeight: 22,
+      textAlign: "left",
+    },
+
+    parentCard: {
+      marginVertical: 30,
+      marginHorizontal: Spacing.xl,
+      borderRadius: 24,
+      backgroundColor: Colors.surface,
+      borderWidth: 1,
+      borderColor: Colors.borderLight,
+      overflow: "hidden",
+      ...Shadow.sm,
+    },
+    parentContent: {
+      padding: 24,
+      alignItems: "center",
+    },
+    parentIcon: {
+      marginBottom: 16,
+    },
+    parentTitle: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+      marginBottom: 10,
+      textAlign: "center",
+    },
+    parentDesc: {
       fontSize: 14,
-      color: 'rgba(255,255,255,0.85)',
-      textAlign: 'center',
-      marginTop: 8,
+      color: Colors.textSecondary,
+      textAlign: "center",
       lineHeight: 22,
     },
 
-    quoteCard: {
-      marginHorizontal: Spacing.xl,
-      backgroundColor: Colors.surface,
-      borderRadius: 24,
+    quotesWrap: {
+      paddingHorizontal: Spacing.xl,
+      gap: 16,
+    },
+    quoteBox: {
+      backgroundColor: Colors.glass,
+      padding: 20,
+      borderRadius: 20,
       borderWidth: 1,
-      borderColor: Colors.border,
-      marginBottom: Spacing.xl,
-      ...Shadow.sm,
-    },
-    quoteInside: { padding: Spacing.xl },
-    quoteHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    quoteBadge: {
-      fontSize: 10,
-      fontWeight: 'bold',
-      color: Colors.primary,
-      backgroundColor: `${Colors.primary}10`,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: 6,
+      borderColor: Colors.glassBorder,
     },
     quoteText: {
-      fontSize: 16,
-      fontWeight: '600',
+      fontSize: 15,
       color: Colors.textPrimary,
-      textAlign: 'center',
-      lineHeight: 28,
-      fontStyle: 'italic',
+      lineHeight: 25,
+      textAlign: "left",
+      fontWeight: "500",
     },
-    quoteFooter: {
-      marginTop: 16,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+    quoteMeta: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-start",
+      marginTop: 12,
+      gap: 8,
     },
-    quoteAuthor: { fontSize: 12, fontWeight: 'bold', color: Colors.textSecondary },
-    nextHint: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    nextHintText: { fontSize: 11, color: Colors.primary, opacity: 0.7 },
+    quoteLine: {
+      width: 14,
+      height: 1,
+      backgroundColor: Colors.textTertiary,
+    },
+    quoteAuthor: {
+      fontSize: 12,
+      color: Colors.textTertiary,
+      fontWeight: "600",
+      textAlign: "left",
+    },
 
-    tabsContainer: { marginBottom: Spacing.lg },
-    tabsScroll: { paddingHorizontal: Spacing.xl },
-
-    virtueGrid: {
+    actionSection: {
+      marginTop: 40,
       paddingHorizontal: Spacing.xl,
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 12,
     },
-    vcard: {
-      width: (width - Spacing.xl * 2 - 12) / 2,
-      backgroundColor: Colors.surface,
-      borderRadius: 20,
-      padding: Spacing.lg,
-      borderWidth: 1,
-      borderColor: Colors.borderLight,
-      ...Shadow.sm,
-    },
-    viconBox: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 12,
-    },
-    vtitle: {
-      fontSize: 14,
-      fontWeight: 'bold',
-      color: Colors.textPrimary,
-      marginBottom: 4,
-      textAlign: 'left',
-    },
-    vdesc: {
-      fontSize: 11,
-      color: Colors.textSecondary,
-      lineHeight: 16,
-      textAlign: 'left',
-    },
-
-    intentionCard: {
-      margin: Spacing.xl,
+    actionButton: {
       borderRadius: 24,
-      overflow: 'hidden',
-      ...Shadow.md,
-    },
-    intentionGradient: {
-      padding: Spacing.lg,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    intentionInfo: { flex: 1, marginRight: 16, alignItems: 'flex-start' },
-    intentionTitle: { fontSize: 18, fontWeight: 'bold', color: '#FFF' },
-    intentionDesc: { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 4, textAlign: 'left' },
-    intentionCircle: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-      backgroundColor: 'rgba(255,255,255,0.1)',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.2)',
-    },
-
-    sectionHeader: { 
-      paddingHorizontal: Spacing.xl, 
-      marginBottom: Spacing.md, 
-      marginTop: Spacing.lg 
-    },
-    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: Colors.textPrimary, textAlign: 'left' },
-
-    wisdomContainer: { paddingHorizontal: Spacing.xl, gap: 12 },
-    wisdomCard: {
-      backgroundColor: `${Colors.primary}05`,
-      padding: 16,
-      borderRadius: 20,
       borderWidth: 1,
       borderColor: Colors.border,
+      backgroundColor: Colors.surface,
+      overflow: "hidden",
     },
-    wisdomInfo: { alignItems: 'flex-start' },
-    wisdomText: { fontSize: 14, color: Colors.textPrimary, lineHeight: 22, textAlign: 'left' },
-    wisdomAuthor: { fontSize: 11, fontWeight: 'bold', color: Colors.primary, marginTop: 4 },
+    actionInner: {
+      padding: 20,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    actionTextWrap: {
+      flex: 1,
+      marginLeft: 16,
+      alignItems: "flex-start",
+    },
+    actionTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+      textAlign: "left",
+    },
+    actionDesc: {
+      fontSize: 12,
+      color: Colors.textSecondary,
+      marginTop: 4,
+      textAlign: "left",
+    },
   });

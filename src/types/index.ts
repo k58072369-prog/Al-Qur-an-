@@ -16,13 +16,17 @@ export type User = {
   totalXP: number;
 };
 
+export type PlanDirection = 'forward' | 'backward';
+
 export type Plan = {
-  startPage: number;
-  endPage: number;
-  currentPage: number;
+  targetPages: number[];
+  currentPageIndex: number;
   pagesPerDay: number;
   totalDays: number;
   startDate: string;
+  direction: PlanDirection;
+  // Metadata for display
+  label: string; 
 };
 
 export type DailyProgress = {

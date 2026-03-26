@@ -2,6 +2,8 @@ import {
   PageProgress,
   MemorizationStrength,
   TOTAL_QURAN_PAGES,
+  Plan,
+  PlanDirection,
 } from '../types';
 
 // ─── Date Helpers ─────────────────────────────────────────
@@ -33,19 +35,21 @@ export function isOverdue(nextReviewDate: string): boolean {
 // ─── Plan Generator ───────────────────────────────────────
 
 export function generatePlan(
-  startPage: number,
-  endPage: number,
-  pagesPerDay: number
-) {
-  const totalPages = endPage - startPage + 1;
-  const totalDays = Math.ceil(totalPages / pagesPerDay);
+  pageNumbers: number[],
+  pagesPerDay: number,
+  label: string = 'خطة حفظ',
+  direction: PlanDirection = 'forward'
+): Plan {
+  const orderedPages = direction === 'forward' ? [...pageNumbers] : [...pageNumbers].reverse();
+  const totalDays = Math.ceil(orderedPages.length / pagesPerDay);
   return {
-    startPage,
-    endPage,
-    currentPage: startPage,
+    targetPages: orderedPages,
+    currentPageIndex: 0,
     pagesPerDay,
     totalDays,
     startDate: todayISO(),
+    direction,
+    label,
   };
 }
 

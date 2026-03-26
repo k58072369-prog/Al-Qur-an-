@@ -80,6 +80,8 @@ type SelectionActions = {
   getMemorizedPages: () => PageProgress[];
   /** Get page strength distribution */
   getStrengthDistribution: () => Record<MemorizationStrength, number>;
+  /** Reset the entire store */
+  reset: () => void;
 };
 
 export type SelectionStore = SelectionState & SelectionActions;
@@ -342,5 +344,12 @@ export const useSelectionStore = create<SelectionStore>((set, get) => ({
         dist[p.strength]++;
       });
     return dist;
+  },
+  reset: () => {
+    set({
+      taskSelections: [],
+      pageProgress: [],
+      isLoaded: true,
+    });
   },
 }));

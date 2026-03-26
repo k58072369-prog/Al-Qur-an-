@@ -12,7 +12,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Modal,
 } from "react-native";
+import { SURAHS } from "../data/quranMeta";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { useAppStore } from "../store/AppStore";
 import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
@@ -68,8 +70,14 @@ export default function OnboardingScreen() {
   const [customGoal, setCustomGoal] = useState("");
   const [isCustomGoal, setIsCustomGoal] = useState(false);
   const [selectedPages, setSelectedPages] = useState<number>(1);
-  const slideAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const [selectionType, setSelectionType] = useState<"range" | "surahs" | "complete">("complete");
+  const [selectedSurahIds, setSelectedSurahIds] = useState<number[]>([]);
+  const [tempStartPage, setTempStartPage] = useState("1");
+  const [tempEndPage, setTempEndPage] = useState("604");
+  const [planDirection, setPlanDirection] = useState<"forward" | "backward">("forward");
+  const [surahModalVisible, setSurahModalVisible] = useState(false);
+  const slideAnim = React.useRef(new Animated.Value(0)).current;
+  const fadeAnim = React.useRef(new Animated.Value(1)).current;
 
   const animateToStep = (nextStep: number) => {
     Animated.sequence([
@@ -114,6 +122,29 @@ export default function OnboardingScreen() {
   };
 
   const handleFinish = () => {
+    let pages: number[] = [];
+    let label = "";
+
+    if (selectionType === "complete") {
+      pages = Array.from({ length: 604 }, (_, i) => i + 1);
+      label = "القرآن الكريم كاملاً";
+    } else if (selectionType === "range") {
+      const start = parseInt(tempStartPage, 10) || 1;
+      const end = parseInt(tempEndPage, 10) || 604;
+      const min = Math.min(start, end);
+      const max = Math.max(start, end);
+      for (let p = min; p <= max; p++) pages.push(p);
+      label = `من صفحة ${min} إلى ${max}`;
+    } else if (selectionType === "surahs") {
+      const selected = SURAHS.filter((s) => selectedSurahIds.includes(s.id)).sort((a, b) => a.id - b.id);
+      selected.forEach((s) => {
+        for (let p = s.startPage; p <= s.endPage; p++) {
+          if (!pages.includes(p)) pages.push(p);
+        }
+      });
+      label = selected.length === 1 ? `سورة ${selected[0].nameAr}` : `مجموعة سور (${selected.length})`;
+    }
+
     dispatch({
       type: "COMPLETE_ONBOARDING",
       payload: {
@@ -121,12 +152,13 @@ export default function OnboardingScreen() {
           name: name || "أخي الحافظ",
           level: selectedLevel,
           dailyPages: selectedPages,
-          goal: isCustomGoal && customGoal ? customGoal : selectedGoal,
+          goal: label,
         },
-        goal: isCustomGoal && customGoal ? customGoal : selectedGoal,
+        pageNumbers: pages,
+        label,
+        direction: planDirection,
       },
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     router.replace("/(tabs)/dashboard" as any);
   };
 
@@ -305,7 +337,7 @@ export default function OnboardingScreen() {
             </View>
           )}
 
-          {/* STEP 2: Goal */}
+          {/* STEP 2: Goal/Plan Selection */}
           {step === 2 && (
             <View style={styles.stepContainer}>
               <Ionicons
@@ -314,75 +346,93 @@ export default function OnboardingScreen() {
                 color={Colors.primary}
                 style={{ marginBottom: Spacing.lg, opacity: 0.85 }}
               />
-              <Text style={styles.stepTitle}>ما هدفك؟</Text>
-              <Text style={styles.stepSubtitle}>اختر ما تريد حفظه</Text>
+              <Text style={styles.stepTitle}>ما هو هدف حفظك؟</Text>
+              <Text style={styles.stepSubtitle}>حدد النطاق والاتجاه المفضل لك</Text>
 
-              {QURAN_GOALS.map((goal) => (
-                <TouchableOpacity
-                  key={goal}
-                  style={[
-                    styles.goalCard,
-                    !isCustomGoal &&
-                      selectedGoal === goal &&
-                      styles.optionCardSelected,
-                  ]}
-                  onPress={() => {
-                    setIsCustomGoal(false);
-                    setSelectedGoal(goal);
-                  }}
-                >
-                  <Text
-                    style={[
-                      styles.goalText,
-                      !isCustomGoal &&
-                        selectedGoal === goal && { color: Colors.primary },
-                    ]}
+              <View style={[styles.card, { width: '100%' }]}>
+                <View style={styles.tabRow}>
+                  <TouchableOpacity 
+                    style={[styles.tab, selectionType === "complete" && styles.activeTab]}
+                    onPress={() => setSelectionType("complete")}
                   >
-                    {goal}
-                  </Text>
-                  {!isCustomGoal && selectedGoal === goal && (
-                    <View style={styles.selectedCheck}>
-                      <Ionicons name="checkmark" size={14} color="#fff" />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
-
-              <TouchableOpacity
-                style={[
-                  styles.goalCard,
-                  isCustomGoal && styles.optionCardSelected,
-                ]}
-                onPress={() => setIsCustomGoal(true)}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={[
-                      styles.goalText,
-                      isCustomGoal && { color: Colors.primary },
-                    ]}
+                    <Text style={[styles.tabText, selectionType === "complete" && styles.activeTabText]}>الختم الكامل</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.tab, selectionType === "surahs" && styles.activeTab]}
+                    onPress={() => setSelectionType("surahs")}
                   >
-                    تحديد هدف خاص...
-                  </Text>
-                  {isCustomGoal && (
-                    <TextInput
-                      style={[
-                        styles.input,
-                        { marginTop: Spacing.sm, textAlign: "right" },
-                      ]}
-                      value={customGoal}
-                      onChangeText={setCustomGoal}
-                      placeholder="اكتب هدفك هنا (مثل: سورة البقرة، 3 أجزاء...)"
-                      placeholderTextColor={Colors.textTertiary}
-                    />
-                  )}
+                    <Text style={[styles.tabText, selectionType === "surahs" && styles.activeTabText]}>سور محددة</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.tab, selectionType === "range" && styles.activeTab]}
+                    onPress={() => setSelectionType("range")}
+                  >
+                    <Text style={[styles.tabText, selectionType === "range" && styles.activeTabText]}>نطاق صفحات</Text>
+                  </TouchableOpacity>
                 </View>
-                {isCustomGoal && (
-                  <View style={styles.selectedCheck}>
-                    <Ionicons name="checkmark" size={14} color="#fff" />
+
+                {selectionType === "range" && (
+                  <View style={styles.rangeInputs}>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabelSmall}>من صفحة</Text>
+                      <TextInput 
+                        style={styles.smallInput} 
+                        value={tempStartPage} 
+                        onChangeText={setTempStartPage}
+                        keyboardType="numeric"
+                        placeholder="1"
+                      />
+                    </View>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabelSmall}>إلى صفحة</Text>
+                      <TextInput 
+                        style={styles.smallInput} 
+                        value={tempEndPage} 
+                        onChangeText={setTempEndPage}
+                        keyboardType="numeric"
+                        placeholder="604"
+                      />
+                    </View>
                   </View>
                 )}
-              </TouchableOpacity>
+
+                {selectionType === "surahs" && (
+                  <TouchableOpacity 
+                    style={styles.surahSelectBtn} 
+                    onPress={() => setSurahModalVisible(true)}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Ionicons name="list" size={18} color={Colors.primary} />
+                      <Text style={styles.surahSelectText}>
+                        {selectedSurahIds.length === 0 
+                          ? "اختر السور التي تود حفظها" 
+                          : `تم اختيار ${selectedSurahIds.length} سورة`}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-back" size={16} color={Colors.textTertiary} />
+                  </TouchableOpacity>
+                )}
+
+                <View style={styles.divider} />
+
+                <View style={styles.directionRow}>
+                  <Text style={styles.inputLabelSmall}>اتجاه الحفظ</Text>
+                  <View style={styles.directionToggle}>
+                    <TouchableOpacity 
+                      style={[styles.dirBtn, planDirection === "forward" && styles.activeDirBtn]}
+                      onPress={() => setPlanDirection("forward")}
+                    >
+                      <Text style={[styles.dirText, planDirection === "forward" && styles.activeDirText]}>من الفاتحة للناس</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={[styles.dirBtn, planDirection === "backward" && styles.activeDirBtn]}
+                      onPress={() => setPlanDirection("backward")}
+                    >
+                      <Text style={[styles.dirText, planDirection === "backward" && styles.activeDirText]}>من الناس للفاتحة</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
             </View>
           )}
 
@@ -482,7 +532,12 @@ export default function OnboardingScreen() {
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>الهدف</Text>
                   <Text style={styles.summaryValue}>
-                    {isCustomGoal && customGoal ? customGoal : selectedGoal}
+                    {(() => {
+                      if (selectionType === "complete") return "القرآن كاملاً";
+                      if (selectionType === "range") return `من ص ${tempStartPage} إلى ${tempEndPage}`;
+                      if (selectionType === "surahs") return `مجموعة سور (${selectedSurahIds.length})`;
+                      return "—";
+                    })()}
                   </Text>
                 </View>
                 <View style={styles.summaryRow}>
@@ -491,6 +546,25 @@ export default function OnboardingScreen() {
                     {DAILY_PAGES_LABELS[selectedPages]}
                   </Text>
                 </View>
+
+                <View style={[styles.summaryRow, { borderBottomWidth: 0 }]}>
+                  <Text style={styles.summaryLabel}>الاتجاه</Text>
+                  <Text style={styles.summaryValue}>
+                    {planDirection === "forward" ? "من الفاتحة للناس" : "من الناس للفاتحة"}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.planPreviewBox}>
+                <Ionicons name="information-circle-outline" size={16} color={Colors.textTertiary} style={{ marginBottom: 4 }} />
+                <Text style={styles.planPreviewText}>
+                  {(() => {
+                    const pagesPerDay = selectedPages;
+                    const totalPages = selectionType === "complete" ? 604 : 100; // Simplified for preview
+                    const days = Math.ceil(totalPages / pagesPerDay);
+                    return `ستحفظ تقريباً خلال ${days} يوماً حسب وردك اليومي.`;
+                  })()}
+                </Text>
               </View>
 
               <Text style={styles.hadith}>
@@ -500,6 +574,49 @@ export default function OnboardingScreen() {
           )}
         </ScrollView>
       </Animated.View>
+
+      {/* Surah Selection Modal (Multi-select) */}
+      <Modal visible={surahModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { height: "90%", width: '90%' }]}>
+            <Text style={styles.modalTitle}>اختر السور</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {SURAHS.map((surah) => {
+                const isSelected = selectedSurahIds.includes(surah.id);
+                return (
+                  <TouchableOpacity
+                    key={surah.id}
+                    style={[styles.surahItem, isSelected && { backgroundColor: `${Colors.primary}10` }]}
+                    onPress={() => {
+                      if (isSelected) {
+                        setSelectedSurahIds(selectedSurahIds.filter(id => id !== surah.id));
+                      } else {
+                        setSelectedSurahIds([...selectedSurahIds, surah.id]);
+                      }
+                    }}
+                  >
+                    <Ionicons 
+                      name={isSelected ? "checkbox" : "square-outline"} 
+                      size={20} 
+                      color={isSelected ? Colors.primary : Colors.textTertiary} 
+                    />
+                    <Text style={[styles.surahNameAr, isSelected && { color: Colors.primary }]}>{surah.nameAr}</Text>
+                    <Text style={styles.surahNumber}>{surah.id}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: Colors.primary }]}
+                onPress={() => setSurahModalVisible(false)}
+              >
+                <Text style={{ color: '#FFF', fontWeight: 'bold' }}>تم الاختيار</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Footer */}
       <View style={styles.footer}>
@@ -513,7 +630,9 @@ export default function OnboardingScreen() {
   );
 }
 
-const getStyles = (Colors: any) =>
+import { darkColors } from "../theme";
+
+const getStyles = (Colors: typeof darkColors) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -655,14 +774,14 @@ const getStyles = (Colors: any) =>
     },
     optionCard: {
       width: "100%",
-      flexDirection: "row",
+      flexDirection: "row-reverse",
       alignItems: "center",
       backgroundColor: Colors.glass,
       borderRadius: BorderRadius.lg,
       borderWidth: 1,
       borderColor: Colors.glassBorder,
       paddingHorizontal: Spacing.base,
-      paddingVertical: Spacing.base,
+      paddingVertical: Spacing.md,
       marginBottom: Spacing.sm,
       gap: Spacing.md,
     },
@@ -672,7 +791,7 @@ const getStyles = (Colors: any) =>
     },
     optionInfo: {
       flex: 1,
-      alignItems: "flex",
+      alignItems: "flex-start",
     },
     optionLabel: {
       fontSize: Typography.base,
@@ -822,5 +941,156 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.xl,
       borderWidth: 1,
       borderColor: `${Colors.primary}20`,
+    },
+    card: {
+      backgroundColor: Colors.glass,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      borderWidth: 1,
+      borderColor: Colors.glassBorder,
+    },
+    label: {
+      fontSize: Typography.sm,
+      color: Colors.textTertiary,
+      textAlign: "left",
+    },
+    divider: {
+      height: 1,
+      backgroundColor: Colors.border,
+      marginVertical: Spacing.md,
+    },
+    tabRow: {
+      flexDirection: "row",
+      backgroundColor: Colors.background,
+      borderRadius: BorderRadius.md,
+      padding: 4,
+      marginBottom: Spacing.md,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 8,
+      alignItems: "center",
+      borderRadius: BorderRadius.md,
+    },
+    activeTab: { backgroundColor: Colors.surface },
+    tabText: { fontSize: 10, color: Colors.textTertiary },
+    activeTabText: { color: Colors.primary, fontWeight: "bold" },
+    rangeInputs: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      gap: Spacing.md,
+      marginBottom: Spacing.md,
+    },
+    inputGroup: { flex: 1 },
+    inputLabelSmall: {
+      fontSize: 9,
+      color: Colors.textTertiary,
+      marginBottom: 4,
+      textAlign: "right",
+    },
+    smallInput: {
+      backgroundColor: Colors.background,
+      borderWidth: 1,
+      borderColor: Colors.border,
+      borderRadius: BorderRadius.sm,
+      padding: 8,
+      textAlign: "center",
+      color: Colors.textPrimary,
+    },
+    surahSelectBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      backgroundColor: Colors.background,
+      padding: 12,
+      borderRadius: BorderRadius.md,
+      borderWidth: 1,
+      borderColor: Colors.border,
+      marginBottom: Spacing.md,
+    },
+    surahSelectText: { fontSize: 13, color: Colors.textPrimary },
+    directionRow: { marginBottom: Spacing.md },
+    directionToggle: { flexDirection: "row", gap: Spacing.sm, marginTop: 8 },
+    dirBtn: {
+      flex: 1,
+      paddingVertical: 10,
+      backgroundColor: Colors.background,
+      borderRadius: BorderRadius.md,
+      borderWidth: 1,
+      borderColor: Colors.border,
+      alignItems: "center",
+    },
+    activeDirBtn: {
+      borderColor: Colors.primary,
+      backgroundColor: `${Colors.primary}05`,
+    },
+    dirText: { fontSize: 11, color: Colors.textSecondary },
+    activeDirText: { color: Colors.primary, fontWeight: "bold" },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalContent: {
+      backgroundColor: Colors.surface,
+      borderRadius: BorderRadius.xl,
+      padding: Spacing.xl,
+      borderWidth: 1,
+      borderColor: Colors.glassBorder,
+    },
+    modalTitle: {
+      fontSize: Typography.lg,
+      fontWeight: Typography.bold,
+      color: Colors.textPrimary,
+      marginBottom: Spacing.lg,
+      textAlign: "center",
+    },
+    modalActions: {
+      flexDirection: "row",
+      justifyContent: "center",
+      marginTop: Spacing.md,
+    },
+    modalButton: {
+      flex: 1,
+      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.md,
+      alignItems: "center",
+    },
+    surahItem: {
+      flexDirection: "row-reverse",
+      alignItems: "center",
+      paddingVertical: Spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: Colors.border,
+    },
+    surahNumber: {
+      width: 30,
+      fontSize: Typography.xs,
+      color: Colors.textTertiary,
+      textAlign: "center",
+    },
+    surahNameAr: {
+      flex: 1,
+      fontSize: Typography.base,
+      color: Colors.textPrimary,
+      fontWeight: Typography.medium,
+      textAlign: "right",
+      paddingRight: Spacing.md,
+    },
+    planPreviewBox: {
+      marginTop: Spacing.xl,
+      padding: Spacing.md,
+      backgroundColor: `${Colors.primary}05`,
+      borderRadius: BorderRadius.md,
+      borderWidth: 1,
+      borderColor: `${Colors.primary}20`,
+      borderStyle: "dashed",
+    },
+    planPreviewText: {
+      fontSize: Typography.xs,
+      color: Colors.textSecondary,
+      textAlign: "center",
+      lineHeight: 18,
     },
   });

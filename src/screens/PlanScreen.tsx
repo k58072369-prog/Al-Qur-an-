@@ -684,7 +684,7 @@ export default function PlanScreen() {
   const [showCelebration, setShowCelebration] = useState(false);
 
   const roadmap = useMemo(() => {
-    if (!plan) return [];
+    if (!plan || !plan.targetPages) return [];
 
     const memorizedPagesSet = new Set(
       pageProgress.filter((pg) => pg.memorized).map((pg) => pg.pageNumber),
@@ -695,16 +695,22 @@ export default function PlanScreen() {
     let foundCurrent = false;
 
     for (let i = 0; i < totalDays; i++) {
-      const start = plan.startPage + i * plan.pagesPerDay;
-      const end = Math.min(start + plan.pagesPerDay - 1, plan.endPage);
+      const startIndex = i * plan.pagesPerDay;
+      const dayPages = plan.targetPages.slice(
+        startIndex,
+        startIndex + plan.pagesPerDay
+      );
+      if (dayPages.length === 0) continue;
+
+      const start = Math.min(...dayPages);
+      const end = Math.max(...dayPages);
+      const pageNumbers = dayPages;
+      const totalInRange = dayPages.length;
 
       let memorizedCount = 0;
-      const pageNumbers: number[] = [];
-      const totalInRange = end - start + 1;
-      for (let p = start; p <= end; p++) {
-        pageNumbers.push(p);
+      dayPages.forEach((p) => {
         if (memorizedPagesSet.has(p)) memorizedCount++;
-      }
+      });
 
       const isCompleted = memorizedCount === totalInRange;
       let isCurrent = false;
@@ -721,33 +727,49 @@ export default function PlanScreen() {
       ).map((s) => s.nameAr);
       const surahLabel = Array.from(new Set(surahs)).slice(0, 2).join("، ");
 
-      const nextStart = end + 1;
-      const nextEnd = Math.min(end + plan.pagesPerDay, plan.endPage);
-      const hasNext = nextStart <= plan.endPage;
+      const nextDayPages = plan.targetPages.slice(
+        (i + 1) * plan.pagesPerDay,
+        (i + 2) * plan.pagesPerDay
+      );
+      const hasNext = nextDayPages.length > 0;
+      const nextMin = hasNext ? Math.min(...nextDayPages) : 0;
+      const nextMax = hasNext ? Math.max(...nextDayPages) : 0;
 
-      const weeklyStartDay = i + 7;
-      const weeklyEndDay = i + 13;
-      const weeklyStartPage = plan.startPage + (weeklyStartDay * plan.pagesPerDay);
-      const weeklyEndPage = Math.min(plan.startPage + ((weeklyEndDay + 1) * plan.pagesPerDay) - 1, plan.endPage);
-      const hasWeekly = weeklyStartPage <= plan.endPage;
+      const weeklyPages = plan.targetPages.slice(
+        (i + 7) * plan.pagesPerDay,
+        (i + 14) * plan.pagesPerDay
+      );
+      const hasWeekly = weeklyPages.length > 0;
+      const weeklyMin = hasWeekly ? Math.min(...weeklyPages) : 0;
+      const weeklyMax = hasWeekly ? Math.max(...weeklyPages) : 0;
 
       const wardStart = ((i * 40) % 604) + 1;
       const wardEnd = ((wardStart + 39 - 1) % 604) + 1;
-      const wardLabel = wardEnd >= wardStart 
-        ? `${toArabicNumerals(wardStart)} - ${toArabicNumerals(wardEnd)}`
-        : `${toArabicNumerals(wardStart)} - ٦٠٤ و ١ - ${toArabicNumerals(wardEnd)}`;
+      const wardLabel =
+        wardEnd >= wardStart
+          ? `${toArabicNumerals(wardStart)} - ${toArabicNumerals(wardEnd)}`
+          : `${toArabicNumerals(wardStart)} - ٦٠٤ و ١ - ${toArabicNumerals(
+              wardEnd
+            )}`;
 
-      const nearStart = Math.max(1, start - 20);
-      const nearEnd = Math.max(1, start - 1);
-      const nearLabel = start > 1 
-        ? `${toArabicNumerals(nearStart)} - ${toArabicNumerals(nearEnd)}`
-        : "لا يوجد (بداية الخطة)";
+      // Review usually looks back at what we ALREADY memorized
+      const alreadyMemorized = plan.targetPages.slice(0, i * plan.pagesPerDay);
+      const nearPages = alreadyMemorized.slice(-20); // Last 20 pages
+      const distantPages = alreadyMemorized.slice(-60, -20); // Previous 40 pages
 
-      const distantStart = Math.max(1, nearStart - 40);
-      const distantEnd = Math.max(1, nearStart - 1);
-      const distantLabel = nearStart > 1
-        ? `${toArabicNumerals(distantStart)} - ${toArabicNumerals(distantEnd)}`
-        : "لا يوجد بعد";
+      const nearLabel =
+        nearPages.length > 0
+          ? `${toArabicNumerals(Math.min(...nearPages))} - ${toArabicNumerals(
+              Math.max(...nearPages)
+            )}`
+          : "لا يوجد (بداية الخطة)";
+
+      const distantLabel =
+        distantPages.length > 0
+          ? `${toArabicNumerals(Math.min(...distantPages))} - ${toArabicNumerals(
+              Math.max(...distantPages)
+            )}`
+          : "لا يوجد بعد";
 
       const listenHizbStart = ((i * 10) % 604) + 1;
       const listenHizbEnd = ((listenHizbStart + 9) % 604) + 1;
@@ -771,7 +793,7 @@ export default function PlanScreen() {
         {
           id: "prep_n",
           label: hasNext
-            ? `التحضير الليلي (٣٠ د): قراءة وسماع ${toArabicNumerals(nextStart)} - ${toArabicNumerals(nextEnd)}`
+            ? `التحضير الليلي (٣٠ د): قراءة وسماع ${toArabicNumerals(nextMin)} - ${toArabicNumerals(nextMax)}`
             : "الاستعداد للختم المبارك",
           icon: "moon",
           color: Colors.warning,
@@ -779,7 +801,7 @@ export default function PlanScreen() {
         {
           id: "prep_w",
           label: hasWeekly
-            ? `التحضير الأسبوعي: قراءة صفحات الأسبوع القادم (${toArabicNumerals(weeklyStartPage)} - ${toArabicNumerals(weeklyEndPage)})`
+            ? `التحضير الأسبوعي: قراءة صفحات الأسبوع القادم (${toArabicNumerals(weeklyMin)} - ${toArabicNumerals(weeklyMax)})`
             : "الأسابيع الأخيرة في الختمة",
           icon: "calendar-outline",
           color: Colors.fortressRecitation,

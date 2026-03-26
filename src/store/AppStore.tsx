@@ -12,9 +12,9 @@ import {
   DailyProgress,
   FORTRESSES,
   FortressId,
-  GOAL_PAGE_RANGES,
   MemorizationStrength,
   PageProgress,
+  PlanDirection,
   StreakData,
   User,
 } from "../types";
@@ -33,7 +33,7 @@ import { StatisticsService } from "./StatisticsService";
 const STORAGE_KEY = "husoon_app_state";
 
 // ─── Initial State ────────────────────────────────────────
-const initialState: AppState = {
+const DEFAULT_INITIAL_STATE: AppState = {
   user: null,
   plan: null,
   dailyProgress: [],
@@ -69,6 +69,9 @@ const initialState: AppState = {
   },
 };
 
+const getInitialState = (): AppState => JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+const initialState = getInitialState();
+
 // ─── Action Types ─────────────────────────────────────────
 type Action =
   | { type: "LOAD_STATE"; payload: Partial<AppState> }
@@ -76,7 +79,9 @@ type Action =
       type: "COMPLETE_ONBOARDING";
       payload: {
         user: Omit<User, "id" | "createdAt" | "title" | "totalXP">;
-        goal: string;
+        pageNumbers: number[];
+        label: string;
+        direction: "forward" | "backward";
       };
     }
   | { type: "TOGGLE_FORTRESS"; payload: { fortressId: FortressId } }
@@ -87,29 +92,63 @@ type Action =
   | { type: "UPDATE_USER"; payload: Partial<User> }
   | { type: "UPDATE_SETTINGS"; payload: Partial<AppState["settings"]> }
   | { type: "UPDATE_GLOBAL_STATS"; payload: any }
-  | { type: "SET_FORTRESS_COMPLETED"; payload: { fortressId: FortressId; completed: boolean } }
-  | { type: "COMPLETE_ALL_TODAY" };
+  | {
+      type: "SET_FORTRESS_COMPLETED";
+      payload: { fortressId: FortressId; completed: boolean };
+    }
+  | { type: "COMPLETE_ALL_TODAY" }
+  | {
+      type: "REGENERATE_PLAN";
+      payload: {
+        pageNumbers: number[];
+        label: string;
+        direction: PlanDirection;
+      };
+    };
 
 // ─── Reducer ──────────────────────────────────────────────
 function appReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "LOAD_STATE": {
+      let plan = (action.payload as any).plan;
+      if (plan && !plan.targetPages) {
+        const pageNumbers = [];
+        const start = plan.startPage || 1;
+        const end = plan.endPage || 604;
+        const min = Math.min(start, end);
+        const max = Math.max(start, end);
+        for (let p = min; p <= max; p++) pageNumbers.push(p);
+
+        plan = generatePlan(
+          pageNumbers,
+          plan.pagesPerDay || 1,
+          "خطة سابقة",
+          plan.direction || "forward",
+        );
+      }
       return {
         ...state,
         ...action.payload,
+        plan: plan || null,
         settings: { ...state.settings, ...(action.payload.settings || {}) },
         isLoaded: true,
       };
     }
 
     case "COMPLETE_ONBOARDING": {
-      const { user: userData, goal } = action.payload;
-      const range = GOAL_PAGE_RANGES[goal] ?? { start: 1, end: 604 };
-      const plan = generatePlan(range.start, range.end, userData.dailyPages);
+      const cleanState = getInitialState();
+      const { user: userData, pageNumbers, label, direction } = action.payload;
+      const pagesToUse = pageNumbers || [];
+      const plan = generatePlan(
+        pagesToUse,
+        userData.dailyPages,
+        label,
+        direction,
+      );
 
       // Build initial page progress for all pages
       const pageProgress: PageProgress[] = [];
-      for (let p = range.start; p <= range.end; p++) {
+      for (let p = 1; p <= 604; p++) {
         pageProgress.push({
           pageNumber: p,
           memorized: false,
@@ -124,7 +163,7 @@ function appReducer(state: AppState, action: Action): AppState {
         id: Date.now().toString(),
         name: userData.name,
         level: userData.level,
-        goal,
+        goal: label,
         dailyPages: userData.dailyPages,
         createdAt: todayISO(),
         title: "مبتدئ",
@@ -138,12 +177,13 @@ function appReducer(state: AppState, action: Action): AppState {
       StatisticsService.trackNewUser();
 
       return {
-        ...state,
+        ...cleanState,
         user,
         plan,
         pageProgress,
         dailyProgress: [todayProgress],
         isOnboarded: true,
+        isLoaded: true,
       };
     }
 
@@ -225,12 +265,15 @@ function appReducer(state: AppState, action: Action): AppState {
       const fortress = FORTRESSES.find((f) => f.id === fortressId);
       const xpReward = fortress?.xpReward ?? 0;
 
-      const existingIndex = state.dailyProgress.findIndex((p) => p.date === today);
+      const existingIndex = state.dailyProgress.findIndex(
+        (p) => p.date === today,
+      );
       let updatedProgress: DailyProgress[];
 
       if (existingIndex === -1 && completed) {
         const newProgress = createEmptyDailyProgress();
-        (newProgress as Record<string, any>)[fortressToField(fortressId)] = true;
+        (newProgress as Record<string, any>)[fortressToField(fortressId)] =
+          true;
         newProgress.xpEarned = xpReward;
         updatedProgress = [...state.dailyProgress, newProgress];
       } else if (existingIndex !== -1) {
@@ -240,7 +283,9 @@ function appReducer(state: AppState, action: Action): AppState {
           const wasCompleted = (p as Record<string, any>)[field];
           if (wasCompleted === completed) return p;
 
-          const newXP = completed ? p.xpEarned + xpReward : p.xpEarned - xpReward;
+          const newXP = completed
+            ? p.xpEarned + xpReward
+            : p.xpEarned - xpReward;
           return { ...p, [field]: completed, xpEarned: Math.max(0, newXP) };
         });
       } else {
@@ -250,25 +295,45 @@ function appReducer(state: AppState, action: Action): AppState {
       const totalXP = updatedProgress.reduce((sum, p) => sum + p.xpEarned, 0);
       const newTitle = getTitleFromXP(totalXP);
       const todayProg = updatedProgress.find((p) => p.date === today);
-      
+
       const completion = todayProg ? getDailyCompletionPercent(todayProg) : 0;
       const allDone = completion >= 1.0;
-      const rawStreak = calculateStreak(state.streak.currentStreak, state.streak.longestStreak, state.streak.lastActiveDate, allDone);
+      const rawStreak = calculateStreak(
+        state.streak.currentStreak,
+        state.streak.longestStreak,
+        state.streak.lastActiveDate,
+        allDone,
+      );
 
       return {
         ...state,
         dailyProgress: updatedProgress,
-        streak: { currentStreak: rawStreak.current, longestStreak: rawStreak.longest, lastActiveDate: rawStreak.lastActiveDate },
-        user: state.user ? { ...state.user, totalXP, title: newTitle as any } : state.user,
+        streak: {
+          currentStreak: rawStreak.current,
+          longestStreak: rawStreak.longest,
+          lastActiveDate: rawStreak.lastActiveDate,
+        },
+        user: state.user
+          ? { ...state.user, totalXP, title: newTitle as any }
+          : state.user,
       };
     }
 
     case "COMPLETE_ALL_TODAY": {
       const today = todayISO();
-      const fortressIds: FortressId[] = ["recitation", "listening", "preparation", "memorization", "review"];
+      const fortressIds: FortressId[] = [
+        "recitation",
+        "listening",
+        "preparation",
+        "memorization",
+        "review",
+      ];
       let newState = state;
-      fortressIds.forEach(id => {
-        newState = appReducer(newState, { type: "SET_FORTRESS_COMPLETED", payload: { fortressId: id, completed: true } });
+      fortressIds.forEach((id) => {
+        newState = appReducer(newState, {
+          type: "SET_FORTRESS_COMPLETED",
+          payload: { fortressId: id, completed: true },
+        });
       });
       return newState;
     }
@@ -288,11 +353,15 @@ function appReducer(state: AppState, action: Action): AppState {
         };
       });
 
-      // Advance plan currentPage
-      const lastMemorized = Math.max(...pages);
-      const updatedPlan = state.plan
-        ? { ...state.plan, currentPage: lastMemorized + 1 }
-        : state.plan;
+      // Advance plan currentPageIndex
+      let updatedPlan = state.plan;
+      if (state.plan) {
+        const newIndex = state.plan.currentPageIndex + pages.length;
+        updatedPlan = {
+          ...state.plan,
+          currentPageIndex: Math.min(newIndex, state.plan.targetPages.length),
+        };
+      }
 
       // Track memorized pages in Firebase
       StatisticsService.trackPageMemorized(pages.length);
@@ -335,13 +404,17 @@ function appReducer(state: AppState, action: Action): AppState {
     case "UPDATE_USER": {
       if (!state.user) return state;
       const newUser = { ...state.user, ...action.payload };
-      
+
       // If dailyPages changed, regenerate the plan
       let newPlan = state.plan;
       if (action.payload.dailyPages !== undefined && state.plan) {
-        newPlan = generatePlan(state.plan.startPage, state.plan.endPage, action.payload.dailyPages);
-        // Maintain the current page
-        newPlan.currentPage = state.plan.currentPage;
+        // Find how many pages were already finished in the current targetPages
+        // For simplicity, we just keep the index or recalculate based on memorized status
+        // Here we just keep the index but wrap it to new pagesPerDay
+        newPlan = { ...state.plan, pagesPerDay: action.payload.dailyPages };
+        newPlan.totalDays = Math.ceil(
+          newPlan.targetPages.length / newPlan.pagesPerDay,
+        );
       }
 
       return {
@@ -365,6 +438,28 @@ function appReducer(state: AppState, action: Action): AppState {
           ...state.globalStats,
           ...action.payload,
         },
+      };
+    }
+
+    case "REGENERATE_PLAN": {
+      const { pageNumbers, label, direction } = action.payload;
+      const pagesPerDay = state.user?.dailyPages ?? 1;
+      const newPlan = generatePlan(pageNumbers, pagesPerDay, label, direction);
+
+      return {
+        ...state,
+        plan: newPlan,
+      };
+    }
+
+    case "RESET": {
+      console.log("[AppStore] Resetting to initial state...");
+      const clean = getInitialState();
+      return {
+        ...clean,
+        isLoaded: true,
+        isOnboarded: false,
+        user: null,
       };
     }
 
@@ -451,8 +546,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     if (state.isLoaded) {
       if (state.isOnboarded) {
         saveState(state);
-      } else if (state.user === null) {
-        // Only clear if user is null (indicator of RESET)
+      } else if (!state.isOnboarded && state.user === null) {
+        // Clear storage on RESET
         AsyncStorage.removeItem(STORAGE_KEY);
       }
     }
@@ -483,16 +578,8 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   const getCurrentPagesForMemorization = useCallback((): number[] => {
     if (!state.plan) return [];
-    const { currentPage, pagesPerDay, endPage } = state.plan;
-    const pages: number[] = [];
-    for (
-      let p = currentPage;
-      p < currentPage + pagesPerDay && p <= endPage;
-      p++
-    ) {
-      pages.push(p);
-    }
-    return pages;
+    const { targetPages, currentPageIndex, pagesPerDay } = state.plan;
+    return targetPages.slice(currentPageIndex, currentPageIndex + pagesPerDay);
   }, [state.plan]);
 
   const contextValue: AppContextType = {
