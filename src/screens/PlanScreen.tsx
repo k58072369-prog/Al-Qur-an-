@@ -1,3 +1,5 @@
+import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -154,17 +156,17 @@ const styles_global = StyleSheet.create({
     fontWeight: '500',
   },
   closeCelebration: {
-    backgroundColor: '#FFF',
-    paddingHorizontal: Spacing.xl * 1.5,
-    paddingVertical: Spacing.md,
-    borderRadius: 30,
     marginTop: Spacing.xl,
-    ...Shadow.md,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   closeCelebrationText: {
-    color: '#059669',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '500',
+    opacity: 0.6,
   },
   particlesContainer: {
     position: "absolute",
@@ -214,6 +216,31 @@ const getStyles = (Colors: any) =>
       color: Colors.textSecondary,
       textAlign: "left",
       marginTop: 4,
+    },
+
+    // Summary Stats
+    summaryStatsRow: {
+       width: '100%',
+       backgroundColor: `${Colors.primary}05`,
+       borderRadius: 16,
+       padding: Spacing.lg,
+       marginBottom: Spacing.xl,
+       borderWidth: 1,
+       borderColor: `${Colors.primary}10`,
+       gap: Spacing.md,
+    },
+    summaryStatItem: {
+       alignItems: 'flex-start',
+    },
+    summaryStatLabel: {
+       fontSize: 11,
+       color: Colors.textTertiary,
+       marginBottom: 2,
+    },
+    summaryStatValue: {
+       fontSize: 14,
+       fontWeight: 'bold',
+       color: Colors.textPrimary,
     },
 
     progressSection: { marginBottom: Spacing.xl, width: "100%" },
@@ -421,53 +448,89 @@ const Particle = () => {
 };
 
 const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
+  const Colors = useTheme();
   const [msg] = useState(() => MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)]);
   
   useEffect(() => {
-    const timer = setTimeout(onComplete, 6000);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    const timer = setTimeout(onComplete, 4000); 
     return () => clearTimeout(timer);
   }, [onComplete]);
 
   return (
     <Animated.View 
-      entering={FadeIn.duration(600)} 
-      exiting={FadeOut.duration(500)}
-      style={[StyleSheet.absoluteFill, styles_global.celebrationOverlay]}
+      entering={FadeIn.duration(300)} 
+      exiting={FadeOut.duration(200)}
+      style={[StyleSheet.absoluteFill, { zIndex: 10000 }]}
     >
-      <LinearGradient
-        colors={["rgba(6, 78, 59, 1)", "rgba(16, 185, 129, 0.95)", "rgba(5, 150, 105, 0.98)"]}
-        style={StyleSheet.absoluteFill}
-      />
+      {/* Background Dimmer */}
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.8)' }]} />
       
-      <View style={styles_global.celebrationContent}>
+      <View style={styles_global.celebrationOverlay}>
         <Animated.View 
-          entering={FadeIn.delay(400).duration(800)}
-          style={styles_global.trophyContainer}
+          entering={FadeIn.duration(600).springify().damping(18)}
+          style={{
+            backgroundColor: Colors.surface, // Solid Theme Background
+            borderRadius: 30,
+            padding: 30,
+            alignItems: 'center',
+            width: width * 0.85,
+            maxWidth: 360,
+            ...Shadow.lg,
+            borderWidth: 1,
+            borderColor: Colors.border,
+          }}
         >
-          <View style={styles_global.glow} />
-          <Ionicons name="trophy" size={130} color="#FFD700" style={styles_global.trophyIcon} />
-        </Animated.View>
-        
-        <Animated.View entering={FadeIn.delay(800)} style={styles_global.textContent}>
-          <Text style={styles_global.celebrationTitle}>{msg.title}</Text>
-          <Text style={styles_global.celebrationSubtitle}>{msg.subtitle}</Text>
-          
-          <View style={styles_global.duaBox}>
-            <Ionicons name="sparkles" size={18} color="#FFD700" style={{ marginBottom: 4 }} />
-            <Text style={styles_global.celebrationDua}>{msg.dua}</Text>
-            <Ionicons name="sparkles" size={18} color="#FFD700" style={{ marginTop: 4, alignSelf: 'flex-end' }} />
+          <View style={{
+              width: 90,
+              height: 90,
+              borderRadius: 45,
+              backgroundColor: `${Colors.success}15`,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 24,
+            }}
+          >
+            <Ionicons name="checkmark-circle" size={60} color={Colors.success} />
           </View>
-        </Animated.View>
+          
+          <Text style={{ fontSize: 28, fontWeight: 'bold', color: Colors.textPrimary, textAlign: 'center', marginBottom: 8 }}>
+            {msg.title}
+          </Text>
+          <Text style={{ fontSize: 16, color: Colors.textSecondary, textAlign: 'center', fontWeight: '500' }}>
+            {msg.subtitle}
+          </Text>
 
-        <TouchableOpacity onPress={onComplete} style={styles_global.closeCelebration}>
-          <Text style={styles_global.closeCelebrationText}>استمرار</Text>
-        </TouchableOpacity>
-        
-        <View style={styles_global.particlesContainer}>
-          {[...Array(40)].map((_, i) => (
-            <Particle key={i} />
-          ))}
-        </View>
+          <View style={{ 
+            marginTop: 24, 
+            padding: 20, 
+            backgroundColor: `${Colors.primary}05`, 
+            borderRadius: 16,
+            width: '100%',
+            borderLeftWidth: 3,
+            borderLeftColor: Colors.primary,
+          }}>
+             <Text style={{ color: Colors.textPrimary, fontSize: 16, fontStyle: 'italic', lineHeight: 24, textAlign: 'center' }}>
+               "{msg.dua}"
+             </Text>
+          </View>
+
+          <TouchableOpacity 
+            onPress={onComplete} 
+            activeOpacity={0.7}
+            style={{
+              marginTop: 24,
+              backgroundColor: Colors.primary,
+              width: '100%',
+              paddingVertical: 14,
+              borderRadius: 14,
+              alignItems: 'center',
+              ...Shadow.emerald,
+            }}
+          >
+             <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' }}>استمرار</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </Animated.View>
   );
@@ -628,6 +691,16 @@ const HeaderComponent = React.memo(({ roadmap, Colors, styles }: any) => {
   const completedCount = roadmap.filter((d: any) => d.isCompleted).length;
   const totalCount = roadmap.length;
   const progressPct = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+  
+  // Current day index
+  const currentDayItem = roadmap.find((d: any) => d.isCurrent);
+  const currentDayIndex = currentDayItem ? currentDayItem.dayIndex : (completedCount < totalCount ? completedCount + 1 : totalCount);
+
+  // Duration calculations (Approximation)
+  const totalYears = Math.floor(totalCount / 355); 
+  const remainingAfterYears = totalCount % 355;
+  const totalMonths = Math.floor(remainingAfterYears / 30);
+  const totalDays = remainingAfterYears % 30;
 
   return (
     <View style={styles.headerContainer}>
@@ -636,6 +709,23 @@ const HeaderComponent = React.memo(({ roadmap, Colors, styles }: any) => {
         <Text style={styles.headerSubtitle}>
           خطة مفصلة للوصول إلى ختم القرآن الكريم
         </Text>
+      </View>
+
+      <View style={styles.summaryStatsRow}>
+         <View style={styles.summaryStatItem}>
+            <Text style={styles.summaryStatLabel}>مدة الرحلة الإجمالية</Text>
+            <Text style={styles.summaryStatValue}>
+               {totalYears > 0 ? `${toArabicNumerals(totalYears)} سنة و ` : ''}
+               {totalMonths > 0 ? `${toArabicNumerals(totalMonths)} شهر و ` : ''}
+               {toArabicNumerals(totalDays)} يوم
+            </Text>
+         </View>
+         <View style={styles.summaryStatItem}>
+            <Text style={styles.summaryStatLabel}>أنت الآن في</Text>
+            <Text style={styles.summaryStatValue}>
+               اليوم {toArabicNumerals(currentDayIndex)} من أصل {toArabicNumerals(totalCount)}
+            </Text>
+         </View>
       </View>
 
       <View style={styles.progressSection}>
@@ -661,8 +751,8 @@ const HeaderComponent = React.memo(({ roadmap, Colors, styles }: any) => {
           <Text style={styles.statLabel}>أيام منجزة</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statVal}>{toArabicNumerals(totalCount)}</Text>
-          <Text style={styles.statLabel}>إجمالي الأيام</Text>
+          <Text style={styles.statVal}>{toArabicNumerals(totalCount - completedCount)}</Text>
+          <Text style={styles.statLabel}>أيام متبقية</Text>
         </View>
       </View>
     </View>
@@ -752,10 +842,10 @@ export default function PlanScreen() {
               wardEnd
             )}`;
 
-      // Review usually looks back at what we ALREADY memorized
+      // Review logic 
       const alreadyMemorized = plan.targetPages.slice(0, i * plan.pagesPerDay);
-      const nearPages = alreadyMemorized.slice(-20); // Last 20 pages
-      const distantPages = alreadyMemorized.slice(-60, -20); // Previous 40 pages
+      const nearPages = alreadyMemorized.slice(-20); 
+      const distantPages = alreadyMemorized.slice(-60, -20); 
 
       const nearLabel =
         nearPages.length > 0
@@ -846,6 +936,12 @@ export default function PlanScreen() {
     return days;
   }, [plan, pageProgress, Colors]);
 
+  const initialScrollIndex = useMemo(() => {
+    if (!roadmap || roadmap.length === 0) return 0;
+    const currentIdx = roadmap.findIndex(d => d.isCurrent);
+    return currentIdx !== -1 ? currentIdx : 0;
+  }, [roadmap]);
+
   const handleToggle = useCallback((day: number) => {
     setExpandedDay((prev) => (prev === day ? null : day));
   }, []);
@@ -923,6 +1019,13 @@ export default function PlanScreen() {
         ListHeaderComponent={<HeaderComponent roadmap={roadmap} Colors={Colors} styles={styles} />}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        initialScrollIndex={initialScrollIndex > 0 ? initialScrollIndex : undefined}
+        getItemLayout={(_, index) => ({
+          length: 100, // Approximate height of a closed item
+          offset: 100 * index,
+          index,
+        })}
+        onScrollToIndexFailed={() => {}}
       />
       {showCelebration && <CelebrationOverlay onComplete={() => setShowCelebration(false)} />}
     </View>

@@ -35,6 +35,7 @@ export default function SettingsScreen() {
     | "startPage"
     | "endPage"
     | "planDirection"
+    | "dailyAyahs"
   >("name");
   const [editValue, setEditValue] = useState("");
   const [surahModalVisible, setSurahModalVisible] = useState(false);
@@ -239,7 +240,7 @@ export default function SettingsScreen() {
             style={styles.infoRow}
             onPress={() => handleEdit("dailyPages")}
           >
-            <Text style={styles.label}>طاقتك اليومية</Text>
+            <Text style={styles.label}>طاقتك اليومية (صفحات)</Text>
             <View style={styles.valueRow}>
               <Text style={styles.value}>
                 {state.user?.dailyPages} صفحة/صفحات
@@ -674,7 +675,9 @@ export default function SettingsScreen() {
                     ? "نهاية النطاق"
                     : editType === "dailyPages"
                       ? "الصفحات اليومية"
-                      : editType === "memorizationTimer"
+                      : editType === "dailyAyahs"
+                        ? "الآيات اليومية"
+                        : editType === "memorizationTimer"
                         ? "مؤقت الحفظ"
                         : editType === "reviewTimer"
                           ? "مؤقت المراجعة"
@@ -856,8 +859,31 @@ const getStyles = (Colors: any) =>
     },
     dangerBtnText: {
       color: Colors.red,
-      fontSize: Typography.sm,
-      fontWeight: Typography.medium,
+      fontSize: Typography.base,
+      fontWeight: Typography.semibold,
+    },
+    unitToggle: {
+      flexDirection: "row",
+      backgroundColor: Colors.border,
+      borderRadius: BorderRadius.md,
+      padding: 2,
+    },
+    unitChip: {
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: BorderRadius.sm,
+    },
+    unitChipActive: {
+      backgroundColor: Colors.surface,
+      ...Shadow.sm,
+    },
+    unitChipText: {
+      fontSize: 10,
+      color: Colors.textTertiary,
+      fontWeight: 'bold',
+    },
+    unitChipTextActive: {
+      color: Colors.primary,
     },
     statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
     modalOverlay: {

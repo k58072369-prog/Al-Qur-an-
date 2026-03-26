@@ -140,10 +140,10 @@ function appReducer(state: AppState, action: Action): AppState {
       const { user: userData, pageNumbers, label, direction } = action.payload;
       const pagesToUse = pageNumbers || [];
       const plan = generatePlan(
-        pagesToUse,
+        pageNumbers,
         userData.dailyPages,
         label,
-        direction,
+        direction
       );
 
       // Build initial page progress for all pages
@@ -408,9 +408,6 @@ function appReducer(state: AppState, action: Action): AppState {
       // If dailyPages changed, regenerate the plan
       let newPlan = state.plan;
       if (action.payload.dailyPages !== undefined && state.plan) {
-        // Find how many pages were already finished in the current targetPages
-        // For simplicity, we just keep the index or recalculate based on memorized status
-        // Here we just keep the index but wrap it to new pagesPerDay
         newPlan = { ...state.plan, pagesPerDay: action.payload.dailyPages };
         newPlan.totalDays = Math.ceil(
           newPlan.targetPages.length / newPlan.pagesPerDay,

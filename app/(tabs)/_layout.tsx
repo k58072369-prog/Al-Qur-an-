@@ -12,8 +12,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Typography, useTheme } from "../../src/theme";
+import { BlurView } from "expo-blur";
 import { useAppStore } from "../../src/store/AppStore";
+import { Typography, useTheme, Shadow, BorderRadius } from "../../src/theme";
 
 // Filled vs outline icons for each tab
 const ICONS: Record<string, { outline: string; filled: string }> = {
@@ -54,21 +55,10 @@ function TabItem({
     }).start();
   }, [isFocused]);
 
-  // Elegant subtle lift for the entire content block
-  const iconTranslateY = progressAnim.interpolate({
+  // Minimalist active scale
+  const activeScale = progressAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -2],
-  });
-
-  // The active background bubble scales in
-  const bgScale = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.5, 1],
-  });
-
-  const bgOpacity = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1],
+    outputRange: [1, 1.08],
   });
 
   const icons = ICONS[routeName] ?? {
@@ -102,60 +92,48 @@ function TabItem({
       style={styles.tabButton}
       activeOpacity={0.8}
     >
-      <Animated.View
-        style={[
-          styles.tabContent,
-          { transform: [{ translateY: iconTranslateY }] },
-        ]}
-      >
-        <View style={styles.iconContainer}>
-          {/* Animated Background Bubble */}
-          <Animated.View
-            style={[
-              styles.iconActiveBg,
-              { opacity: bgOpacity, transform: [{ scale: bgScale }] },
-            ]}
-          />
-          <Ionicons
-            name={iconName as any}
-            size={22}
-            color={isFocused ? Colors.primary : Colors.textTertiary}
-            style={{ zIndex: 2 }} // Ensure icon is over the bubble
-          />
-        </View>
-
-        <Text
-          numberOfLines={1}
-          style={[styles.tabText, isFocused && styles.tabTextActive]}
+        <Animated.View
+          style={[
+            styles.tabContent,
+            { transform: [{ scale: activeScale }] },
+          ]}
         >
-          {title}
-        </Text>
-      </Animated.View>
+          <View style={styles.iconContainer}>
+            <Ionicons
+              name={iconName as any}
+              size={24}
+              color={isFocused ? Colors.primary : Colors.textSecondary}
+            />
+          </View>
+
+          <Text
+            numberOfLines={1}
+            style={[styles.tabText, isFocused && styles.tabTextActive]}
+          >
+            {title}
+          </Text>
+        </Animated.View>
     </TouchableOpacity>
   );
 }
 
-function PremiumTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+function PremiumTabBar({ state: navState, descriptors, navigation }: BottomTabBarProps) {
   const Colors = useTheme();
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
+  const { state: appState } = useAppStore();
+  const isLight = appState.themeMode === 'light';
 
   return (
     <View style={styles.outerContainer}>
-      <LinearGradient
-        colors={[Colors.surface, Colors.surface]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
 
       <View style={styles.buttonsRow}>
-        {state.routes.map((route, index) => {
+        {navState.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           if ((options as any).href === null) return null;
 
           const title =
-            options.title !== undefined ? options.title : route.name;
-          const isFocused = state.index === index;
+             options.title !== undefined ? options.title : route.name;
+          const isFocused = navState.index === index;
 
           const onPress = () => {
             const event = navigation.emit({
@@ -210,32 +188,30 @@ const getStyles = (Colors: any) =>
     // The Floating Pill bar
     outerContainer: {
       position: "absolute",
-      bottom: Platform.OS === "ios" ? 28 : 16,
-      left: 16,
-      right: 16,
+      bottom: Platform.OS === "ios" ? 32 : 24,
+      left: 24,
+      right: 24,
       height: 70,
-      borderRadius: 35, // Perfectly rounded capsule
+      borderRadius: 24,
       borderWidth: 1,
-      borderColor: Colors.glassBorder,
-      overflow: "hidden", // Clean and sharp glass crop
+      borderColor: Colors.border,
+      backgroundColor: Colors.surface,
 
-      // Beautiful subtle shadow
       ...Platform.select({
         ios: {
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.08,
-          shadowRadius: 16,
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
         },
-        android: { elevation: 0 },
+        android: { elevation: 3 },
       }),
     },
-
     buttonsRow: {
       ...StyleSheet.absoluteFillObject,
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 9,
+      paddingHorizontal: 12,
     },
 
     tabButton: {
@@ -252,27 +228,29 @@ const getStyles = (Colors: any) =>
     },
 
     iconContainer: {
-      width: 44,
       height: 32,
       alignItems: "center",
       justifyContent: "center",
     },
 
-    iconActiveBg: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: Colors.primaryMuted, // E.g. rgba(193, 154, 107, 0.15) or suitable soft equivalent
-      borderRadius: 16, // Soft rounded rectangle/pill behind the icon
+    activeDot: {
+      width: 4,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: Colors.primary,
+      marginTop: 4,
     },
 
     tabText: {
       fontSize: 10,
-      color: Colors.textTertiary,
+      color: Colors.textSecondary,
       fontWeight: Typography.medium,
       textAlign: "center",
+      marginTop: 2,
     },
 
     tabTextActive: {
       color: Colors.primary,
-      fontWeight: Typography.bold,
+      fontWeight: Typography.semibold,
     },
   });

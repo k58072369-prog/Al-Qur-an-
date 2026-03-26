@@ -481,20 +481,9 @@ export default function OnboardingScreen() {
                   {selectedGoal && selectedPages > 0
                     ? `تقريباً ${Math.ceil(
                         (() => {
-                          const range = {
-                            "القرآن الكريم كاملاً": 604,
-                            "الجزء الثلاثون (عمّ)": 23,
-                            "الجزء التاسع والعشرون": 20,
-                            "الجزء الثامن والعشرون": 20,
-                            "خمسة أجزاء": 100,
-                            "عشرة أجزاء": 200,
-                            "خمسة عشر جزءاً": 300,
-                            "عشرون جزءاً": 400,
-                          };
-                          return (
-                            (range[selectedGoal as keyof typeof range] ?? 100) /
-                            selectedPages
-                          );
+                           // ... estimating total items ...
+                           const count = selectionType === "complete" ? 604 : 100; // Simplified
+                           return count / selectedPages;
                         })(),
                       )} يوم`
                     : "—"}

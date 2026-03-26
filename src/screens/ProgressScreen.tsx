@@ -72,22 +72,37 @@ export default function ProgressScreen() {
     return { ...juz, pct };
   });
 
-  // Surah progress calculation
-  const surahProgress = SURAHS.slice(0, 15).map(surah => {
-    const pagesInSurah = Array.from({ length: surah.endPage - surah.startPage + 1 }, (_, i) => surah.startPage + i);
-    const memorizedInSurah = pagesInSurah.filter(p => memorizedPages.some(mp => mp.pageNumber === p));
-    const pct = memorizedInSurah.length / pagesInSurah.length;
-    return { ...surah, pct };
-  }).filter(s => s.pct > 0 || (s.id <= 3)); 
-
   // Completion Estimation
   const pagesCount = memorizedPages.length;
-  const streakCount = Math.max(streak.currentStreak, 1);
-  const avgPagesPerDay = pagesCount / streakCount;
-  const remaining = totalPages - pagesCount;
-  const daysLeft = avgPagesPerDay > 0 ? Math.ceil(remaining / avgPagesPerDay) : remaining;
+  const targetPagesCount = plan?.targetPages.length || 604;
+  const remainingCount = targetPagesCount - pagesCount;
+  
+  // Use dailyPages setting as the baseline for estimation
+  const pagesPerDay = user?.dailyPages || 1;
+  const daysRemaining = Math.max(1, Math.ceil(remainingCount / pagesPerDay));
+  
   const finishDate = new Date();
-  finishDate.setDate(finishDate.getDate() + daysLeft);
+  finishDate.setDate(finishDate.getDate() + daysRemaining);
+  
+  // Surah progress calculation - only for surahs in the plan
+  const planPages = new Set(plan?.targetPages || []);
+  const surahsInPlan = SURAHS.filter(surah => {
+    for (let p = surah.startPage; p <= surah.endPage; p++) {
+      if (planPages.has(p)) return true;
+    }
+    return false;
+  });
+
+  const surahProgress = surahsInPlan.map(surah => {
+    const pagesInSurahInPlan = Array.from(
+      { length: surah.endPage - surah.startPage + 1 }, 
+      (_, i) => surah.startPage + i
+    ).filter(p => planPages.has(p));
+    
+    const memorizedInSurah = pagesInSurahInPlan.filter(p => memorizedPages.some(mp => mp.pageNumber === p));
+    const pct = memorizedInSurah.length / pagesInSurahInPlan.length;
+    return { ...surah, pct, totalInPlan: pagesInSurahInPlan.length, memorizedCount: memorizedInSurah.length };
+  });
 
   // Fortress consistency
   const fortressStats = [
@@ -145,15 +160,20 @@ export default function ProgressScreen() {
         {/* Quick Stats Grid */}
         <View style={styles.statsGrid}>
           {[
-            { label: 'الختم المتوقع', value: finishDate.toLocaleDateString('ar-EG', { month: 'short', year: '2-digit' }), icon: 'calendar', color: Colors.primary },
-            { label: 'معدل الحفظ', value: `${avgPagesPerDay.toFixed(1)} ص/ي`, icon: 'trending-up', color: Colors.success },
-            { label: 'الصفحات', value: `${memorizedPages.length}`, icon: 'book', color: Colors.purple },
-            { label: 'السلسلة', value: `${streak.currentStreak} يوم`, icon: 'flame', color: Colors.gold },
+            { label: 'الختم المتوقع', value: finishDate.toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' }), sub: `${daysRemaining} يوم متبقي`, icon: 'calendar', color: Colors.primary },
+            { label: 'التقدم الحالي', value: `${Math.round(planPct * 100)}%`, sub: `${memorizedPages.length} من ${targetPagesCount} صفحة`, icon: 'analytics', color: Colors.success },
+            { label: 'السلسلة', value: `${streak.currentStreak} يوم`, sub: `الأطول: ${streak.longestStreak}`, icon: 'flame', color: Colors.gold },
+            { label: 'إجمالي النقاط', value: `${user?.totalXP ?? 0}`, sub: `اللقب: ${user?.title}`, icon: 'star', color: Colors.purple },
           ].map((item, i) => (
             <View key={i} style={styles.gridCard}>
-              <Ionicons name={item.icon as any} size={20} color={item.color} />
-              <Text style={[styles.gridValue, { color: item.color }]}>{item.value}</Text>
-              <Text style={styles.gridLabel}>{item.label}</Text>
+              <View style={[styles.gridIcon, { backgroundColor: `${item.color}15` }]}>
+                <Ionicons name={item.icon as any} size={24} color={item.color} />
+              </View>
+              <View style={styles.gridInfo}>
+                <Text style={styles.gridLabel}>{item.label}</Text>
+                <Text style={[styles.gridValue, { color: Colors.textPrimary }]}>{item.value}</Text>
+                <Text style={styles.gridSub}>{item.sub}</Text>
+              </View>
             </View>
           ))}
         </View>
@@ -179,7 +199,7 @@ export default function ProgressScreen() {
               </View>
               <View style={styles.metaItem}>
                 <View style={[styles.metaDot, { backgroundColor: Colors.border }]} />
-                <Text style={styles.metaText}>متبقي: {remaining}</Text>
+                <Text style={styles.metaText}>متبقي: {remainingCount}</Text>
               </View>
             </View>
           </View>
@@ -187,21 +207,33 @@ export default function ProgressScreen() {
 
         {/* Juz completion Grid */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>خريطة الأجزاء (30 جزء)</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>خريطة الأجزاء</Text>
+            <Text style={styles.sectionBadge}>{juzProgress.filter(j => j.pct >= 1).length} / 30 مكتمل</Text>
+          </View>
           <View style={styles.juzGrid}>
             {juzProgress.map((j) => (
               <View key={j.id} style={styles.juzBox}>
                 <View 
                   style={[
-                    styles.juzCheck, 
+                    styles.juzBoxInner, 
                     { 
-                      backgroundColor: j.pct >= 1 ? Colors.primary : j.pct > 0 ? `${Colors.primary}40` : Colors.borderLight,
-                      borderColor: j.pct > 0 ? Colors.primary : Colors.border
+                      borderColor: j.pct > 0 ? Colors.primary : Colors.borderLight,
+                      backgroundColor: j.pct >= 1 ? Colors.primary : Colors.glass,
                     }
                   ]}
                 >
-                  <Text style={[styles.juzNumber, j.pct >= 0.5 && { color: '#fff' }]}>{j.id}</Text>
+                  {j.pct > 0 && j.pct < 1 && (
+                    <View style={[styles.juzFill, { height: `${j.pct * 100}%` }]} />
+                  )}
+                  <Text style={[
+                    styles.juzNumber, 
+                    { color: j.pct >= 1 ? '#fff' : Colors.textPrimary }
+                  ]}>
+                    {j.id}
+                  </Text>
                 </View>
+                <Text style={styles.juzPctLabel}>{Math.round(j.pct * 100)}%</Text>
               </View>
             ))}
           </View>
@@ -209,13 +241,15 @@ export default function ProgressScreen() {
 
         {/* Surah Progress List */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>تقدم السور الأساسية</Text>
+          <Text style={styles.sectionTitle}>تقدم السور الحالية</Text>
           <View style={styles.surahCard}>
-            {surahProgress.map((surah) => (
+            {surahProgress.length > 0 ? surahProgress.map((surah) => (
               <View key={surah.id} style={styles.surahRow}>
                 <View style={styles.surahHeader}>
                   <Text style={styles.surahName}>{surah.nameAr}</Text>
-                  <Text style={styles.surahPctText}>{Math.round(surah.pct * 100)}%</Text>
+                  <Text style={styles.surahPctText}>
+                    {surah.memorizedCount} / {surah.totalInPlan} صفحة
+                  </Text>
                 </View>
                 <View style={styles.surahBarBg}>
                   <View 
@@ -229,7 +263,9 @@ export default function ProgressScreen() {
                   />
                 </View>
               </View>
-            ))}
+            )) : (
+              <Text style={styles.emptyText}>لا توجد سور في الخطة الحالية</Text>
+            )}
           </View>
         </View>
 
@@ -295,10 +331,13 @@ const getStyles = (Colors: any) => StyleSheet.create({
   xpBarFill: { height: 6, backgroundColor: Colors.primary, borderRadius: 3 },
   xpText: { fontSize: 10, color: Colors.textTertiary },
 
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
-  gridCard: { width: (width - Spacing.base * 2 - Spacing.sm) / 2, backgroundColor: Colors.glass, borderRadius: BorderRadius.lg, padding: Spacing.base, gap: 4, borderWidth: 1, borderColor: Colors.glassBorder, alignItems: 'center' },
-  gridValue: { fontSize: Typography.base, fontWeight: Typography.bold },
-  gridLabel: { fontSize: 10, color: Colors.textTertiary, textAlign: 'center' },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md },
+  gridCard: { width: '100%', backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, flexDirection: 'row', alignItems: 'center', gap: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder },
+  gridIcon: { width: 50, height: 50, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  gridInfo: { flex: 1, alignItems: 'flex-start' },
+  gridValue: { fontSize: Typography.lg, fontWeight: Typography.bold, marginTop: 2 },
+  gridLabel: { fontSize: 13, color: Colors.textSecondary, fontWeight: Typography.semibold },
+  gridSub: { fontSize: 11, color: Colors.textTertiary, marginTop: 2 },
 
   section: { gap: Spacing.md },
   sectionTitle: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'left', paddingHorizontal: 4 },
@@ -314,11 +353,36 @@ const getStyles = (Colors: any) => StyleSheet.create({
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   metaDot: { width: 8, height: 8, borderRadius: 4 },
   metaText: { fontSize: 11, color: Colors.textSecondary },
-
-  juzGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', backgroundColor: Colors.glass, padding: Spacing.md, borderRadius: BorderRadius.xl, borderWidth: 1, borderColor: Colors.glassBorder },
-  juzBox: { width: (width - Spacing.xl * 2 - 80) / 6, alignItems: 'center' },
-  juzCheck: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
-  juzNumber: { fontSize: 13, fontWeight: Typography.bold, color: Colors.textSecondary },
+  juzGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', backgroundColor: Colors.glass, paddingVertical: Spacing.lg, borderRadius: BorderRadius.xl, borderWidth: 1, borderColor: Colors.glassBorder },
+  juzBox: { width: (width - Spacing.xl * 2 - 80) / 5, alignItems: 'center', gap: 4 },
+  juzBoxInner: { 
+    width: 44, 
+    height: 44, 
+    borderRadius: 12, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    borderWidth: 1.5, 
+    position: 'relative', 
+    overflow: 'hidden' 
+  },
+  juzFill: { 
+    position: 'absolute', 
+    bottom: -2, 
+    left: -2, 
+    right: -2, 
+    backgroundColor: Colors.primary 
+  },
+  juzNumber: { 
+    fontSize: 14, 
+    fontWeight: Typography.bold, 
+    color: Colors.textPrimary,
+    zIndex: 10,
+    elevation: 2,
+  },
+  juzPctLabel: { fontSize: 10, color: Colors.textTertiary, fontWeight: '500' },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sectionBadge: { fontSize: 11, color: Colors.primary, fontWeight: 'bold', backgroundColor: `${Colors.primary}10`, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  emptyText: { textAlign: 'center', color: Colors.textTertiary, paddingVertical: 20 },
 
   surahCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.md },
   surahRow: { gap: 6 },

@@ -12,6 +12,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image,
 } from "react-native";
 import "../global.css";
 import { AppProvider } from "../src/store/AppStore";
@@ -170,7 +171,11 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
         >
           <View style={styles.outerRing}>
             <View style={styles.innerRing}>
-              <Ionicons name="shield-checkmark" size={54} color={Colors.primary} />
+              <Image 
+                source={require("../assets/images/logo.png")} 
+                style={styles.logoImageSplash} 
+                resizeMode="contain"
+              />
             </View>
           </View>
         </Animated.View>
@@ -251,9 +256,9 @@ const getStyles = (Colors: any) => StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   outerRing: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
     borderWidth: 1,
     borderColor: `${Colors.primary}15`,
     alignItems: "center",
@@ -261,9 +266,9 @@ const getStyles = (Colors: any) => StyleSheet.create({
     backgroundColor: `${Colors.primary}03`,
   },
   innerRing: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
     backgroundColor: Colors.glass,
     borderWidth: 1.5,
     borderColor: `${Colors.primary}30`,
@@ -329,5 +334,9 @@ const getStyles = (Colors: any) => StyleSheet.create({
   },
   starsRow: {
     flexDirection: "row",
+  },
+  logoImageSplash: {
+    width: 120,
+    height: 120,
   },
 });

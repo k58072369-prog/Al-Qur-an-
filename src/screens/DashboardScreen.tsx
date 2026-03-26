@@ -12,6 +12,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 import { ModuleCard } from "../components/ModuleCard";
 import { StreakBadge } from "../components/StreakBadge";
@@ -29,7 +30,7 @@ export default function DashboardScreen() {
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
 
   const { state, getMemorizedPages, getPagesDue } = useAppStore();
-  const { user, streak } = state;
+  const { user, streak, plan } = state;
 
   const [updateInfo, setUpdateInfo] = React.useState<{
     hasUpdate: boolean;
@@ -136,16 +137,20 @@ export default function DashboardScreen() {
     router.push({ pathname: "/module", params: { id } } as any);
   };
 
-  // Calculate generic completion rate over modules today
-  const activeSelections = taskSelections.filter((s) => {
-    const d = new Date(s.createdAt);
-    const today = new Date();
-    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth();
-  });
-
-  const completedToday = activeSelections.filter((s) => s.isCompleted).length;
-  const completionPct =
-    activeSelections.length > 0 ? completedToday / activeSelections.length : 0;
+  // Calculate daily completion for the Five Fortresses (Housons)
+  const todayStr = new Date().toDateString();
+  const dailySelections = taskSelections.filter((s) => new Date(s.createdAt).toDateString() === todayStr);
+  const completedHousons = dailySelections.filter((s) => s.isCompleted).length;
+  const totalHousonsCount = 5; // The 5 core system modules
+  const dailyCompletionPct = dailySelections.length > 0 ? completedHousons / dailySelections.length : 0;
+  // Expected Completion Logic
+  const memorizedCount = memorizedPages.length;
+  const targetPagesCount = plan?.targetPages.length || 604;
+  const remainingCount = targetPagesCount - memorizedCount;
+  const pagesPerDay = user?.dailyPages || 1;
+  const daysRemaining = Math.max(1, Math.ceil(remainingCount / pagesPerDay));
+  const finishDate = new Date();
+  finishDate.setDate(finishDate.getDate() + daysRemaining);
 
   return (
     <View style={styles.container}>
@@ -168,12 +173,11 @@ export default function DashboardScreen() {
         >
           <View style={styles.brandingHeader}>
             <View style={styles.headerLogoBox}>
-              <Ionicons
-                name="shield-checkmark"
-                size={20}
-                color={Colors.primary}
+              <Image 
+                source={require("../../assets/images/logo.png")} 
+                style={styles.logoImageHeader} 
+                resizeMode="contain"
               />
-              <Text style={styles.brandingText}>الحصون الخمسة</Text>
             </View>
             <TouchableOpacity
               style={styles.settingsBtn}
@@ -298,53 +302,54 @@ export default function DashboardScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* Daily Progress Panel */}
+        {/* Daily Fortress Progress Panel */}
         {state.settings.showDailyProgressOnDashboard && (
-          <Animated.View style={[styles.progressPanel, { opacity: fadeAnim }]}>
-            <LinearGradient
-              colors={Colors.gradientCard}
-              style={styles.progressGradient}
-            >
-              {/* Left: Circular */}
-              <View style={styles.circularWrapper}>
-                <View style={styles.circularOuter}>
-                  <View
-                    style={[
-                      styles.circularInner,
-                      {
-                        borderColor:
-                          completionPct >= 1 ? Colors.primary : Colors.border,
-                      },
-                    ]}
-                  >
-                    <Text style={styles.pctText}>
-                      {Math.round(completionPct * 100)}%
-                    </Text>
-                    <Text style={styles.pctLabel}>إنجاز اليوم</Text>
-                  </View>
+          <Animated.View style={[styles.statsPanel, { opacity: fadeAnim }]}>
+            <View style={styles.statsRow}>
+              <View style={styles.statCard}>
+                <View style={[styles.statIconBox, { backgroundColor: `${Colors.primary}15` }]}>
+                  <Ionicons name="shield-checkmark-outline" size={20} color={Colors.primary} />
+                </View>
+                <View style={styles.statInfo}>
+                  <Text style={styles.statLabel}>حصون اليوم</Text>
+                  <Text style={styles.statValue}>{completedHousons} / {totalHousonsCount}</Text>
                 </View>
               </View>
 
-              {/* Right: Stats */}
-              <View style={styles.statsColumn}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{taskSelections.length}</Text>
-                  <Text style={styles.statLabel}>إجمالي الأوراد</Text>
+              <View style={styles.statCard}>
+                <View style={[styles.statIconBox, { backgroundColor: `${Colors.gold}15` }]}>
+                  <Ionicons name="sparkles-outline" size={20} color={Colors.gold} />
                 </View>
-                <View style={styles.statDivider} />
-                <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{memorizedPages.length}</Text>
-                  <Text style={styles.statLabel}>صفحة محفوظة</Text>
-                </View>
-                <View style={styles.statDivider} />
-                <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: Colors.warning }]}>
-                    {pagesDue.length}
-                  </Text>
-                  <Text style={styles.statLabel}>للمراجعة</Text>
+                <View style={styles.statInfo}>
+                  <Text style={styles.statLabel}>إنجاز اليوم</Text>
+                  <Text style={styles.statValue}>{Math.round(dailyCompletionPct * 100)}%</Text>
                 </View>
               </View>
-            </LinearGradient>
+            </View>
+
+            <View style={[styles.statsRow, { marginTop: Spacing.sm }]}>
+              <View style={styles.statCard}>
+                <View style={[styles.statIconBox, { backgroundColor: `${Colors.blue}15` }]}>
+                  <Ionicons name="book-outline" size={20} color={Colors.blue} />
+                </View>
+                <View style={styles.statInfo}>
+                  <Text style={styles.statLabel}>الختم المتوقع</Text>
+                  <Text style={styles.statValue} numberOfLines={1}>
+                    {finishDate.toLocaleDateString("ar-EG", { day: 'numeric', month: "short" })}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.statCard}>
+                <View style={[styles.statIconBox, { backgroundColor: `${Colors.warning}15` }]}>
+                  <Ionicons name="time-outline" size={20} color={Colors.warning} />
+                </View>
+                <View style={styles.statInfo}>
+                  <Text style={styles.statLabel}>أيام الاستمرارية</Text>
+                  <Text style={styles.statValue}>{streak.currentStreak} يوم</Text>
+                </View>
+              </View>
+            </View>
           </Animated.View>
         )}
 
@@ -372,12 +377,12 @@ export default function DashboardScreen() {
         </View>
 
         {/* All Done Message */}
-        {completionPct >= 1 && activeSelections.length > 0 && (
+        {completedHousons >= totalHousonsCount && (
           <View style={styles.allDoneBox}>
             <Ionicons name="medal-outline" size={40} color={Colors.primary} />
-            <Text style={styles.allDoneTitle}>أحسنت! أتممت مهام اليوم</Text>
+            <Text style={styles.allDoneTitle}>أحسنت! أتممت حصون اليوم</Text>
             <Text style={styles.allDoneSubtitle}>
-              استمر على هذا المنوال وحافظ على سلسلتك
+              لقد أتممت نظام الحصون الخمسة لليوم بنجاح
             </Text>
           </View>
         )}
@@ -581,69 +586,46 @@ const getStyles = (Colors: any) =>
       textAlign: "left",
     },
 
-    // Progress Panel
-    progressPanel: {
-      borderRadius: BorderRadius.sm,
-      overflow: "hidden",
-      borderWidth: 1,
-      borderColor: Colors.glassBorder,
-    },
-    progressGradient: {
-      flexDirection: "row",
-      alignItems: "center",
-      padding: Spacing.lg,
-      gap: Spacing.lg,
-    },
-    circularWrapper: {
-      width: 100,
-      height: 100,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    circularOuter: {
-      width: 100,
-      height: 100,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    circularInner: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      borderWidth: 2,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    pctText: {
-      fontSize: Typography.lg,
-      fontWeight: Typography.bold,
-      color: Colors.primary,
-    },
-    pctLabel: {
-      fontSize: 10,
-      color: Colors.textTertiary,
-      marginTop: 1,
-    },
-    statsColumn: {
-      flex: 1,
+    // Stats Panel
+    statsPanel: {
       gap: Spacing.sm,
     },
-    statItem: {
-      alignItems: "flex-start",
+    statsRow: {
+      flexDirection: "row",
+      gap: Spacing.sm,
     },
-    statValue: {
-      fontSize: Typography.md,
-      fontWeight: Typography.semibold,
-      color: Colors.textPrimary,
+    statCard: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: Colors.glass,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.md,
+      borderWidth: 1,
+      borderColor: Colors.glassBorder,
+      gap: Spacing.sm,
+    },
+    statIconBox: {
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    statInfo: {
+      flex: 1,
+      alignItems: "flex-start",
     },
     statLabel: {
       fontSize: 10,
-      color: Colors.textTertiary,
-      marginTop: 1,
+      color: Colors.textSecondary,
+      fontWeight: "500",
     },
-    statDivider: {
-      height: 1,
-      backgroundColor: Colors.border,
+    statValue: {
+      fontSize: Typography.sm,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+      marginTop: 2,
     },
 
     // Overlay Styles (Update / Disabled)
@@ -768,18 +750,16 @@ const getStyles = (Colors: any) =>
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: Spacing.xl,
+      marginBottom: Spacing.md,
     },
     headerLogoBox: {
       flexDirection: "row",
       alignItems: "center",
-      gap: Spacing.sm,
-      backgroundColor: Colors.glass,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: 6,
-      borderRadius: BorderRadius.md,
-      borderWidth: 1,
-      borderColor: Colors.glassBorder,
+      gap: Spacing.xs,
+    },
+    logoImageHeader: {
+      width: 48,
+      height: 48,
     },
     brandingText: {
       fontSize: Typography.sm,

@@ -5,6 +5,7 @@ import {
   Plan,
   PlanDirection,
 } from '../types';
+import { SURAHS } from '../data/quranMeta';
 
 // ─── Date Helpers ─────────────────────────────────────────
 
@@ -40,12 +41,55 @@ export function generatePlan(
   label: string = 'خطة حفظ',
   direction: PlanDirection = 'forward'
 ): Plan {
-  const orderedPages = direction === 'forward' ? [...pageNumbers] : [...pageNumbers].reverse();
-  const totalDays = Math.ceil(orderedPages.length / pagesPerDay);
+  // Deduplicate and filter out zeros
+  const uniquePages = Array.from(new Set(pageNumbers)).filter(p => p > 0);
+  let orderedPages: number[];
+
+  if (direction === 'forward') {
+    orderedPages = [...uniquePages].sort((a, b) => a - b);
+  } else {
+    // Group by Surah in reverse, but keep pages ascending within each Surah
+    const usedPages = new Set(uniquePages);
+    const result: number[] = [];
+    const addedPages = new Set<number>();
+    
+    // Process Surahs from 114 down to 1
+    const reversedSurahs = [...SURAHS].sort((a, b) => b.id - a.id);
+    
+    reversedSurahs.forEach(surah => {
+      // Find pages of this Surah that are in the requested set
+      const surahPages: number[] = [];
+      for (let p = surah.startPage; p <= surah.endPage; p++) {
+        if (usedPages.has(p) && !addedPages.has(p)) {
+          surahPages.push(p);
+        }
+      }
+      
+      // Add them in their natural order (start to end of Surah)
+      surahPages.forEach(p => {
+        result.push(p);
+        addedPages.add(p);
+      });
+    });
+
+    // Just in case some pages weren't part of any Surah (though Quran is 114 Surahs covering all 604 pages)
+    // or if the user provided pages in a weird way, we ensure all requested pages are included.
+    pageNumbers.sort((a, b) => b - a).forEach(p => {
+      if (!addedPages.has(p)) {
+        result.push(p);
+        addedPages.add(p);
+      }
+    });
+
+    orderedPages = result;
+  }
+
+  const totalDays = Math.ceil(orderedPages.length / Math.max(1, pagesPerDay));
+
   return {
     targetPages: orderedPages,
     currentPageIndex: 0,
-    pagesPerDay,
+    pagesPerDay: Math.max(1, pagesPerDay),
     totalDays,
     startDate: todayISO(),
     direction,
