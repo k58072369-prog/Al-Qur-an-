@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Vibration } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, Typography, Spacing, BorderRadius } from '../theme';
+import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../theme';
 import { formatTime } from '../utils/helpers';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -19,6 +19,7 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title }: TaskTime
   const [isFinished, setIsFinished] = useState(false);
   
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     let interval: any = null;
@@ -39,7 +40,7 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title }: TaskTime
     if (isActive) {
       Animated.loop(
         Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.05, duration: 1000, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1.03, duration: 1000, useNativeDriver: true }),
           Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
         ])
       ).start();
@@ -55,46 +56,85 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title }: TaskTime
     setIsFinished(false);
   };
 
+  const currentProgress = initialSeconds > 0 ? (initialSeconds - seconds) / initialSeconds : 0;
+
   return (
     <View style={styles.overlay}>
       <LinearGradient 
-        colors={['rgba(7, 9, 15, 0.95)', 'rgba(10, 15, 24, 0.98)']} 
+        colors={[Colors.background, Colors.surface]} 
         style={styles.container}
       >
+        {/* Background Decorative Circles */}
+        <View style={[styles.decorCircle, { top: -50, left: -50, backgroundColor: Colors.primarySubtle }]} />
+        <View style={[styles.decorCircle, { bottom: -100, right: -50, backgroundColor: Colors.primarySubtle, width: 300, height: 300 }]} />
+
         <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-          <Ionicons name="close" size={24} color={Colors.textSecondary} />
+          <Ionicons name="close" size={28} color={Colors.textSecondary} />
         </TouchableOpacity>
 
-        <Text style={styles.title}>{title}</Text>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: Colors.textPrimary }]}>{title}</Text>
+          <View style={[styles.badge, { backgroundColor: isActive ? Colors.primaryMuted : Colors.glass }]}>
+             <Text style={[styles.badgeText, { color: isActive ? Colors.primary : Colors.textTertiary }]}>
+                {isActive ? 'جاري الآن' : 'متوقف'}
+             </Text>
+          </View>
+        </View>
         
-        <Animated.View style={[styles.timerCircle, { transform: [{ scale: pulseAnim }], borderColor: isActive ? Colors.primary : Colors.border }]}>
-          <Text style={[styles.timeText, { color: isFinished ? Colors.success : Colors.textPrimary }]}>
-            {formatTime(seconds)}
-          </Text>
-          <Text style={styles.remainingLabel}>المتبقي</Text>
+        <Animated.View style={[
+          styles.timerContainer, 
+          { transform: [{ scale: pulseAnim }] }
+        ]}>
+          <View style={[styles.progressBackground, { borderColor: Colors.borderLight }]}>
+             {/* Progress simulation with shadow/border */}
+             <View style={[
+                styles.timerCircle, 
+                { 
+                  borderColor: isActive ? Colors.primary : Colors.border,
+                  backgroundColor: Colors.glassElevated,
+                }
+              ]}>
+                <Text style={[styles.timeText, { color: isFinished ? Colors.success : Colors.textPrimary }]}>
+                  {formatTime(seconds)}
+                </Text>
+                <Text style={[styles.remainingLabel, { color: Colors.textTertiary }]}>المتبقي</Text>
+              </View>
+          </View>
         </Animated.View>
 
         <View style={styles.controls}>
           {!isFinished ? (
-            <TouchableOpacity style={[styles.btn, { backgroundColor: isActive ? Colors.warning : Colors.primary }]} onPress={toggle}>
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              style={[styles.btn, { backgroundColor: isActive ? Colors.warning : Colors.primary }, Shadow.md]} 
+              onPress={toggle}
+            >
               <Ionicons name={isActive ? "pause" : "play"} size={24} color="#FFF" />
-              <Text style={styles.btnText}>{isActive ? "إيقاف مؤقت" : "ابدأ الآن"}</Text>
+              <Text style={styles.btnText}>{isActive ? "إيقاف مؤقت" : "ابدأ الجلسة"}</Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity style={[styles.btn, { backgroundColor: Colors.success }]} onPress={onClose}>
+            <TouchableOpacity 
+              activeOpacity={0.8}
+              style={[styles.btn, { backgroundColor: Colors.success }, Shadow.md]} 
+              onPress={onClose}
+            >
               <Ionicons name="checkmark-done" size={24} color="#FFF" />
               <Text style={styles.btnText}>إكمال الورد</Text>
             </TouchableOpacity>
           )}
           
           <TouchableOpacity style={styles.resetBtn} onPress={reset}>
-            <Text style={styles.resetText}>إعادة ضبط</Text>
+            <Ionicons name="refresh" size={16} color={Colors.textTertiary} style={{ marginLeft: 6 }} />
+            <Text style={[styles.resetText, { color: Colors.textTertiary }]}>إعادة ضبط الوقت</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.hint}>
-          {isActive ? "استمر في التركيز على وردك اليومي" : "اضغط ابدأ عندما تكون مستعداً"}
-        </Text>
+        <View style={[styles.footer, { backgroundColor: Colors.glass, borderColor: Colors.glassBorder }]}>
+          <Ionicons name="bulb-outline" size={18} color={Colors.gold} />
+          <Text style={[styles.hint, { color: Colors.textSecondary }]}>
+            {isActive ? "استمر في التركيز، الله يبارك في وقتك" : "اضغط ابدأ عندما تكون مستعداً للبدء"}
+          </Text>
+        </View>
       </LinearGradient>
     </View>
   );
@@ -104,46 +144,76 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 2000,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   container: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: Spacing.xl,
+  },
+  decorCircle: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 150,
+    opacity: 0.4,
   },
   closeBtn: {
     position: 'absolute',
     top: 60,
     right: Spacing.xl,
     padding: Spacing.sm,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: BorderRadius.full,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: Spacing["4xl"],
   },
   title: {
-    fontSize: Typography.lg,
+    fontSize: Typography.xl,
     fontWeight: Typography.bold,
-    color: '#FFF',
-    marginBottom: Spacing["3xl"],
+    marginBottom: Spacing.sm,
   },
-  timerCircle: {
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    borderWidth: 2,
+  badge: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  badgeText: {
+    fontSize: Typography.xs,
+    fontWeight: Typography.semibold,
+  },
+  timerContainer: {
+    marginBottom: Spacing["5xl"],
+  },
+  progressBackground: {
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    borderWidth: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing["4xl"],
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    ...Shadow.lg,
+  },
+  timerCircle: {
+    width: 230,
+    height: 230,
+    borderRadius: 115,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   timeText: {
-    fontSize: 54,
-    fontWeight: '300',
-    fontFamily: 'monospace',
+    fontSize: Typography["5xl"],
+    fontWeight: '200',
+    fontFamily: 'System', // Use system thin font
+    letterSpacing: -1,
   },
   remainingLabel: {
     fontSize: Typography.sm,
-    color: 'rgba(255,255,255,0.4)',
     marginTop: -5,
   },
   controls: {
@@ -152,11 +222,11 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   btn: {
-    width: '80%',
+    width: '85%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.lg,
     borderRadius: BorderRadius.xl,
     gap: Spacing.md,
   },
@@ -166,17 +236,27 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   resetBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: Spacing.sm,
   },
   resetText: {
     fontSize: Typography.sm,
-    color: 'rgba(255,255,255,0.5)',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 60,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    gap: Spacing.sm,
+    maxWidth: '90%',
   },
   hint: {
-    position: 'absolute',
-    bottom: 80,
     fontSize: Typography.sm,
-    color: 'rgba(255,255,255,0.4)',
     textAlign: 'center',
   }
 });

@@ -59,7 +59,7 @@ export default function ProgressScreen() {
     strengthDist[p.strength as MemorizationStrength]++;
   });
 
-  const totalPages = plan ? plan.endPage - plan.startPage + 1 : 604;
+  const totalPages = plan ? plan.targetPages.length : 604;
   const planPct = totalPages > 0 ? memorizedPages.length / totalPages : 0;
 
   const totalXP = user?.totalXP ?? 0;
@@ -205,37 +205,62 @@ export default function ProgressScreen() {
           </View>
         </View>
 
-        {/* Juz completion Grid */}
+        {/* Juz completion Map */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>خريطة الأجزاء</Text>
-            <Text style={styles.sectionBadge}>{juzProgress.filter(j => j.pct >= 1).length} / 30 مكتمل</Text>
+            <View>
+              <Text style={styles.sectionTitle}>خريطة الأجزاء الثلاثين</Text>
+              <Text style={styles.sectionSubtitle}>تتبع تقدمك في كل جزء على حدة</Text>
+            </View>
+            <View style={styles.sectionBadge}>
+              <Text style={styles.sectionBadgeText}>{juzProgress.filter(j => j.pct >= 1).length} مكتمل</Text>
+            </View>
           </View>
+
           <View style={styles.juzGrid}>
-            {juzProgress.map((j) => (
-              <View key={j.id} style={styles.juzBox}>
-                <View 
-                  style={[
-                    styles.juzBoxInner, 
-                    { 
-                      borderColor: j.pct > 0 ? Colors.primary : Colors.borderLight,
-                      backgroundColor: j.pct >= 1 ? Colors.primary : Colors.glass,
-                    }
-                  ]}
-                >
-                  {j.pct > 0 && j.pct < 1 && (
-                    <View style={[styles.juzFill, { height: `${j.pct * 100}%` }]} />
-                  )}
-                  <Text style={[
-                    styles.juzNumber, 
-                    { color: j.pct >= 1 ? '#fff' : Colors.textPrimary }
-                  ]}>
-                    {j.id}
+            {juzProgress.map((j) => {
+              const info = j;
+              const isCompleted = info.pct >= 1;
+              const isStarted = info.pct > 0;
+              
+              return (
+                <View key={info.id} style={styles.juzCardWrapper}>
+                  <View 
+                    style={[
+                      styles.juzCard, 
+                      { 
+                        backgroundColor: isCompleted ? Colors.success : Colors.surface,
+                        borderColor: isCompleted ? Colors.success : isStarted ? Colors.primary : Colors.borderLight,
+                        ...Shadow.sm,
+                      }
+                    ]}
+                  >
+                    {/* Progress Fill Background for partially started Juz */}
+                    {isStarted && !isCompleted && (
+                      <View style={[styles.juzCardProgress, { height: `${info.pct * 100}%`, backgroundColor: `${Colors.primary}15` }]} />
+                    )}
+
+                    <Text style={[
+                      styles.juzCardNumber, 
+                      { color: isCompleted ? '#FFF' : isStarted ? Colors.primary : Colors.textTertiary }
+                    ]}>
+                      {info.id}
+                    </Text>
+
+                    {isCompleted ? (
+                      <View style={styles.completedIconBox}>
+                        <Ionicons name="checkmark-sharp" size={10} color="#FFF" />
+                      </View>
+                    ) : isStarted ? (
+                      <Text style={[styles.juzPctSmall, { color: Colors.primary }]}>{Math.round(info.pct * 100)}%</Text>
+                    ) : null}
+                  </View>
+                  <Text style={[styles.juzCardLabel, { color: isStarted ? Colors.textSecondary : Colors.textMuted }]}>
+                    جزء {info.id}
                   </Text>
                 </View>
-                <Text style={styles.juzPctLabel}>{Math.round(j.pct * 100)}%</Text>
-              </View>
-            ))}
+              );
+            })}
           </View>
         </View>
 
@@ -341,6 +366,7 @@ const getStyles = (Colors: any) => StyleSheet.create({
 
   section: { gap: Spacing.md },
   sectionTitle: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'left', paddingHorizontal: 4 },
+  sectionSubtitle: { fontSize: 11, color: Colors.textTertiary, textAlign: 'left', marginTop: 2, paddingHorizontal: 4 },
 
   advancedCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.md },
   advancedHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -353,35 +379,70 @@ const getStyles = (Colors: any) => StyleSheet.create({
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   metaDot: { width: 8, height: 8, borderRadius: 4 },
   metaText: { fontSize: 11, color: Colors.textSecondary },
-  juzGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', backgroundColor: Colors.glass, paddingVertical: Spacing.lg, borderRadius: BorderRadius.xl, borderWidth: 1, borderColor: Colors.glassBorder },
-  juzBox: { width: (width - Spacing.xl * 2 - 80) / 5, alignItems: 'center', gap: 4 },
-  juzBoxInner: { 
-    width: 44, 
-    height: 44, 
-    borderRadius: 12, 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    borderWidth: 1.5, 
-    position: 'relative', 
-    overflow: 'hidden' 
+  
+  juzGrid: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    gap: 12, 
+    justifyContent: 'flex-start',
+    paddingVertical: Spacing.md,
   },
-  juzFill: { 
-    position: 'absolute', 
-    bottom: -2, 
-    left: -2, 
-    right: -2, 
-    backgroundColor: Colors.primary 
+  juzCardWrapper: {
+    width: (width - Spacing.base * 2 - 48) / 5,
+    alignItems: 'center',
+    marginBottom: Spacing.md,
   },
-  juzNumber: { 
-    fontSize: 14, 
-    fontWeight: Typography.bold, 
-    color: Colors.textPrimary,
+  juzCard: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  juzCardProgress: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  juzCardNumber: {
+    fontSize: Typography.base,
+    fontWeight: '800',
     zIndex: 10,
-    elevation: 2,
   },
-  juzPctLabel: { fontSize: 10, color: Colors.textTertiary, fontWeight: '500' },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sectionBadge: { fontSize: 11, color: Colors.primary, fontWeight: 'bold', backgroundColor: `${Colors.primary}10`, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  juzPctSmall: {
+    fontSize: 8,
+    fontWeight: 'bold',
+    position: 'absolute',
+    bottom: 4,
+    zIndex: 10,
+  },
+  juzCardLabel: {
+    fontSize: 9,
+    marginTop: 6,
+    fontWeight: '600',
+  },
+  completedIconBox: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#FFF',
+    borderRadius: 8,
+    width: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.success,
+  },
+  
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 4 },
+  sectionBadge: { backgroundColor: `${Colors.primary}10`, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  sectionBadgeText: { fontSize: 11, color: Colors.primary, fontWeight: 'bold' },
+  
   emptyText: { textAlign: 'center', color: Colors.textTertiary, paddingVertical: 20 },
 
   surahCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.md },

@@ -36,9 +36,9 @@ export default function ModuleScreen() {
   const getRecommendedTime = (mId: string) => {
     switch (mId) {
       case "recitation":
-        return 20 * 60; // Standard 20m per juz
+        return (state.settings.recitationTimerMinutes || 20) * 60;
       case "listening":
-        return 15 * 60;
+        return (state.settings.listeningTimerMinutes || 15) * 60;
       case "preparation_night":
       case "preparation_before":
       case "preparation_weekly":

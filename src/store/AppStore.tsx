@@ -28,7 +28,9 @@ import {
   strengthAfterReview,
   todayISO,
 } from "../utils/helpers";
+import { getMushafEdition } from "../data/mushafEditions";
 import { StatisticsService } from "./StatisticsService";
+import { NotificationService } from "./NotificationService";
 // Storage Key ──────────────────────────────────────────
 const STORAGE_KEY = "husoon_app_state";
 
@@ -57,15 +59,32 @@ const DEFAULT_INITIAL_STATE: AppState = {
   settings: {
     hapticsEnabled: false,
     reviewStrategy: "spaced",
-    notificationsEnabled: true,
-    morningReminderTime: "06:00",
-    nightReminderTime: "22:00",
+    notifications: {
+      enabled: true,
+      recitationEnabled: true,
+      recitationTime: "08:00",
+      listeningEnabled: true,
+      listeningTime: "10:00",
+      weeklyPrepEnabled: true,
+      weeklyPrepTime: "18:00",
+      nightlyPrepEnabled: true,
+      nightlyPrepTime: "22:00",
+      dailyPrepEnabled: true,
+      dailyPrepTime: "05:45",
+      memorizationEnabled: true,
+      memorizationTime: "06:00",
+      reviewEnabled: true,
+      reviewTime: "16:00",
+    },
     showDailyProgressOnDashboard: true,
     memorizationTimerMinutes: 15,
     preparationTimerMinutes: 15,
     reviewTimerMinutes: 15,
+    recitationTimerMinutes: 20,
+    listeningTimerMinutes: 15,
     memorizationMethod: "standard",
     chunksPerPage: 1,
+    mushafEdition: "madani_604",
   },
 };
 
@@ -126,11 +145,30 @@ function appReducer(state: AppState, action: Action): AppState {
           plan.direction || "forward",
         );
       }
+      const mergedSettings = { 
+        ...DEFAULT_INITIAL_STATE.settings, 
+        ...(action.payload.settings || {}) 
+      };
+      
+      // Ensure the nested notifications object is correctly merged too
+      if (action.payload.settings?.notifications) {
+        mergedSettings.notifications = {
+          ...DEFAULT_INITIAL_STATE.settings.notifications,
+          ...action.payload.settings.notifications
+        };
+      }
+
+      // Schedule reminders if loaded
+      // REMOVED: scheduleFortressReminders from reducer to prevent side effects and loops
+      // if (mergedSettings.notifications) {
+      //   NotificationService.scheduleFortressReminders(mergedSettings.notifications);
+      // }
+
       return {
         ...state,
         ...action.payload,
         plan: plan || null,
-        settings: { ...state.settings, ...(action.payload.settings || {}) },
+        settings: mergedSettings,
         isLoaded: true,
       };
     }
@@ -138,13 +176,16 @@ function appReducer(state: AppState, action: Action): AppState {
     case "COMPLETE_ONBOARDING": {
       const cleanState = getInitialState();
       const { user: userData, pageNumbers, label, direction } = action.payload;
-      const pagesToUse = pageNumbers || [];
+      const editionId = (cleanState.settings.mushafEdition as string) ?? 'madani_604';
+      const editionData = getMushafEdition(editionId as any);
       const plan = generatePlan(
         pageNumbers,
         userData.dailyPages,
         label,
-        direction
+        direction,
+        editionData.surahPages
       );
+      (plan as any).mushafEditionId = editionId;
 
       // Build initial page progress for all pages
       const pageProgress: PageProgress[] = [];
@@ -422,9 +463,14 @@ function appReducer(state: AppState, action: Action): AppState {
     }
 
     case "UPDATE_SETTINGS": {
+      const newSettings = { ...state.settings, ...action.payload };
+      // REMOVED: scheduleFortressReminders from reducer to prevent side effects and loops
+      // if (action.payload.notifications) {
+      //   NotificationService.scheduleFortressReminders(newSettings.notifications);
+      // }
       return {
         ...state,
-        settings: { ...state.settings, ...action.payload },
+        settings: newSettings,
       };
     }
 
@@ -441,7 +487,10 @@ function appReducer(state: AppState, action: Action): AppState {
     case "REGENERATE_PLAN": {
       const { pageNumbers, label, direction } = action.payload;
       const pagesPerDay = state.user?.dailyPages ?? 1;
-      const newPlan = generatePlan(pageNumbers, pagesPerDay, label, direction);
+      const editionId = (state.settings as any).mushafEdition ?? 'madani_604';
+      const editionData = getMushafEdition(editionId as any);
+      const newPlan = generatePlan(pageNumbers, pagesPerDay, label, direction, editionData.surahPages);
+      (newPlan as any).mushafEditionId = editionId;
 
       return {
         ...state,
@@ -536,6 +585,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     loadState();
     StatisticsService.trackAppLaunch();
+    NotificationService.registerForPushNotificationsAsync();
   }, []);
 
   // Persist state on every change
@@ -559,6 +609,20 @@ export function AppProvider({ children }: PropsWithChildren) {
       return unsub;
     }
   }, [state.isOnboarded]);
+
+  // Monitor notification settings changes and schedule reminders
+  useEffect(() => {
+    if (state.isLoaded && state.settings.notifications) {
+      // Use stringified version to ensure we only react to content changes, not reference changes
+      const settingsStr = JSON.stringify(state.settings.notifications);
+      
+      const timer = setTimeout(() => {
+        NotificationService.scheduleFortressReminders(state.settings.notifications);
+      }, 1000); // Increased debounce to 1s for stability
+      
+      return () => clearTimeout(timer);
+    }
+  }, [JSON.stringify(state.settings.notifications), state.isLoaded]);
 
   const getTodayProgress = useCallback((): DailyProgress | null => {
     const today = todayISO();

@@ -1,0 +1,174 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import {
+  Dimensions,
+  Linking,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { useTheme, Shadow, Spacing, Typography, BorderRadius } from "../theme";
+import { UpdateInfo } from "../store/UpdateService";
+
+const { width } = Dimensions.get("window");
+
+interface Props {
+  type: 'disabled' | 'force_update' | 'optional_update';
+  info: UpdateInfo;
+  onDismiss?: () => void;
+}
+
+export default function VersionOverlay({ type, info, onDismiss }: Props) {
+  const Colors = useTheme();
+  
+  const isBlocking = type === 'disabled' || type === 'force_update';
+
+  const handleUpdate = () => {
+    if (info.link) {
+      Linking.openURL(info.link);
+    }
+  };
+
+  return (
+    <Modal visible={true} transparent animationType="fade">
+      <View style={styles.overlay}>
+        <Animated.View 
+          entering={FadeInDown.duration(400).springify()}
+          style={[styles.content, { backgroundColor: Colors.surface, borderColor: Colors.borderLight }]}
+        >
+          <View style={[styles.iconContainer, { backgroundColor: `${type === 'disabled' ? Colors.red : Colors.primary}15` }]}>
+            <Ionicons 
+              name={type === 'disabled' ? "construct-outline" : "rocket-outline"} 
+              size={48} 
+              color={type === 'disabled' ? Colors.red : Colors.primary} 
+            />
+          </View>
+
+          <Text style={[styles.title, { color: Colors.textPrimary }]}>
+            {type === 'disabled' ? "الصيانة الدورية" : 
+             type === 'force_update' ? "تحديث إجباري هام" : "يتوفر إصدار جديد"}
+          </Text>
+
+          <Text style={[styles.message, { color: Colors.textSecondary }]}>
+            {type === 'disabled' ? (info.disabledMessage || "التطبيق متوقف حالياً للصيانة.") : 
+             type === 'force_update' ? "نعتذر، ولكن يجب تحديث التطبيق للاستمتاع بآخر المميزات وضمان أمان بياناتك." : 
+             "هناك نسخة أحدث من التطبيق متوفرة بمميزات وتحسينات جديدة."}
+          </Text>
+
+          {info.changelog && (
+            <View style={[styles.changelogBox, { backgroundColor: Colors.glass, borderColor: Colors.glassBorder }]}>
+              <Text style={[styles.changelogTitle, { color: Colors.textTertiary }]}>ما الجديد:</Text>
+              <Text style={[styles.changelogText, { color: Colors.textPrimary }]}>{info.changelog}</Text>
+            </View>
+          )}
+
+          <View style={styles.actions}>
+            {type !== 'disabled' && (
+              <TouchableOpacity
+                style={[styles.primaryBtn, { backgroundColor: Colors.primary, ...Shadow.emerald }]}
+                onPress={handleUpdate}
+              >
+                <Text style={styles.primaryBtnText}>تحديث الآن</Text>
+              </TouchableOpacity>
+            )}
+
+            {!isBlocking && onDismiss && (
+              <TouchableOpacity
+                style={[styles.secondaryBtn, { borderColor: Colors.border }]}
+                onPress={onDismiss}
+              >
+                <Text style={[styles.secondaryBtnText, { color: Colors.textTertiary }]}>تذكيري لاحقاً</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </Animated.View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.xl,
+  },
+  content: {
+    width: width * 0.9,
+    maxWidth: 400,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    alignItems: "center",
+    borderWidth: 1,
+    ...Shadow.lg,
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.lg,
+  },
+  title: {
+    fontSize: Typography.xl,
+    fontWeight: Typography.bold,
+    textAlign: "center",
+    marginBottom: Spacing.md,
+  },
+  message: {
+    fontSize: Typography.sm,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: Spacing.xl,
+  },
+  changelogBox: {
+    width: "100%",
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    marginBottom: Spacing.xl,
+  },
+  changelogTitle: {
+    fontSize: 10,
+    fontWeight: "bold",
+    marginBottom: 4,
+    textTransform: "uppercase",
+  },
+  changelogText: {
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  actions: {
+    width: "100%",
+    gap: Spacing.md,
+  },
+  primaryBtn: {
+    width: "100%",
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+  },
+  primaryBtnText: {
+    color: "#FFFFFF",
+    fontSize: Typography.base,
+    fontWeight: Typography.bold,
+  },
+  secondaryBtn: {
+    width: "100%",
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    borderWidth: 1,
+  },
+  secondaryBtnText: {
+    fontSize: Typography.sm,
+    fontWeight: Typography.medium,
+  },
+});

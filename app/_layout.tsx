@@ -18,6 +18,8 @@ import "../global.css";
 import { AppProvider } from "../src/store/AppStore";
 import { useTheme, Typography, Spacing, BorderRadius } from "../src/theme";
 import { StatisticsService } from "../src/store/StatisticsService";
+import { UpdateService, UpdateInfo } from "../src/store/UpdateService";
+import VersionOverlay from "../src/components/VersionOverlay";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -64,9 +66,37 @@ export default function RootLayout() {
   );
 }
 
-function MainLayout({ showCustomSplash, onFinish }: { showCustomSplash: boolean, onFinish: () => void }) {
+function MainLayout({
+  showCustomSplash,
+  onFinish,
+}: {
+  showCustomSplash: boolean;
+  onFinish: () => void;
+}) {
   const Colors = useTheme();
   const pathname = usePathname();
+
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
+  const [blockType, setBlockType] = useState<
+    "disabled" | "force_update" | "optional_update" | null
+  >(null);
+
+  useEffect(() => {
+    async function checkVersion() {
+      try {
+        const info = await UpdateService.checkForUpdate();
+        if (info) {
+          setUpdateInfo(info);
+          if (info.isAppDisabled) setBlockType("disabled");
+          else if (info.isMandatory) setBlockType("force_update");
+          else if (info.hasUpdate) setBlockType("optional_update");
+        }
+      } catch (err) {
+        console.warn("[RootLayout] Update check failed:", err);
+      }
+    }
+    checkVersion();
+  }, []);
 
   // Track page views
   useEffect(() => {
@@ -86,6 +116,14 @@ function MainLayout({ showCustomSplash, onFinish }: { showCustomSplash: boolean,
         }}
       />
       {showCustomSplash && <CustomSplashScreen onFinish={onFinish} />}
+
+      {updateInfo && blockType && (
+        <VersionOverlay
+          type={blockType}
+          info={updateInfo}
+          onDismiss={() => setBlockType(null)}
+        />
+      )}
     </View>
   );
 }

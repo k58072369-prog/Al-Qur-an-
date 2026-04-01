@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Dimensions,
   ScrollView,
@@ -11,15 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Animated, {
-  FadeInDown,
-  FadeInUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
 import { Shadow, Spacing, useTheme } from "../theme";
 
 const { width } = Dimensions.get("window");
@@ -49,8 +40,8 @@ const AKHIRA_VIRTUES = [
 ];
 
 const PARENT_VIRTUE = {
-  title: "تاج البر والوقار لوالديك",
-  desc: "قال ﷺ: «من قرأ القرآن وعلم وعمل به أُلبس والديه يوم القيامة تاج نور».. أعظم بر تقدمه لمن ربيّاك هو أن تكون من حفظة كتاب الله.",
+  title: "سوار الكرامة وشرف الوالدين",
+  desc: "أبهى صور البر وأسمى درجات الوفاء لمن ربيّاك؛ أن تقرأ القرآن وتعمل به حتى يُلبس والديك تاجاً من نور يوم القيامة، ضياؤه يفوق ضياء الشمس.",
   icon: "ribbon-outline",
   color: "#F59E0B",
 };
@@ -99,22 +90,6 @@ export default function ReviewScreen() {
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
 
   const [tappedIntention, setTappedIntention] = useState(false);
-  const pulse = useSharedValue(1);
-
-  useEffect(() => {
-    pulse.value = withRepeat(
-      withSequence(
-        withTiming(1.05, { duration: 1500 }),
-        withTiming(1, { duration: 1500 }),
-      ),
-      -1,
-      true,
-    );
-  }, []);
-
-  const animatedIcon = useAnimatedStyle(() => ({
-    transform: [{ scale: pulse.value }],
-  }));
 
   const handleRenewIntention = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -135,26 +110,23 @@ export default function ReviewScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Modern Minimal Header */}
-        <Animated.View
-          entering={FadeInUp.duration(1000)}
-          style={styles.heroSection}
-        >
+        <View style={styles.heroSection}>
           <View style={styles.heroHeader}>
-            <Animated.View style={[styles.heroIconBox, animatedIcon]}>
+            <View style={styles.heroIconBox}>
               <Ionicons
                 name="bookmark-outline"
                 size={30}
                 color={Colors.primary}
               />
-            </Animated.View>
+            </View>
             <View style={styles.heroTextContent}>
-              <Text style={styles.heroTitle}>فضائل حفظ الوحي</Text>
+              <Text style={styles.heroTitle}>مقامات حملة القرآن الكريم</Text>
               <Text style={styles.heroSubtitle}>
-                حقائق إيمانية موثقة من الكتاب والسنة حول مقام حملة القرآن الكريم
+                بشائر وحقائق إيمانية حول المنزلة الرفيعة لحافظ كتاب الله عز وجل
               </Text>
             </View>
           </View>
-        </Animated.View>
+        </View>
 
         {/* Section: Rewards */}
         <View style={styles.sectionHeader}>
@@ -162,11 +134,7 @@ export default function ReviewScreen() {
         </View>
 
         {AKHIRA_VIRTUES.map((v, i) => (
-          <Animated.View
-            key={v.id}
-            entering={FadeInDown.delay(200 + i * 150)}
-            style={styles.virtueCard}
-          >
+          <View key={v.id} style={styles.virtueCard}>
             <View
               style={[styles.cardIconBox, { backgroundColor: `${v.color}10` }]}
             >
@@ -176,40 +144,34 @@ export default function ReviewScreen() {
               <Text style={styles.cardTitle}>{v.title}</Text>
               <Text style={styles.cardDesc}>{v.desc}</Text>
             </View>
-          </Animated.View>
+          </View>
         ))}
 
         {/* Highlight Section for Parents */}
-        <Animated.View
-          entering={FadeInDown.delay(700)}
-          style={styles.parentCard}
-        >
+        <View style={styles.parentCard}>
           <LinearGradient
-            colors={[`${Colors.primary}15`, `${Colors.background}00`]}
+            colors={[`${Colors.primary}10`, `${Colors.background}`]}
             style={styles.parentContent}
           >
-            <Ionicons
-              name={PARENT_VIRTUE.icon as any}
-              size={40}
-              color={PARENT_VIRTUE.color}
-              style={styles.parentIcon}
-            />
+            <View style={styles.parentIconBadge}>
+              <Ionicons
+                name={PARENT_VIRTUE.icon as any}
+                size={34}
+                color={PARENT_VIRTUE.color}
+              />
+            </View>
             <Text style={styles.parentTitle}>{PARENT_VIRTUE.title}</Text>
             <Text style={styles.parentDesc}>{PARENT_VIRTUE.desc}</Text>
           </LinearGradient>
-        </Animated.View>
+        </View>
 
         {/* Section: Worldly Benefits */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>بركة القرآن في حياتك</Text>
         </View>
 
-        {DUNYA_VIRTUES.map((v, i) => (
-          <Animated.View
-            key={v.id}
-            entering={FadeInDown.delay(900 + i * 150)}
-            style={styles.virtueCard}
-          >
+        {DUNYA_VIRTUES.map((v, idx) => (
+          <View key={v.id} style={styles.virtueCard}>
             <View
               style={[styles.cardIconBox, { backgroundColor: `${v.color}10` }]}
             >
@@ -219,7 +181,7 @@ export default function ReviewScreen() {
               <Text style={styles.cardTitle}>{v.title}</Text>
               <Text style={styles.cardDesc}>{v.desc}</Text>
             </View>
-          </Animated.View>
+          </View>
         ))}
 
         {/* Quotes Section */}
@@ -229,25 +191,18 @@ export default function ReviewScreen() {
 
         <View style={styles.quotesWrap}>
           {SCHOLAR_SAYINGS.map((quote, idx) => (
-            <Animated.View
-              key={idx}
-              entering={FadeInDown.delay(1300 + idx * 200)}
-              style={styles.quoteBox}
-            >
+            <View key={idx} style={styles.quoteBox}>
               <Text style={styles.quoteText}>{quote.text}</Text>
               <View style={styles.quoteMeta}>
                 <View style={styles.quoteLine} />
                 <Text style={styles.quoteAuthor}>{quote.author}</Text>
               </View>
-            </Animated.View>
+            </View>
           ))}
         </View>
 
         {/* Bottom Action Card */}
-        <Animated.View
-          entering={FadeInDown.delay(2000)}
-          style={styles.actionSection}
-        >
+        <View style={styles.actionSection}>
           <TouchableOpacity
             style={[
               styles.actionButton,
@@ -285,7 +240,7 @@ export default function ReviewScreen() {
               </View>
             </View>
           </TouchableOpacity>
-        </Animated.View>
+        </View>
 
         <View style={{ height: 120 }} />
       </ScrollView>
@@ -306,12 +261,12 @@ const getStyles = (Colors: any) =>
     heroHeader: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: Colors.glass,
+      backgroundColor: Colors.surface,
       padding: 20,
       borderRadius: 24,
       borderWidth: 1,
       borderColor: Colors.glassBorder,
-      ...Shadow.xs,
+      ...Shadow.sm,
     },
     heroIconBox: {
       width: 56,
@@ -362,7 +317,7 @@ const getStyles = (Colors: any) =>
       borderWidth: 1,
       borderColor: Colors.borderLight,
       marginBottom: 12,
-      ...Shadow.xs,
+      ...Shadow.sm,
     },
     cardIconBox: {
       width: 48,
@@ -388,7 +343,7 @@ const getStyles = (Colors: any) =>
     },
 
     parentCard: {
-      marginVertical: 30,
+      marginVertical: 20,
       marginHorizontal: Spacing.xl,
       borderRadius: 24,
       backgroundColor: Colors.surface,
@@ -400,12 +355,19 @@ const getStyles = (Colors: any) =>
     parentContent: {
       padding: 24,
       alignItems: "center",
+      justifyContent: "center",
     },
-    parentIcon: {
+    parentIconBadge: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: `${PARENT_VIRTUE.color}10`,
+      alignItems: "center",
+      justifyContent: "center",
       marginBottom: 16,
     },
     parentTitle: {
-      fontSize: 22,
+      fontSize: 20,
       fontWeight: "bold",
       color: Colors.textPrimary,
       marginBottom: 10,
@@ -416,6 +378,7 @@ const getStyles = (Colors: any) =>
       color: Colors.textSecondary,
       textAlign: "center",
       lineHeight: 22,
+      paddingHorizontal: 10,
     },
 
     quotesWrap: {

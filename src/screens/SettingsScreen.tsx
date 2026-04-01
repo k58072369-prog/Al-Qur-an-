@@ -1,8 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Alert,
   Modal,
@@ -13,10 +14,14 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Platform,
+  Linking,
 } from "react-native";
 import { SURAHS } from "../data/quranMeta";
+import { MUSHAF_EDITIONS, getMushafEdition } from "../data/mushafEditions";
 import { useAppStore } from "../store/AppStore";
 import { useSelectionStore } from "../store/selectionStore";
+import { NotificationService } from "../store/NotificationService";
 import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../theme";
 
 export default function SettingsScreen() {
@@ -32,10 +37,17 @@ export default function SettingsScreen() {
     | "memorizationTimer"
     | "reviewTimer"
     | "preparationTimer"
+    | "recitationTimer"
+    | "listeningTimer"
     | "startPage"
     | "endPage"
     | "planDirection"
     | "dailyAyahs"
+    | "recitationTime"
+    | "listeningTime"
+    | "preparationTime"
+    | "memorizationTime"
+    | "reviewTime"
   >("name");
   const [editValue, setEditValue] = useState("");
   const [surahModalVisible, setSurahModalVisible] = useState(false);
@@ -48,6 +60,58 @@ export default function SettingsScreen() {
   const [planDirection, setPlanDirection] = useState<"forward" | "backward">(
     "forward",
   );
+  
+  const [timePickerVisible, setTimePickerVisible] = useState(false);
+  const [selectedHour, setSelectedHour] = useState(8);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+  
+  const [permStatus, setPermStatus] = useState<string>("undetermined");
+
+  // Sync local state with store on mount
+  useEffect(() => {
+    if (state.plan) {
+      setPlanDirection(state.plan.direction);
+      const pages = state.plan.targetPages;
+      if (pages.length > 0) {
+        setTempStartPage(Math.min(...pages).toString());
+        setTempEndPage(Math.max(...pages).toString());
+      }
+      
+      // Try to determine selection type from label
+      if (state.plan.label.includes("سور محددة") || state.plan.label.includes("سورة")) {
+        setSelectionType("surahs");
+        
+        // Infer surah IDs from pages if selection is surahs
+        const editionId = state.plan.mushafEditionId || state.settings.mushafEdition || 'madani_604';
+        const edition = getMushafEdition(editionId as any);
+        const pageSet = new Set(pages);
+        const surahIds: number[] = [];
+        
+        Object.entries(edition.surahPages).forEach(([id, [start, end]]) => {
+          // If any page of this surah is in our plan, it was likely selected
+          for (let p = start; p <= end; p++) {
+            if (pageSet.has(p)) {
+              surahIds.push(Number(id));
+              break;
+            }
+          }
+        });
+        setSelectedSurahIds(surahIds);
+      } else if (state.plan.label.includes("من صفحة")) {
+        setSelectionType("range");
+      } else {
+        setSelectionType("complete");
+      }
+    }
+  }, [state.plan, state.settings.mushafEdition]);
+
+  useEffect(() => {
+    const checkPerms = async () => {
+      const status = await NotificationService.getPermissionStatus();
+      setPermStatus(status);
+    };
+    checkPerms();
+  }, []);
 
   const handleEdit = (type: string) => {
     setEditType(type as any);
@@ -61,10 +125,31 @@ export default function SettingsScreen() {
     else if (type === "reviewTimer")
       value = (state.settings.reviewTimerMinutes ?? 15).toString();
     else if (type === "preparationTimer")
-      value = (state.settings.preparationTimerMinutes ?? 15).toString();
+      value = (state.settings.preparationTimerMinutes || 15).toString();
+    else if (type === "recitationTimer")
+      value = (state.settings.recitationTimerMinutes || 20).toString();
+    else if (type === "listeningTimer")
+      value = (state.settings.listeningTimerMinutes || 15).toString();
+    else if (type === "recitationTime")
+      value = state.settings.notifications.recitationTime;
+    else if (type === "listeningTime")
+      value = state.settings.notifications.listeningTime;
+    else if (type === "preparationTime")
+      value = state.settings.notifications.preparationTime;
+    else if (type === "memorizationTime")
+      value = state.settings.notifications.memorizationTime;
+    else if (type === "reviewTime")
+      value = state.settings.notifications.reviewTime;
 
-    setEditValue(value);
-    setEditModalVisible(true);
+    if (type.endsWith("Time")) {
+      const [h, m] = value.split(':').map(Number);
+      setSelectedHour(h || 0);
+      setSelectedMinute(m || 0);
+      setTimePickerVisible(true);
+    } else {
+      setEditValue(value);
+      setEditModalVisible(true);
+    }
   };
 
   const saveEdit = () => {
@@ -87,6 +172,32 @@ export default function SettingsScreen() {
         type: "UPDATE_SETTINGS",
         payload: { preparationTimerMinutes: parseInt(editValue, 10) || 15 },
       });
+    } else if (editType === "recitationTimer") {
+      dispatch({
+        type: "UPDATE_SETTINGS",
+        payload: { recitationTimerMinutes: parseInt(editValue, 10) || 20 },
+      });
+    } else if (editType === "listeningTimer") {
+      dispatch({
+        type: "UPDATE_SETTINGS",
+        payload: { listeningTimerMinutes: parseInt(editValue, 10) || 15 },
+      });
+    } else if (
+      editType === "recitationTime" ||
+      editType === "listeningTime" ||
+      editType === "preparationTime" ||
+      editType === "memorizationTime" ||
+      editType === "reviewTime"
+    ) {
+      dispatch({
+        type: "UPDATE_SETTINGS",
+        payload: {
+          notifications: {
+            ...state.settings.notifications,
+            [editType]: editValue,
+          },
+        },
+      });
     } else {
       payload[editType as string] = editValue;
       dispatch({ type: "UPDATE_USER", payload });
@@ -94,33 +205,56 @@ export default function SettingsScreen() {
     setEditModalVisible(false);
   };
 
+  const saveSelectedTime = () => {
+    const formattedTime = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
+    dispatch({
+      type: "UPDATE_SETTINGS",
+      payload: {
+        notifications: {
+          ...state.settings.notifications,
+          [editType]: formattedTime,
+        },
+      },
+    });
+    setTimePickerVisible(false);
+  };
+
   const applyPlanChanges = () => {
     let pages: number[] = [];
     let label = "";
 
+    // جلب طبعة المصحف المختارة
+    const editionId = (state.settings as any).mushafEdition ?? 'madani_604';
+    const edition = getMushafEdition(editionId);
+    const totalPages = edition.totalPages;
+
     if (selectionType === "complete") {
-      pages = Array.from({ length: 604 }, (_, i) => i + 1);
-      label = "القرآن الكريم كاملاً";
+      pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+      label = `القرآن الكريم كاملاً — ${edition.nameAr}`;
     } else if (selectionType === "range") {
       const start = parseInt(tempStartPage, 10) || 1;
-      const end = parseInt(tempEndPage, 10) || 604;
-      const min = Math.min(start, end);
-      const max = Math.max(start, end);
+      const end = parseInt(tempEndPage, 10) || totalPages;
+      const min = Math.max(1, Math.min(start, end));
+      const max = Math.min(totalPages, Math.max(start, end));
       for (let p = min; p <= max; p++) pages.push(p);
-      label = `من صفحة ${min} إلى ${max}`;
+      label = `من صفحة ${min} إلى ${max} — ${edition.nameAr}`;
     } else if (selectionType === "surahs") {
       const selected = SURAHS.filter((s) =>
         selectedSurahIds.includes(s.id),
       ).sort((a, b) => a.id - b.id);
       selected.forEach((s) => {
-        for (let p = s.startPage; p <= s.endPage; p++) {
+        // استخدم إحداثيات الطبعة لكل سورة
+        const editionRange = edition.surahPages[s.id];
+        const start = editionRange ? editionRange[0] : s.startPage;
+        const end = editionRange ? editionRange[1] : s.endPage;
+        for (let p = start; p <= end; p++) {
           if (!pages.includes(p)) pages.push(p);
         }
       });
       label =
         selected.length === 1
-          ? `سورة ${selected[0].nameAr}`
-          : `مجموعة سور (${selected.length})`;
+          ? `سورة ${selected[0].nameAr} — ${edition.nameAr}`
+          : `مجموعة سور (${selected.length}) — ${edition.nameAr}`;
     }
 
     if (pages.length === 0) {
@@ -137,7 +271,7 @@ export default function SettingsScreen() {
       },
     });
 
-    Alert.alert("تم التحديث", "تم تحديث خطة الحفظ بنجاح");
+    Alert.alert("تم التحديث", `تم إنشاء خطة جديدة بتبعية ${edition.nameAr} (${edition.totalPages} صفحة) بنجاح`);
   };
 
   const handleReset = () => {
@@ -195,9 +329,17 @@ export default function SettingsScreen() {
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity 
+          style={styles.backBtn} 
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace("/");
+            }
+          }}
+        >
           <Ionicons
             name="chevron-forward"
             size={20}
@@ -248,6 +390,57 @@ export default function SettingsScreen() {
               <Ionicons name="pencil" size={12} color={Colors.primary} />
             </View>
           </TouchableOpacity>
+        </View>
+
+        <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
+          طبعة المصحف الشريف
+        </Text>
+        <View style={styles.card}>
+          <Text style={[styles.smallValue, { marginBottom: Spacing.md, lineHeight: 20 }]}>
+            اختر طبعة المصحف التي تحفظ منها. سيتم بناء الخطة بناءً على أرقام صفحات هذه الطبعة تحديداً.
+          </Text>
+          {MUSHAF_EDITIONS.map((edition, idx) => {
+            const currentEditionId = (state.settings as any).mushafEdition ?? 'madani_604';
+            const isSelected = currentEditionId === edition.id;
+            return (
+              <React.Fragment key={edition.id}>
+                <TouchableOpacity
+                  style={[styles.infoRow, { alignItems: 'flex-start', paddingVertical: Spacing.md }]}
+                  onPress={() => dispatch({
+                    type: 'UPDATE_SETTINGS',
+                    payload: { mushafEdition: edition.id } as any,
+                  })}
+                >
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                      {isSelected && (
+                        <View style={{
+                          width: 8, height: 8, borderRadius: 4,
+                          backgroundColor: Colors.primary,
+                        }} />
+                      )}
+                      <Text style={[
+                        styles.label,
+                        isSelected && { color: Colors.primary, fontWeight: 'bold' }
+                      ]}>
+                        {edition.nameAr}
+                      </Text>
+                    </View>
+                    <Text style={styles.smallValue}>{edition.description}</Text>
+                    <Text style={[styles.smallValue, { color: Colors.textTertiary, fontSize: 10, marginTop: 2 }]}>
+                      رواية: {edition.riwaya} • {edition.totalPages} صفحة
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name={isSelected ? 'radio-button-on' : 'radio-button-off'}
+                    size={20}
+                    color={isSelected ? Colors.primary : Colors.textTertiary}
+                  />
+                </TouchableOpacity>
+                {idx < MUSHAF_EDITIONS.length - 1 && <View style={styles.divider} />}
+              </React.Fragment>
+            );
+          })}
         </View>
 
         <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
@@ -432,6 +625,32 @@ export default function SettingsScreen() {
               <Ionicons name="time-outline" size={14} color={Colors.primary} />
             </View>
           </TouchableOpacity>
+          <View style={styles.divider} />
+          <TouchableOpacity
+            style={styles.infoRow}
+            onPress={() => handleEdit("recitationTimer" as any)}
+          >
+            <Text style={styles.label}>مؤقت التلاوة</Text>
+            <View style={styles.valueRow}>
+              <Text style={styles.value}>
+                {state.settings.recitationTimerMinutes} دقيقة
+              </Text>
+              <Ionicons name="time-outline" size={14} color={Colors.primary} />
+            </View>
+          </TouchableOpacity>
+          <View style={styles.divider} />
+          <TouchableOpacity
+            style={styles.infoRow}
+            onPress={() => handleEdit("listeningTimer" as any)}
+          >
+            <Text style={styles.label}>مؤقت الاستماع</Text>
+            <View style={styles.valueRow}>
+              <Text style={styles.value}>
+                {state.settings.listeningTimerMinutes} دقيقة
+              </Text>
+              <Ionicons name="time-outline" size={14} color={Colors.primary} />
+            </View>
+          </TouchableOpacity>
         </View>
 
         <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
@@ -558,14 +777,14 @@ export default function SettingsScreen() {
         </View>
 
         <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
-          التخصيص والتنبيهات
+          المظهر والتخصيص
         </Text>
         <View style={styles.card}>
           <View style={styles.themeRow}>
             <View>
-              <Text style={styles.label}>المظهر</Text>
+              <Text style={styles.label}>مظهر التطبيق</Text>
               <Text style={styles.value}>
-                {state.themeMode === "light" ? "فاتح" : "داكن"}
+                {state.themeMode === "light" ? "الوضع الفاتح" : "الوضع الداكن"}
               </Text>
             </View>
             <TouchableOpacity
@@ -579,46 +798,221 @@ export default function SettingsScreen() {
               />
             </TouchableOpacity>
           </View>
-          <View style={styles.divider} />
-          <TouchableOpacity
-            style={styles.infoRow}
-            onPress={() =>
-              dispatch({
+        </View>
+
+        <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
+          تنبيهات الحصون الخمسة
+        </Text>
+
+        <View style={{ marginBottom: Spacing.md, paddingHorizontal: Spacing.xs }}>
+          <Text style={[styles.smallValue, { marginBottom: Spacing.sm }]}>أوضاع مقترحة للجدولة:</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} gap={8}>
+            <TouchableOpacity 
+              style={styles.templateBtn}
+              onPress={() => dispatch({
                 type: "UPDATE_SETTINGS",
                 payload: {
-                  notificationsEnabled: !state.settings.notificationsEnabled,
-                },
-              })
-            }
-          >
-            <View>
-              <Text style={styles.label}>التنبيهات اليومية</Text>
-              <Text style={styles.value}>
-                {state.settings.notificationsEnabled ? "مفعلة" : "معطلة"}
-              </Text>
-            </View>
-            <View
-              style={[
-                styles.statusBadge,
-                {
-                  backgroundColor: state.settings.notificationsEnabled
-                    ? `${Colors.success}15`
-                    : `${Colors.red}15`,
-                },
-              ]}
+                  notifications: {
+                    ...state.settings.notifications,
+                    enabled: true,
+                    recitationEnabled: true, recitationTime: "07:00",
+                    listeningEnabled: true, listeningTime: "09:00",
+                    weeklyPrepEnabled: true, weeklyPrepTime: "17:00",
+                    nightlyPrepEnabled: true, nightlyPrepTime: "21:00",
+                    dailyPrepEnabled: true, dailyPrepTime: "04:45",
+                    memorizationEnabled: true, memorizationTime: "05:00",
+                    reviewEnabled: true, reviewTime: "15:00",
+                  }
+                }
+              })}
             >
-              <Text
-                style={{
-                  color: state.settings.notificationsEnabled
-                    ? Colors.success
-                    : Colors.red,
-                  fontSize: 10,
-                }}
-              >
-                {state.settings.notificationsEnabled ? "نشط" : "متوقف"}
+              <Text style={styles.templateBtnText}>البكور (الفجر)</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.templateBtn}
+              onPress={() => dispatch({
+                type: "UPDATE_SETTINGS",
+                payload: {
+                  notifications: {
+                    ...state.settings.notifications,
+                    enabled: true,
+                    recitationEnabled: true, recitationTime: "08:00",
+                    listeningEnabled: true, listeningTime: "10:00",
+                    weeklyPrepEnabled: true, weeklyPrepTime: "18:00",
+                    nightlyPrepEnabled: true, nightlyPrepTime: "22:00",
+                    dailyPrepEnabled: true, dailyPrepTime: "05:45",
+                    memorizationEnabled: true, memorizationTime: "06:00",
+                    reviewEnabled: true, reviewTime: "16:00",
+                  }
+                }
+              })}
+            >
+              <Text style={styles.templateBtnText}>قياسي (صباحي)</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.templateBtn}
+              onPress={() => dispatch({
+                type: "UPDATE_SETTINGS",
+                payload: {
+                  notifications: {
+                    ...state.settings.notifications,
+                    enabled: true,
+                    recitationEnabled: true, recitationTime: "10:00",
+                    listeningEnabled: true, listeningTime: "12:00",
+                    weeklyPrepEnabled: true, weeklyPrepTime: "20:00",
+                    nightlyPrepEnabled: true, nightlyPrepTime: "23:00",
+                    dailyPrepEnabled: true, dailyPrepTime: "07:45",
+                    memorizationEnabled: true, memorizationTime: "08:00",
+                    reviewEnabled: true, reviewTime: "17:00",
+                  }
+                }
+              })}
+            >
+              <Text style={styles.templateBtnText}>متأخر</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+
+        <View style={styles.card}>
+          <View style={styles.themeRow}>
+            <View>
+              <Text style={styles.label}>تشغيل كافة التنبيهات</Text>
+              <Text style={styles.value}>
+                {state.settings.notifications.enabled ? "مفعّل" : "متوقف"}
               </Text>
             </View>
+            <TouchableOpacity
+              style={styles.themeToggle}
+              onPress={() => dispatch({
+                type: "UPDATE_SETTINGS",
+                payload: {
+                  notifications: {
+                    ...state.settings.notifications,
+                    enabled: !state.settings.notifications.enabled
+                  }
+                }
+              })}
+            >
+              <Ionicons
+                name={state.settings.notifications.enabled ? "notifications-circle" : "notifications-off-circle"}
+                size={22}
+                color={state.settings.notifications.enabled ? Colors.primary : Colors.textTertiary}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.divider} />
+
+          {[
+            { id: 'recitation', label: 'تنبيه التلاوة', field: 'recitationEnabled', timeField: 'recitationTime' },
+            { id: 'listening', label: 'تنبيه الاستماع', field: 'listeningEnabled', timeField: 'listeningTime' },
+            { id: 'weekly', label: 'التحضير الأسبوعي', field: 'weeklyPrepEnabled', timeField: 'weeklyPrepTime' },
+            { id: 'nightly', label: 'التحضير الليلي', field: 'nightlyPrepEnabled', timeField: 'nightlyPrepTime' },
+            { id: 'daily', label: 'التحضير القبلي', field: 'dailyPrepEnabled', timeField: 'dailyPrepTime' },
+            { id: 'memorization', label: 'تنبيه الحفظ', field: 'memorizationEnabled', timeField: 'memorizationTime' },
+            { id: 'review', label: 'تنبيه المراجعة', field: 'reviewEnabled', timeField: 'reviewTime' },
+          ].map((item, idx, arr) => {
+            const isMasterEnabled = state.settings.notifications.enabled;
+            const isEnabled = (state.settings.notifications as any)[item.field];
+            const time = (state.settings.notifications as any)[item.timeField];
+            
+            return (
+              <React.Fragment key={item.id}>
+                <View style={[styles.notificationRow, !isMasterEnabled && { opacity: 0.5 }]}>
+                  <TouchableOpacity 
+                    style={styles.notifMain}
+                    disabled={!isMasterEnabled}
+                    onPress={() => dispatch({
+                      type: "UPDATE_SETTINGS",
+                      payload: {
+                        notifications: {
+                          ...state.settings.notifications,
+                          [item.field]: !isEnabled
+                        }
+                      }
+                    })}
+                  >
+                    <Ionicons 
+                      name={isEnabled && isMasterEnabled ? "notifications" : "notifications-off-outline"} 
+                      size={20} 
+                      color={isEnabled && isMasterEnabled ? Colors.primary : Colors.textTertiary} 
+                    />
+                    <Text style={[styles.label, { marginLeft: 12 }]}>{item.label}</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={styles.timeBtn} 
+                    disabled={!isMasterEnabled}
+                    onPress={() => handleEdit(item.timeField)}
+                  >
+                    <Text style={styles.timeText}>{time}</Text>
+                    <Ionicons name="time-outline" size={14} color={Colors.primary} />
+                  </TouchableOpacity>
+                </View>
+                {idx < arr.length - 1 && <View style={styles.divider} />}
+              </React.Fragment>
+            );
+          })}
+        </View>
+
+        <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
+          إدارة الصلاحيات
+        </Text>
+        <View style={styles.card}>
+          <View style={styles.permRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>ظهور التنبيهات</Text>
+              <Text style={[
+                styles.smallValue, 
+                { color: permStatus === "granted" ? Colors.primary : Colors.red }
+              ]}>
+                {permStatus === "granted" ? "مفعلة" : "غير مفعلة"}
+              </Text>
+            </View>
+            <TouchableOpacity 
+              style={[styles.permBtn, permStatus === "granted" && styles.permBtnDisabled]}
+              onPress={async () => {
+                const s = await NotificationService.requestPermissions();
+                setPermStatus(s);
+              }}
+              disabled={permStatus === "granted"}
+            >
+              <Text style={styles.permBtnText}>
+                {permStatus === "granted" ? "مكتمل" : "تفعيل"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.divider} />
+
+          <TouchableOpacity 
+            style={styles.actionRow}
+            onPress={() => NotificationService.openNotificationSettings()}
+          >
+            <Ionicons name="settings-outline" size={16} color={Colors.textSecondary} />
+            <Text style={[styles.label, { flex: 1, marginLeft: 10 }]}>إعدادات النظام المتقدمة</Text>
+            <Ionicons name="chevron-back" size={14} color={Colors.textTertiary} />
           </TouchableOpacity>
+
+          {Platform.OS === 'android' && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.infoRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.label}>العمل في الخلفية</Text>
+                  <Text style={styles.smallValue}>لضمان وصول التنبيهات حتى في وضع توفير الطاقة</Text>
+                </View>
+                <TouchableOpacity 
+                  style={styles.permBtn}
+                  onPress={() => Linking.openSettings()}
+                >
+                  <Text style={styles.permBtnText}>إعدادات البطارية</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
 
         <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
@@ -644,7 +1038,7 @@ export default function SettingsScreen() {
           <View style={styles.divider} />
           <View style={styles.infoRow}>
             <Text style={styles.label}>الإصدار</Text>
-            <Text style={styles.value}>1.0.0 (BETA)</Text>
+            <Text style={styles.value}>{Constants.expoConfig?.version || "1.0.0"} (BETA)</Text>
           </View>
         </View>
 
@@ -683,7 +1077,19 @@ export default function SettingsScreen() {
                           ? "مؤقت المراجعة"
                           : editType === "preparationTimer"
                             ? "مؤقت التحضير"
-                            : "الهدف"}
+                            : editType === "listeningTimer"
+                              ? "مؤقت الاستماع"
+                              : editType === "recitationTime"
+                                ? "وقت تنبيه التلاوة"
+                                : editType === "listeningTime"
+                                  ? "وقت تنبيه الاستماع"
+                                  : editType === "preparationTime"
+                                    ? "وقت تنبيه التهيؤ"
+                                    : editType === "memorizationTime"
+                                      ? "وقت تنبيه الحفظ"
+                                      : editType === "reviewTime"
+                                        ? "وقت تنبيه المراجعة"
+                                        : "الهدف"}
             </Text>
             <TextInput
               style={styles.modalInput}
@@ -767,6 +1173,80 @@ export default function SettingsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Modern Time Picker Modal */}
+      <Modal visible={timePickerVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { paddingHorizontal: 0, maxHeight: '80%' }]}>
+            <Text style={styles.modalTitle}>
+              {editType === "recitationTime" ? "وقت التلاوة" :
+               editType === "listeningTime" ? "وقت الاستماع" :
+               editType === "preparationTime" ? "وقت التهيؤ" :
+               editType === "memorizationTime" ? "وقت الحفظ" :
+               "وقت المراجعة"}
+            </Text>
+            
+            <View style={styles.timePickerContainer}>
+              <View style={styles.timeColumn}>
+                <Text style={styles.timeColumnLabel}>الساعة</Text>
+                <ScrollView 
+                  style={styles.timeList} 
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 20 }}
+                >
+                  {Array.from({ length: 24 }, (_, i) => i).map(h => (
+                    <TouchableOpacity 
+                      key={h} 
+                      style={[styles.timeItem, selectedHour === h && styles.timeItemActive]}
+                      onPress={() => setSelectedHour(h)}
+                    >
+                      <Text style={[styles.timeItemText, selectedHour === h && styles.timeItemTextActive]}>
+                        {h.toString().padStart(2, '0')}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+              
+              <View style={styles.timeColumn}>
+                <Text style={styles.timeColumnLabel}>الدقيقة</Text>
+                <ScrollView 
+                  style={styles.timeList} 
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 20 }}
+                >
+                  {Array.from({ length: 12 }, (_, i) => i * 5).map(m => (
+                    <TouchableOpacity 
+                      key={m} 
+                      style={[styles.timeItem, selectedMinute === m && styles.timeItemActive]}
+                      onPress={() => setSelectedMinute(m)}
+                    >
+                      <Text style={[styles.timeItemText, selectedMinute === m && styles.timeItemTextActive]}>
+                        {m.toString().padStart(2, '0')}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+
+            <View style={[styles.modalActions, { paddingHorizontal: Spacing.xl, marginTop: Spacing.lg }]}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalCancel]}
+                onPress={() => setTimePickerVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>إلغاء</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalSave]}
+                onPress={saveSelectedTime}
+              >
+                <Text style={styles.modalSaveText}>تأكيد</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -829,6 +1309,12 @@ const getStyles = (Colors: any) =>
       color: Colors.textPrimary,
       fontWeight: Typography.medium,
     },
+    smallValue: {
+      fontSize: 11,
+      color: Colors.textSecondary,
+      textAlign: 'left',
+      lineHeight: 16,
+    },
     divider: {
       height: 1,
       backgroundColor: Colors.border,
@@ -838,6 +1324,33 @@ const getStyles = (Colors: any) =>
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+    },
+    notificationRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 4,
+    },
+    notifMain: {
+      flexDirection: "row",
+      alignItems: "center",
+      flex: 1,
+    },
+    timeBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      backgroundColor: Colors.background,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: Colors.border,
+    },
+    timeText: {
+      fontSize: 13,
+      fontWeight: "bold",
+      color: Colors.primary,
     },
     themeToggle: {
       width: 40,
@@ -1048,4 +1561,83 @@ const getStyles = (Colors: any) =>
       ...Shadow.emerald,
     },
     applyBtnText: { color: "#FFF", fontSize: 15, fontWeight: "bold" },
+    timePickerContainer: {
+      flexDirection: 'row',
+      height: 200,
+      paddingHorizontal: Spacing.xl,
+    },
+    timeColumn: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    timeColumnLabel: {
+      fontSize: 10,
+      color: Colors.textTertiary,
+      marginBottom: 8,
+      fontWeight: 'bold',
+    },
+    timeList: {
+      width: '100%',
+    },
+    timeItem: {
+      paddingVertical: 10,
+      alignItems: 'center',
+      borderRadius: 8,
+      marginVertical: 2,
+    },
+    timeItemActive: {
+      backgroundColor: `${Colors.primary}15`,
+      borderWidth: 1,
+      borderColor: `${Colors.primary}30`,
+    },
+    timeItemText: {
+      fontSize: 18,
+      color: Colors.textSecondary,
+      fontWeight: '500',
+    },
+    timeItemTextActive: {
+      color: Colors.primary,
+      fontWeight: 'bold',
+    },
+    permRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    permBtn: {
+      backgroundColor: `${Colors.primary}10`,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: `${Colors.primary}20`,
+    },
+    permBtnDisabled: {
+      backgroundColor: Colors.border,
+      borderColor: Colors.border,
+    },
+    permBtnText: {
+      fontSize: 12,
+      color: Colors.primary,
+      fontWeight: 'bold',
+    },
+    actionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 4,
+    },
+    templateBtn: {
+      backgroundColor: Colors.surface,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: BorderRadius.full,
+      borderWidth: 1,
+      borderColor: Colors.border,
+      marginRight: 8,
+    },
+    templateBtnText: {
+      fontSize: 12,
+      color: Colors.textSecondary,
+      fontWeight: '600',
+    },
   });

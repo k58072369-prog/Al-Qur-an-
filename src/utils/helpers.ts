@@ -39,51 +39,51 @@ export function generatePlan(
   pageNumbers: number[],
   pagesPerDay: number,
   label: string = 'خطة حفظ',
-  direction: PlanDirection = 'forward'
+  direction: PlanDirection = 'forward',
+  mushafSurahPages?: Record<number, [number, number]>
 ): Plan {
   // Deduplicate and filter out zeros
   const uniquePages = Array.from(new Set(pageNumbers)).filter(p => p > 0);
-  let orderedPages: number[];
+  const usedPageSet = new Set(uniquePages);
 
-  if (direction === 'forward') {
-    orderedPages = [...uniquePages].sort((a, b) => a - b);
-  } else {
-    // Group by Surah in reverse, but keep pages ascending within each Surah
-    const usedPages = new Set(uniquePages);
-    const result: number[] = [];
-    const addedPages = new Set<number>();
-    
-    // Process Surahs from 114 down to 1
-    const reversedSurahs = [...SURAHS].sort((a, b) => b.id - a.id);
-    
-    reversedSurahs.forEach(surah => {
-      // Find pages of this Surah that are in the requested set
-      const surahPages: number[] = [];
-      for (let p = surah.startPage; p <= surah.endPage; p++) {
-        if (usedPages.has(p) && !addedPages.has(p)) {
-          surahPages.push(p);
-        }
-      }
-      
-      // Add them in their natural order (start to end of Surah)
-      surahPages.forEach(p => {
-        result.push(p);
-        addedPages.add(p);
-      });
-    });
+  // Build list of surahs with their page boundaries
+  // If edition data is provided, use it; otherwise fall back to default SURAHS (madani_604)
+  const surahsData: { id: number; startPage: number; endPage: number }[] =
+    mushafSurahPages
+      ? Object.entries(mushafSurahPages)
+          .map(([id, [s, e]]) => ({ id: Number(id), startPage: s, endPage: e }))
+      : SURAHS.map(s => ({ id: s.id, startPage: s.startPage, endPage: s.endPage }));
 
-    // Just in case some pages weren't part of any Surah (though Quran is 114 Surahs covering all 604 pages)
-    // or if the user provided pages in a weird way, we ensure all requested pages are included.
-    pageNumbers.sort((a, b) => b - a).forEach(p => {
-      if (!addedPages.has(p)) {
+  // Sort surahs by direction
+  const sortedSurahs = [...surahsData].sort((a, b) =>
+    direction === 'forward' ? a.id - b.id : b.id - a.id
+  );
+
+  const result: number[] = [];
+  const addedPages = new Set<number>();
+
+  // Process surahs in order; within each surah pages are always ascending
+  sortedSurahs.forEach(surah => {
+    for (let p = surah.startPage; p <= surah.endPage; p++) {
+      if (usedPageSet.has(p) && !addedPages.has(p)) {
         result.push(p);
         addedPages.add(p);
       }
-    });
+    }
+  });
 
-    orderedPages = result;
-  }
+  // Fallback: include any pages not covered by surah data
+  const fallbackSorted = [...uniquePages].sort((a, b) =>
+    direction === 'forward' ? a - b : b - a
+  );
+  fallbackSorted.forEach(p => {
+    if (!addedPages.has(p)) {
+      result.push(p);
+      addedPages.add(p);
+    }
+  });
 
+  const orderedPages = result;
   const totalDays = Math.ceil(orderedPages.length / Math.max(1, pagesPerDay));
 
   return {

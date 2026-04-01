@@ -26,7 +26,9 @@ export type Plan = {
   startDate: string;
   direction: PlanDirection;
   // Metadata for display
-  label: string; 
+  label: string;
+  /** طبعة المصحف المستخدمة لبناء هذه الخطة */
+  mushafEditionId?: string;
 };
 
 export type DailyProgress = {
@@ -141,15 +143,17 @@ export type ModuleInfo = {
 export type AppSettings = {
   hapticsEnabled: boolean;
   reviewStrategy: 'spaced' | 'random' | 'recency';
-  notificationsEnabled: boolean;
-  morningReminderTime: string;
-  nightReminderTime: string;
+  notifications: NotificationSettings;
   showDailyProgressOnDashboard: boolean;
   memorizationTimerMinutes: number;
   preparationTimerMinutes: number;
   reviewTimerMinutes: number;
+  recitationTimerMinutes: number;
+  listeningTimerMinutes: number;
   memorizationMethod: 'standard' | 'linking';
   chunksPerPage: number;
+  /** طبعة المصحف المختارة */
+  mushafEdition: 'madani_604' | 'madani_612' | 'warsh_622' | 'indopak_604' | 'tajweed_604';
 };
 
 export type AppState = {
@@ -181,11 +185,21 @@ export type ReviewPage = {
 };
 
 export type NotificationSettings = {
-  nightPrepEnabled: boolean;
-  nightPrepTime: string;
-  morningReminderEnabled: boolean;
-  morningReminderTime: string;
-  reviewReminderEnabled: boolean;
+  enabled: boolean;
+  recitationEnabled: boolean;
+  recitationTime: string;
+  listeningEnabled: boolean;
+  listeningTime: string;
+  weeklyPrepEnabled: boolean;
+  weeklyPrepTime: string;
+  nightlyPrepEnabled: boolean;
+  nightlyPrepTime: string;
+  dailyPrepEnabled: boolean;
+  dailyPrepTime: string;
+  memorizationEnabled: boolean;
+  memorizationTime: string;
+  reviewEnabled: boolean;
+  reviewTime: string;
 };
 
 // ============================================================
