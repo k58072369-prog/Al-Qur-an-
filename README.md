@@ -223,60 +223,87 @@ _A Complete Cumulative System for Memorizing and Mastering the Holy Quran_
 
 ---
 
-## هيكل التطبيق
+## هيكل التطبيق الفعلي
 
-التطبيق مبني بهيكلية واضحة ومقسّمة إلى مجلدات وظيفية:
+المشروع مبني على Expo Router مع فصل واضح بين طبقة التوجيه (`app/`) وطبقة المنطق والشاشات (`src/`):
 
 ```
 alhousonalkhamsa/
-├── app/                          # مسارات Expo Router
-│   ├── (tabs)/                   # الشاشات الرئيسية (التبويبات)
-│   │   ├── index.tsx             # لوحة التحكم (Dashboard)
-│   │   ├── progress.tsx          # شاشة التحليلات والإحصائيات
-│   │   ├── virtues.tsx           # شاشة فضائل القرآن
-│   │   └── settings.tsx          # شاشة الإعدادات
-│   ├── fortress/                 # شاشات الحصون الخمسة
-│   │   ├── recitation.tsx        # حصن التلاوة
-│   │   ├── listening.tsx         # حصن الاستماع
-│   │   ├── preparation.tsx       # حصن التحضير
-│   │   ├── new-memorization.tsx  # حصن الحفظ الجديد
-│   │   └── review.tsx            # حصن المراجعة
-│   ├── onboarding/               # شاشات الإعداد الأولي
-│   │   ├── welcome.tsx           # شاشة الترحيب
-│   │   ├── level.tsx             # اختيار المستوى
-│   │   ├── goal.tsx              # اختيار الهدف
-│   │   ├── surahs.tsx            # اختيار السور
-│   │   ├── capacity.tsx          # تحديد الطاقة اليومية
-│   │   ├── direction.tsx         # اتجاه الحفظ
-│   │   ├── method.tsx            # منهجية الحفظ
-│   │   └── summary.tsx           # ملخص الخطة
-│   ├── review-selection.tsx      # شاشة اختيار استراتيجية المراجعة
-│   ├── _layout.tsx               # التخطيط الجذري
-│   └── +not-found.tsx            # شاشة 404
-├── components/                   # المكونات القابلة لإعادة الاستخدام
-│   ├── ui/                       # مكونات الواجهة الأساسية
-│   ├── fortress/                 # مكونات خاصة بالحصون
-│   └── shared/                   # مكونات مشتركة
-├── constants/                    # الثوابت (البيانات الأساسية)
-│   ├── quran.ts                  # بيانات القرآن (السور والأجزاء والصفحات)
-│   ├── mushaf-editions.ts        # بيانات الطبعات الخمس
-│   ├── levels.ts                 # مستويات XP والألقاب
-│   └── virtues.ts                # نصوص فضائل القرآن
-├── stores/                       # إدارة الحالة (Zustand)
-│   ├── useUserStore.ts           # بيانات المستخدم والإعدادات
-│   ├── useProgressStore.ts       # بيانات التقدم والحفظ
-│   ├── useFortressStore.ts       # حالة الحصون اليومية
-│   └── useVersionStore.ts        # حالة التحديثات
-├── utils/                        # الدوال المساعدة
-│   ├── plan-generator.ts         # مولّد الخطة حسب المدخلات
-│   ├── review-strategy.ts        # محركات استراتيجيات المراجعة
-│   ├── date-helpers.ts           # دوال التاريخ الهجري والميلادي
-│   └── streak-calculator.ts      # حساب السلاسل والاستمرارية
-├── services/                     # الخدمات الخارجية
-│   └── version-check.ts          # خدمة التحقق من الإصدارات
-└── assets/                       # الموارد الثابتة
-    ├── images/                   # الصور والشعارات
-    └── fonts/                    # الخطوط العربية
+├── app/                              # طبقة التوجيه — Expo Router
+│   ├── (tabs)/                       # الشاشات الرئيسية (التبويبات)
+│   │   ├── _layout.tsx               # تخطيط شريط التبويبات
+│   │   ├── dashboard.tsx             # تبويب لوحة التحكم
+│   │   ├── memorization.tsx          # تبويب الحفظ والحصون
+│   │   ├── progress.tsx              # تبويب التحليلات والإحصائيات
+│   │   └── review.tsx                # تبويب فضائل القرآن
+│   ├── _layout.tsx                   # التخطيط الجذري للتطبيق (Splash + Init)
+│   ├── index.tsx                     # نقطة الدخول (التحقق من Onboarding)
+│   ├── onboarding.tsx                # شاشة الإعداد الأولي (5 خطوات)
+│   ├── module.tsx                    # شاشة الحصن الفردي (تستقبل id)
+│   ├── explanation.tsx               # شاشة شرح نظام الحصون
+│   ├── settings.tsx                  # شاشة الإعدادات
+│   └── legal.tsx                     # شاشة الشروط والخصوصية
+│
+├── src/                              # قلب التطبيق — المنطق والشاشات
+│   ├── screens/                      # مكوّنات الشاشات الكاملة
+│   │   ├── DashboardScreen.tsx       # لوحة التحكم الرئيسية
+│   │   ├── OnboardingScreen.tsx      # الإعداد الأولي (5 خطوات)
+│   │   ├── ModuleScreen.tsx          # شاشة الحصن الفردي
+│   │   ├── PlanScreen.tsx            # خطة الحفظ التفصيلية
+│   │   ├── ProgressScreen.tsx        # التحليلات المتقدمة
+│   │   ├── ReviewScreen.tsx          # فضائل القرآن والحافظ
+│   │   ├── SettingsScreen.tsx        # الإعدادات الشاملة
+│   │   ├── AppExplanationScreen.tsx  # شرح نظام الحصون الخمسة
+│   │   └── LegalScreen.tsx           # الشروط والخصوصية
+│   │
+│   ├── components/                   # المكوّنات القابلة لإعادة الاستخدام
+│   │   ├── ModuleCard.tsx            # بطاقة الحصن في الرئيسية
+│   │   ├── FortressCard.tsx          # بطاقة تفصيل الحصن
+│   │   ├── TaskTimer.tsx             # المؤقت المدمج للجلسات
+│   │   ├── StreakBadge.tsx           # شارة السلاسل والاستمرارية
+│   │   ├── SurahPicker.tsx           # منتقي السور (114 سورة)
+│   │   ├── PageRangePicker.tsx       # منتقي نطاق الصفحات
+│   │   ├── RangeChip.tsx             # شريحة عرض النطاق المختار
+│   │   ├── SelectionToggle.tsx       # زر التبديل بين الخيارات
+│   │   ├── CircularProgress.tsx      # شريط التقدم الدائري
+│   │   ├── PrimaryButton.tsx         # زر الإجراء الرئيسي
+│   │   └── VersionOverlay.tsx        # نافذة تحديث/صيانة التطبيق
+│   │
+│   ├── store/                        # إدارة الحالة (Zustand)
+│   │   ├── AppStore.tsx              # المخزن الرئيسي (مستخدم، خطة، سلاسل، إعدادات)
+│   │   ├── selectionStore.ts         # حالة اختيارات الأوراد اليومية
+│   │   ├── NotificationService.ts    # جدولة الإشعارات المحلية
+│   │   ├── UpdateService.ts          # خدمة التحقق من الإصدارات
+│   │   ├── FiveFortressService.ts    # منطق الحصون الخمسة
+│   │   └── StatisticsService.ts      # حسابات الإحصائيات
+│   │
+│   ├── features/
+│   │   └── selection/
+│   │       └── SelectionScreen.tsx   # شاشة اختيار الأوراد (Bottom Sheet)
+│   │
+│   ├── data/                         # البيانات الثابتة
+│   │   ├── quranMeta.ts              # بيانات السور والأجزاء والصفحات
+│   │   └── mushafEditions.ts         # بيانات الطبعات الخمس للمصحف
+│   │
+│   ├── theme/                        # نظام التصميم
+│   │   └── index.ts                  # الألوان، المسافات، الخطوط، الظلال
+│   │
+│   ├── types/                        # تعريفات TypeScript
+│   │   └── index.ts                  # أنواع البيانات المشتركة
+│   │
+│   ├── utils/                        # الدوال المساعدة
+│   │   ├── helpers.ts                # دوال التنسيق والحساب والتحفيز
+│   │   └── storage.ts                # دوال AsyncStorage
+│   │
+│   └── firebase.ts                   # إعداد Firebase (Analytics)
+│
+├── assets/                           # الموارد الثابتة
+│   └── images/                       # الصور والشعارات والأيقونات
+│
+├── app.json                          # إعداد Expo (اسم، أيقونة، إصدار)
+├── eas.json                          # إعداد EAS Build (dev/prod)
+├── version.json                      # ملف التحكم في الإصدارات عن بُعد
+└── package.json                      # التبعيات والأوامر
 ```
 
 ---
@@ -552,60 +579,87 @@ Full control over every aspect of the app:
 
 ---
 
-## App Architecture
+## Actual Project Structure
 
-The app follows a clean, functionally organized folder structure:
+The project is built on Expo Router with a clear separation between the routing layer (`app/`) and the logic/screens layer (`src/`):
 
 ```
 alhousonalkhamsa/
-├── app/                          # Expo Router routes
-│   ├── (tabs)/                   # Main tab screens
-│   │   ├── index.tsx             # Dashboard
-│   │   ├── progress.tsx          # Analytics and statistics
-│   │   ├── virtues.tsx           # Quran virtues screen
-│   │   └── settings.tsx          # Settings screen
-│   ├── fortress/                 # Five Fortresses screens
-│   │   ├── recitation.tsx        # Recitation fortress
-│   │   ├── listening.tsx         # Listening fortress
-│   │   ├── preparation.tsx       # Preparation fortress
-│   │   ├── new-memorization.tsx  # New memorization fortress
-│   │   └── review.tsx            # Review fortress
-│   ├── onboarding/               # First-time setup screens
-│   │   ├── welcome.tsx           # Welcome screen
-│   │   ├── level.tsx             # Level selection
-│   │   ├── goal.tsx              # Goal selection
-│   │   ├── surahs.tsx            # Surah selection
-│   │   ├── capacity.tsx          # Daily capacity
-│   │   ├── direction.tsx         # Memorization direction
-│   │   ├── method.tsx            # Memorization method
-│   │   └── summary.tsx           # Plan summary
-│   ├── review-selection.tsx      # Review strategy selector
-│   ├── _layout.tsx               # Root layout
-│   └── +not-found.tsx            # 404 screen
-├── components/                   # Reusable UI components
-│   ├── ui/                       # Base UI components
-│   ├── fortress/                 # Fortress-specific components
-│   └── shared/                   # Shared components
-├── constants/                    # Static data and constants
-│   ├── quran.ts                  # Quran data (surahs, juz, pages)
-│   ├── mushaf-editions.ts        # Five edition datasets
-│   ├── levels.ts                 # XP levels and titles
-│   └── virtues.ts                # Virtue texts
-├── stores/                       # State management (Zustand)
-│   ├── useUserStore.ts           # User data and settings
-│   ├── useProgressStore.ts       # Progress and memorization data
-│   ├── useFortressStore.ts       # Daily fortress state
-│   └── useVersionStore.ts        # Update state
-├── utils/                        # Utility functions
-│   ├── plan-generator.ts         # Plan generation based on inputs
-│   ├── review-strategy.ts        # Review strategy engines
-│   ├── date-helpers.ts           # Hijri and Gregorian date utilities
-│   └── streak-calculator.ts      # Streak and consistency calculation
-├── services/                     # External services
-│   └── version-check.ts          # Version checking service
-└── assets/                       # Static assets
-    ├── images/                   # Images and logos
-    └── fonts/                    # Arabic fonts
+├── app/                              # Routing layer — Expo Router
+│   ├── (tabs)/                       # Main tab screens
+│   │   ├── _layout.tsx               # Tab bar layout
+│   │   ├── dashboard.tsx             # Dashboard tab
+│   │   ├── memorization.tsx          # Fortresses & Memorization tab
+│   │   ├── progress.tsx              # Analytics & Statistics tab
+│   │   └── review.tsx                # Quran Virtues tab
+│   ├── _layout.tsx                   # Root app layout (Splash + Init)
+│   ├── index.tsx                     # Entry point (Onboarding check)
+│   ├── onboarding.tsx                # First-time setup (5 steps)
+│   ├── module.tsx                    # Individual Fortress screen (receives id)
+│   ├── explanation.tsx               # Five Fortresses explanation screen
+│   ├── settings.tsx                  # Settings screen
+│   └── legal.tsx                     # Terms & Privacy screen
+│
+├── src/                              # App core — Logic & Screens
+│   ├── screens/                      # Full screen components
+│   │   ├── DashboardScreen.tsx       # Main dashboard
+│   │   ├── OnboardingScreen.tsx      # 5-step first-time setup
+│   │   ├── ModuleScreen.tsx          # Individual fortress screen
+│   │   ├── PlanScreen.tsx            # Detailed memorization plan
+│   │   ├── ProgressScreen.tsx        # Advanced analytics
+│   │   ├── ReviewScreen.tsx          # Quran virtues & motivation
+│   │   ├── SettingsScreen.tsx        # Comprehensive settings
+│   │   ├── AppExplanationScreen.tsx  # Five Fortresses system explanation
+│   │   └── LegalScreen.tsx           # Terms & Privacy
+│   │
+│   ├── components/                   # Reusable UI components
+│   │   ├── ModuleCard.tsx            # Fortress card on dashboard
+│   │   ├── FortressCard.tsx          # Fortress detail card
+│   │   ├── TaskTimer.tsx             # Built-in session countdown timer
+│   │   ├── StreakBadge.tsx           # Streak & consistency badge
+│   │   ├── SurahPicker.tsx           # Surah picker (all 114 surahs)
+│   │   ├── PageRangePicker.tsx       # Page range picker
+│   │   ├── RangeChip.tsx             # Selected range chip display
+│   │   ├── SelectionToggle.tsx       # Option toggle button
+│   │   ├── CircularProgress.tsx      # Circular progress indicator
+│   │   ├── PrimaryButton.tsx         # Primary action button
+│   │   └── VersionOverlay.tsx        # Update / maintenance overlay
+│   │
+│   ├── store/                        # State management (Zustand)
+│   │   ├── AppStore.tsx              # Main store (user, plan, streaks, settings)
+│   │   ├── selectionStore.ts         # Daily ward selection state
+│   │   ├── NotificationService.ts    # Local notification scheduling
+│   │   ├── UpdateService.ts          # Remote version check service
+│   │   ├── FiveFortressService.ts    # Five Fortresses business logic
+│   │   └── StatisticsService.ts      # Statistics calculations
+│   │
+│   ├── features/
+│   │   └── selection/
+│   │       └── SelectionScreen.tsx   # Ward selection screen (Bottom Sheet)
+│   │
+│   ├── data/                         # Static data
+│   │   ├── quranMeta.ts              # Surah, juz & page metadata
+│   │   └── mushafEditions.ts         # Five Mushaf edition datasets
+│   │
+│   ├── theme/                        # Design system
+│   │   └── index.ts                  # Colors, spacing, typography, shadows
+│   │
+│   ├── types/                        # TypeScript definitions
+│   │   └── index.ts                  # Shared data types
+│   │
+│   ├── utils/                        # Utility functions
+│   │   ├── helpers.ts                # Formatting, calculations, motivation
+│   │   └── storage.ts                # AsyncStorage helpers
+│   │
+│   └── firebase.ts                   # Firebase config (Analytics)
+│
+├── assets/                           # Static assets
+│   └── images/                       # Images, logos, icons
+│
+├── app.json                          # Expo config (name, icon, version)
+├── eas.json                          # EAS Build config (dev/prod profiles)
+├── version.json                      # Remote version control file
+└── package.json                      # Dependencies and scripts
 ```
 
 ---
