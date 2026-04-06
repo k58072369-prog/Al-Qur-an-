@@ -8,7 +8,8 @@ export type MushafEditionId =
   | 'madani_612'    // المدني برواية حفص (612 صفحة)
   | 'warsh_622'     // مصحف ورش عن نافع (622 صفحة)
   | 'indopak_604'   // المصحف الهندي الباكستاني (604 صفحة)
-  | 'tajweed_604';  // مصحف التجويد الملون (604 صفحة)
+  | 'tajweed_604'   // مصحف التجويد الملون (604 صفحة)
+  | 'shamerly_522'; // مصحف الشمرلي المصري (522 صفحة)
 
 export type MushafEdition = {
   id: MushafEditionId;
@@ -171,6 +172,15 @@ export const MUSHAF_EDITIONS: MushafEdition[] = [
     riwaya: 'حفص عن عاصم',
     description: 'نفس توزيع المدني مع علامات التجويد الملونة — ٦٠٤ صفحة',
     surahPages: MADANI_604_PAGES, // نفس التوزيع
+  },
+  {
+    id: 'shamerly_522',
+    nameAr: 'مصحف الشمرلي (المصري)',
+    nameEn: 'Shamerly Mushaf',
+    totalPages: 522,
+    riwaya: 'حفص عن عاصم',
+    description: 'المصحف المصري المعتمد بالمساجد (الحرمين) — ٥٢٢ صفحة، ١٥ سطراً',
+    surahPages: buildScaledPages(MADANI_604_PAGES, 604, 522),
   },
 ];
 

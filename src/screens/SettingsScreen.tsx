@@ -45,7 +45,9 @@ export default function SettingsScreen() {
     | "dailyAyahs"
     | "recitationTime"
     | "listeningTime"
-    | "preparationTime"
+    | "weeklyPrepTime"
+    | "nightlyPrepTime"
+    | "dailyPrepTime"
     | "memorizationTime"
     | "reviewTime"
   >("name");
@@ -56,7 +58,7 @@ export default function SettingsScreen() {
   >("complete");
   const [selectedSurahIds, setSelectedSurahIds] = useState<number[]>([]);
   const [tempStartPage, setTempStartPage] = useState("1");
-  const [tempEndPage, setTempEndPage] = useState("604");
+  const [tempEndPage, setTempEndPage] = useState("");
   const [planDirection, setPlanDirection] = useState<"forward" | "backward">(
     "forward",
   );
@@ -134,8 +136,12 @@ export default function SettingsScreen() {
       value = state.settings.notifications.recitationTime;
     else if (type === "listeningTime")
       value = state.settings.notifications.listeningTime;
-    else if (type === "preparationTime")
-      value = state.settings.notifications.preparationTime;
+    else if (type === "weeklyPrepTime")
+      value = state.settings.notifications.weeklyPrepTime;
+    else if (type === "nightlyPrepTime")
+      value = state.settings.notifications.nightlyPrepTime;
+    else if (type === "dailyPrepTime")
+      value = state.settings.notifications.dailyPrepTime;
     else if (type === "memorizationTime")
       value = state.settings.notifications.memorizationTime;
     else if (type === "reviewTime")
@@ -185,7 +191,9 @@ export default function SettingsScreen() {
     } else if (
       editType === "recitationTime" ||
       editType === "listeningTime" ||
-      editType === "preparationTime" ||
+      editType === "weeklyPrepTime" ||
+      editType === "nightlyPrepTime" ||
+      editType === "dailyPrepTime" ||
       editType === "memorizationTime" ||
       editType === "reviewTime"
     ) {
@@ -285,15 +293,18 @@ export default function SettingsScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              // 1. Clear everything from storage
+              // 1. Cancel all scheduled notifications first
+              await NotificationService.cancelAllFortressReminders();
+
+              // 2. Clear everything from storage
               await AsyncStorage.clear();
               console.log("[Settings] Storage cleared successfully");
-              
-              // 2. Clear memory states (AppStore & SelectionStore)
+
+              // 3. Clear memory states (AppStore & SelectionStore)
               dispatch({ type: "RESET" });
               useSelectionStore.getState().reset();
-              
-              // 3. Force redirect to entry point
+
+              // 4. Force redirect to entry point
               router.replace("/" as any);
             } catch (e) {
               console.error("[Settings] Reset failed:", e);
@@ -427,7 +438,7 @@ export default function SettingsScreen() {
                       </Text>
                     </View>
                     <Text style={styles.smallValue}>{edition.description}</Text>
-                    <Text style={[styles.smallValue, { color: Colors.textTertiary, fontSize: 10, marginTop: 2 }]}>
+                    <Text style={[styles.smallValue, { color: Colors.textTertiary, fontFamily: Typography.body, fontSize: 10, marginTop: 2 }]}>
                       رواية: {edition.riwaya} • {edition.totalPages} صفحة
                     </Text>
                   </View>
@@ -517,7 +528,7 @@ export default function SettingsScreen() {
                   value={tempEndPage}
                   onChangeText={setTempEndPage}
                   keyboardType="numeric"
-                  placeholder="604"
+                  placeholder={(getMushafEdition((state.settings as any).mushafEdition ?? 'madani_604').totalPages).toString()}
                 />
               </View>
             </View>
@@ -801,12 +812,12 @@ export default function SettingsScreen() {
         </View>
 
         <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
-          تنبيهات الحصون الخمسة
+          تنبيهات خماسية الحفظ
         </Text>
 
         <View style={{ marginBottom: Spacing.md, paddingHorizontal: Spacing.xs }}>
           <Text style={[styles.smallValue, { marginBottom: Spacing.sm }]}>أوضاع مقترحة للجدولة:</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} gap={8}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
             <TouchableOpacity 
               style={styles.templateBtn}
               onPress={() => dispatch({
@@ -1083,13 +1094,17 @@ export default function SettingsScreen() {
                                 ? "وقت تنبيه التلاوة"
                                 : editType === "listeningTime"
                                   ? "وقت تنبيه الاستماع"
-                                  : editType === "preparationTime"
-                                    ? "وقت تنبيه التهيؤ"
-                                    : editType === "memorizationTime"
-                                      ? "وقت تنبيه الحفظ"
-                                      : editType === "reviewTime"
-                                        ? "وقت تنبيه المراجعة"
-                                        : "الهدف"}
+                                  : editType === "weeklyPrepTime"
+                                    ? "وقت التحضير الأسبوعي"
+                                    : editType === "nightlyPrepTime"
+                                      ? "وقت التحضير الليلي"
+                                      : editType === "dailyPrepTime"
+                                        ? "وقت التحضير القبلي"
+                                        : editType === "memorizationTime"
+                                          ? "وقت تنبيه الحفظ"
+                                          : editType === "reviewTime"
+                                            ? "وقت تنبيه المراجعة"
+                                            : "الهدف"}
             </Text>
             <TextInput
               style={styles.modalInput}
@@ -1181,7 +1196,9 @@ export default function SettingsScreen() {
             <Text style={styles.modalTitle}>
               {editType === "recitationTime" ? "وقت التلاوة" :
                editType === "listeningTime" ? "وقت الاستماع" :
-               editType === "preparationTime" ? "وقت التهيؤ" :
+               editType === "weeklyPrepTime" ? "التحضير الأسبوعي" :
+               editType === "nightlyPrepTime" ? "التحضير الليلي" :
+               editType === "dailyPrepTime" ? "التحضير القبلي" :
                editType === "memorizationTime" ? "وقت الحفظ" :
                "وقت المراجعة"}
             </Text>
@@ -1263,7 +1280,7 @@ const getStyles = (Colors: any) =>
       paddingBottom: Spacing.md,
     },
     headerTitle: {
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
@@ -1279,7 +1296,7 @@ const getStyles = (Colors: any) =>
     },
     content: { padding: Spacing.xl },
     sectionTitle: {
-      fontSize: Typography.md,
+      fontFamily: Typography.heading, fontSize: Typography.md,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
       marginBottom: Spacing.sm,
@@ -1300,17 +1317,17 @@ const getStyles = (Colors: any) =>
     },
     valueRow: { flexDirection: "row", alignItems: "center", gap: Spacing.sm },
     label: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textTertiary,
       textAlign: "left",
     },
     value: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textPrimary,
       fontWeight: Typography.medium,
     },
     smallValue: {
-      fontSize: 11,
+      fontFamily: Typography.body, fontSize: 11,
       color: Colors.textSecondary,
       textAlign: 'left',
       lineHeight: 16,
@@ -1348,7 +1365,7 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.border,
     },
     timeText: {
-      fontSize: 13,
+      fontFamily: Typography.heading, fontSize: 13,
       fontWeight: "bold",
       color: Colors.primary,
     },
@@ -1372,7 +1389,7 @@ const getStyles = (Colors: any) =>
     },
     dangerBtnText: {
       color: Colors.red,
-      fontSize: Typography.base,
+      fontFamily: Typography.heading, fontSize: Typography.base,
       fontWeight: Typography.semibold,
     },
     unitToggle: {
@@ -1391,7 +1408,7 @@ const getStyles = (Colors: any) =>
       ...Shadow.sm,
     },
     unitChipText: {
-      fontSize: 10,
+      fontFamily: Typography.heading, fontSize: 10,
       color: Colors.textTertiary,
       fontWeight: 'bold',
     },
@@ -1414,7 +1431,7 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.glassBorder,
     },
     modalTitle: {
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: Spacing.lg,
@@ -1426,7 +1443,7 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.border,
       borderRadius: BorderRadius.md,
       padding: Spacing.md,
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textPrimary,
       marginBottom: Spacing.xl,
     },
@@ -1449,12 +1466,12 @@ const getStyles = (Colors: any) =>
     modalSave: { backgroundColor: Colors.primary },
     modalCancelText: {
       color: Colors.textSecondary,
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       fontWeight: Typography.medium,
     },
     modalSaveText: {
       color: "#FFF",
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       fontWeight: Typography.medium,
     },
     surahItem: {
@@ -1466,20 +1483,20 @@ const getStyles = (Colors: any) =>
     },
     surahNumber: {
       width: 30,
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textTertiary,
       textAlign: "center",
     },
     surahNameAr: {
       flex: 1,
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textPrimary,
       fontWeight: Typography.medium,
       textAlign: "left",
       paddingRight: Spacing.md,
     },
     surahPages: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textTertiary,
     },
     tabRow: {
@@ -1496,7 +1513,7 @@ const getStyles = (Colors: any) =>
       borderRadius: BorderRadius.md,
     },
     activeTab: { backgroundColor: Colors.surface, ...Shadow.sm },
-    tabText: { fontSize: 12, color: Colors.textTertiary },
+    tabText: { fontFamily: Typography.body, fontSize: 12, color: Colors.textTertiary },
     activeTabText: { color: Colors.primary, fontWeight: "bold" },
     rangeInputs: {
       flexDirection: "row",
@@ -1506,7 +1523,7 @@ const getStyles = (Colors: any) =>
     },
     inputGroup: { flex: 1 },
     inputLabel: {
-      fontSize: 10,
+      fontFamily: Typography.body, fontSize: 10,
       color: Colors.textTertiary,
       marginBottom: 4,
       textAlign: "right",
@@ -1531,7 +1548,7 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.border,
       marginBottom: Spacing.md,
     },
-    surahSelectText: { fontSize: 13, color: Colors.textPrimary },
+    surahSelectText: { fontFamily: Typography.body, fontSize: 13, color: Colors.textPrimary },
     directionRow: { marginBottom: Spacing.md },
     directionToggle: { flexDirection: "row", gap: Spacing.sm, marginTop: 8 },
     dirBtn: {
@@ -1547,7 +1564,7 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.primary,
       backgroundColor: `${Colors.primary}05`,
     },
-    dirText: { fontSize: 11, color: Colors.textSecondary },
+    dirText: { fontFamily: Typography.body, fontSize: 11, color: Colors.textSecondary },
     activeDirText: { color: Colors.primary, fontWeight: "bold" },
     applyBtn: {
       backgroundColor: Colors.primary,
@@ -1560,7 +1577,7 @@ const getStyles = (Colors: any) =>
       marginTop: Spacing.sm,
       ...Shadow.emerald,
     },
-    applyBtnText: { color: "#FFF", fontSize: 15, fontWeight: "bold" },
+    applyBtnText: { color: "#FFF", fontFamily: Typography.heading, fontSize: 15, fontWeight: "bold" },
     timePickerContainer: {
       flexDirection: 'row',
       height: 200,
@@ -1571,7 +1588,7 @@ const getStyles = (Colors: any) =>
       alignItems: 'center',
     },
     timeColumnLabel: {
-      fontSize: 10,
+      fontFamily: Typography.heading, fontSize: 10,
       color: Colors.textTertiary,
       marginBottom: 8,
       fontWeight: 'bold',
@@ -1591,7 +1608,7 @@ const getStyles = (Colors: any) =>
       borderColor: `${Colors.primary}30`,
     },
     timeItemText: {
-      fontSize: 18,
+      fontFamily: Typography.body, fontSize: 18,
       color: Colors.textSecondary,
       fontWeight: '500',
     },
@@ -1617,7 +1634,7 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.border,
     },
     permBtnText: {
-      fontSize: 12,
+      fontFamily: Typography.heading, fontSize: 12,
       color: Colors.primary,
       fontWeight: 'bold',
     },
@@ -1636,7 +1653,7 @@ const getStyles = (Colors: any) =>
       marginRight: 8,
     },
     templateBtnText: {
-      fontSize: 12,
+      fontFamily: Typography.heading, fontSize: 12,
       color: Colors.textSecondary,
       fontWeight: '600',
     },

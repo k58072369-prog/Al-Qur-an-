@@ -48,9 +48,8 @@ const LEVELS: {
   },
 ];
 
-const DAILY_PAGES = [0.5, 1, 2, 3, 5];
+const DAILY_PAGES = [1, 2, 3, 5];
 const DAILY_PAGES_LABELS: Record<number, string> = {
-  0.5: "نصف صفحة",
   1: "صفحة واحدة",
   2: "صفحتان",
   3: "٣ صفحات",
@@ -235,7 +234,7 @@ export default function OnboardingScreen() {
                 />
               </View>
               <Text style={styles.stepTitle}>مرحباً بك في</Text>
-              <Text style={styles.appName}>الحصون الخمسة</Text>
+              <Text style={styles.appName}>خماسية الحفظ</Text>
               <Text style={styles.appSubtitle}></Text>
 
               <View style={styles.inputContainer}>
@@ -254,7 +253,7 @@ export default function OnboardingScreen() {
                 {[
                   {
                     icon: "shield-checkmark-outline",
-                    text: "نظام الحصون الخمسة المتكامل",
+                    text: "نظام خماسية الحفظ المتكامل",
                   },
                   {
                     icon: "sync-outline",
@@ -693,6 +692,7 @@ const getStyles = (Colors: typeof darkColors) =>
       paddingTop: Spacing.xl,
     },
     stepTitle: {
+      fontFamily: Typography.heading,
       fontSize: Typography["2xl"],
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
@@ -700,20 +700,21 @@ const getStyles = (Colors: typeof darkColors) =>
       marginBottom: Spacing.sm,
     },
     appName: {
+      fontFamily: Typography.heading,
       fontSize: Typography["3xl"],
       fontWeight: Typography.extrabold,
       color: Colors.primary,
       textAlign: "center",
     },
     appSubtitle: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textSecondary,
       textAlign: "center",
       marginTop: Spacing.sm,
       marginBottom: Spacing["sm"],
     },
     stepSubtitle: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textSecondary,
       textAlign: "center",
       marginBottom: Spacing.xl,
@@ -723,7 +724,7 @@ const getStyles = (Colors: typeof darkColors) =>
       marginBottom: Spacing.xl,
     },
     inputLabel: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textTertiary,
       textAlign: "left",
       marginBottom: Spacing.sm,
@@ -736,7 +737,7 @@ const getStyles = (Colors: typeof darkColors) =>
       paddingHorizontal: Spacing.base,
       paddingVertical: Spacing.md,
       color: Colors.textPrimary,
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       textAlign: "right",
     },
     featuresList: {
@@ -756,7 +757,7 @@ const getStyles = (Colors: typeof darkColors) =>
       paddingVertical: Spacing.md,
     },
     featureText: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textSecondary,
       flex: 1,
       textAlign: "left",
@@ -783,12 +784,12 @@ const getStyles = (Colors: typeof darkColors) =>
       alignItems: "flex-start",
     },
     optionLabel: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       fontWeight: Typography.medium,
       color: Colors.textPrimary,
     },
     optionDescription: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textTertiary,
       marginTop: 2,
     },
@@ -814,7 +815,7 @@ const getStyles = (Colors: typeof darkColors) =>
       marginBottom: Spacing.sm,
     },
     goalText: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textPrimary,
       textAlign: "left",
       flex: 1,
@@ -842,12 +843,12 @@ const getStyles = (Colors: typeof darkColors) =>
       backgroundColor: Colors.primaryMuted,
     },
     pageNum: {
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
     pageLabel: {
-      fontSize: 10,
+      fontFamily: Typography.body, fontSize: 10,
       color: Colors.textTertiary,
       textAlign: "center",
     },
@@ -861,12 +862,12 @@ const getStyles = (Colors: typeof darkColors) =>
       alignItems: "center",
     },
     estimateLabel: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textSecondary,
       marginBottom: 3,
     },
     estimateValue: {
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.semibold,
       color: Colors.primary,
     },
@@ -881,7 +882,7 @@ const getStyles = (Colors: typeof darkColors) =>
       gap: Spacing.sm,
     },
     summaryTitle: {
-      fontSize: Typography.base,
+      fontFamily: Typography.heading, fontSize: Typography.base,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
       textAlign: "left",
@@ -896,18 +897,18 @@ const getStyles = (Colors: typeof darkColors) =>
       borderBottomColor: Colors.border,
     },
     summaryLabel: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textTertiary,
       textAlign: "right",
     },
     summaryValue: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       fontWeight: Typography.medium,
       color: Colors.textPrimary,
       textAlign: "right",
     },
     hadith: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.primary,
       textAlign: "center",
       fontStyle: "italic",
@@ -939,7 +940,7 @@ const getStyles = (Colors: typeof darkColors) =>
       borderColor: Colors.glassBorder,
     },
     label: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textTertiary,
       textAlign: "left",
     },
@@ -962,7 +963,7 @@ const getStyles = (Colors: typeof darkColors) =>
       borderRadius: BorderRadius.md,
     },
     activeTab: { backgroundColor: Colors.surface },
-    tabText: { fontSize: 10, color: Colors.textTertiary },
+    tabText: { fontFamily: Typography.body, fontSize: 10, color: Colors.textTertiary },
     activeTabText: { color: Colors.primary, fontWeight: "bold" },
     rangeInputs: {
       flexDirection: "row",
@@ -972,7 +973,7 @@ const getStyles = (Colors: typeof darkColors) =>
     },
     inputGroup: { flex: 1 },
     inputLabelSmall: {
-      fontSize: 9,
+      fontFamily: Typography.body, fontSize: 9,
       color: Colors.textTertiary,
       marginBottom: 4,
       textAlign: "right",
@@ -997,7 +998,7 @@ const getStyles = (Colors: typeof darkColors) =>
       borderColor: Colors.border,
       marginBottom: Spacing.md,
     },
-    surahSelectText: { fontSize: 13, color: Colors.textPrimary },
+    surahSelectText: { fontFamily: Typography.body, fontSize: 13, color: Colors.textPrimary },
     directionRow: { marginBottom: Spacing.md },
     directionToggle: { flexDirection: "row", gap: Spacing.sm, marginTop: 8 },
     dirBtn: {
@@ -1013,7 +1014,7 @@ const getStyles = (Colors: typeof darkColors) =>
       borderColor: Colors.primary,
       backgroundColor: `${Colors.primary}05`,
     },
-    dirText: { fontSize: 11, color: Colors.textSecondary },
+    dirText: { fontFamily: Typography.body, fontSize: 11, color: Colors.textSecondary },
     activeDirText: { color: Colors.primary, fontWeight: "bold" },
     modalOverlay: {
       flex: 1,
@@ -1029,7 +1030,7 @@ const getStyles = (Colors: typeof darkColors) =>
       borderColor: Colors.glassBorder,
     },
     modalTitle: {
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: Spacing.lg,
@@ -1055,13 +1056,13 @@ const getStyles = (Colors: typeof darkColors) =>
     },
     surahNumber: {
       width: 30,
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textTertiary,
       textAlign: "center",
     },
     surahNameAr: {
       flex: 1,
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textPrimary,
       fontWeight: Typography.medium,
       textAlign: "right",
@@ -1077,7 +1078,7 @@ const getStyles = (Colors: typeof darkColors) =>
       borderStyle: "dashed",
     },
     planPreviewText: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textSecondary,
       textAlign: "center",
       lineHeight: 18,

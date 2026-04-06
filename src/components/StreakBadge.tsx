@@ -70,13 +70,13 @@ const getStyles = (Colors: any) =>
       justifyContent: "center",
     },
     count: {
-      fontSize: Typography.base,
+      fontFamily: Typography.heading, fontSize: Typography.base,
       fontWeight: Typography.semibold,
       color: Colors.gold,
       textAlign: "left",
     },
     label: {
-      fontSize: 10,
+      fontFamily: Typography.body, fontSize: 10,
       color: Colors.textTertiary,
       textAlign: "left",
       marginTop: 1,
@@ -93,7 +93,7 @@ const getStyles = (Colors: any) =>
       gap: Spacing.sm,
     },
     bestCount: {
-      fontSize: Typography.base,
+      fontFamily: Typography.heading, fontSize: Typography.base,
       fontWeight: Typography.semibold,
       color: Colors.goldLight,
       textAlign: "center",

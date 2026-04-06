@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFonts, Cairo_400Regular, Cairo_700Bold } from "@expo-google-fonts/cairo";
+import { useFonts, Tajawal_400Regular, Tajawal_500Medium, Tajawal_700Bold } from "@expo-google-fonts/tajawal";
 import { Stack, usePathname } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -32,8 +32,9 @@ export default function RootLayout() {
 
   // Load actual fonts to ensure fontsLoaded becomes true correctly
   const [fontsLoaded] = useFonts({
-    Cairo_400Regular,
-    Cairo_700Bold,
+    Tajawal_400Regular,
+    Tajawal_500Medium,
+    Tajawal_700Bold,
     ...Ionicons.font,
   });
 
@@ -242,7 +243,7 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
 
         {/* Text Section */}
         <Animated.View style={[styles.textBlock, { opacity: fadeAnim }]}>
-          <Text style={styles.splashTitle}>الحصون الخمسة</Text>
+          <Text style={styles.splashTitle}>خماسية الحفظ</Text>
           <Text style={styles.tagline}>خطة متكاملة لإتقان حفظ القرآن</Text>
         </Animated.View>
 
@@ -345,6 +346,7 @@ const getStyles = (Colors: any) => StyleSheet.create({
     marginBottom: 40,
   },
   splashTitle: {
+    fontFamily: "Tajawal_700Bold",
     fontSize: Typography["3xl"],
     fontWeight: Typography.extrabold,
     color: Colors.textPrimary,
@@ -352,6 +354,7 @@ const getStyles = (Colors: any) => StyleSheet.create({
     letterSpacing: 1,
   },
   tagline: {
+    fontFamily: "Tajawal_400Regular",
     fontSize: Typography.base,
     color: Colors.textSecondary,
     marginTop: 8,
@@ -375,6 +378,7 @@ const getStyles = (Colors: any) => StyleSheet.create({
     borderRadius: 3,
   },
   loadingText: {
+    fontFamily: "Tajawal_400Regular",
     marginTop: 12,
     fontSize: 12,
     color: Colors.textTertiary,
@@ -387,6 +391,7 @@ const getStyles = (Colors: any) => StyleSheet.create({
     alignItems: "center",
   },
   quoteText: {
+    fontFamily: "Tajawal_700Bold",
     fontSize: 16,
     color: Colors.primary,
     fontWeight: "600",

@@ -79,7 +79,7 @@ export default function AppExplanationScreen() {
               color={Colors.primary}
             />
           </View>
-          <Text style={styles.mainTitle}>نظام الحصون الخمسة</Text>
+          <Text style={styles.mainTitle}>نظام خماسية الحفظ</Text>
           <Text style={styles.mainDescription}>
             نظام تراكمي يهدف لجعل حفظ القرآن الكريم راسخاً كحفظ سورة الفاتحة،
             يتطلب الهمة العالية والالتزام بالوقت للوصول للإتقان التام.
@@ -103,7 +103,7 @@ export default function AppExplanationScreen() {
             </View>
             <View style={styles.presentationInfo}>
               <Text style={styles.presentationTitle}>
-                عرض تقديمي لطريقة الحصون
+                عرض تقديمي لطريقة خماسية الحفظ
               </Text>
               <Text style={styles.presentationSubtitle}>
                 شاهد الشرح الكامل للطريقة بشكل احترافي
@@ -118,7 +118,7 @@ export default function AppExplanationScreen() {
         </TouchableOpacity>
 
         <FortressCard
-          title="الحصن الأول: الختمة (التلاوة والاستماع)"
+          title="المرحلة الأولى: الختمة (التلاوة والاستماع)"
           icon="book-outline"
           color={Colors.fortressRecitation}
           content={
@@ -138,7 +138,7 @@ export default function AppExplanationScreen() {
         />
 
         <FortressCard
-          title="الحصن الثاني: التحضير"
+          title="المرحلة الثانية: التحضير"
           icon="timer-outline"
           color={Colors.fortressPreparation}
           content={
@@ -162,21 +162,21 @@ export default function AppExplanationScreen() {
         />
 
         <FortressCard
-          title="الحصن الثالث: الحفظ الجديد"
+          title="المرحلة الثالثة: الحفظ الجديد"
           icon="create-outline"
           color={Colors.fortressMemorization}
           content="تكرار الصفحة أو الصفحات الجديدة لمدة لا تقل عن 15 دقيقة. الالتزام بالوقت ضروري حتى لو شعرت بالحفظ السريع، لأن التكرار هو ما ينقل الحفظ للذاكرة البعيدة."
         />
 
         <FortressCard
-          title="الحصن الرابع: مراجعة القريب"
+          title="المرحلة الرابعة: مراجعة القريب"
           icon="sync-outline"
           color={Colors.fortressReview}
           content="تبدأ بعد حفظ أول 10-20 صفحة، وتتمثل في مراجعة آخر ما تم حفظه (بمقدار جزء تقريباً) يومياً قبل البدء في الحفظ الجديد لضمان عدم تفلته."
         />
 
         <FortressCard
-          title="الحصن الخامس: مراجعة البعيد"
+          title="المرحلة الخامسة: مراجعة البعيد"
           icon="layers-outline"
           color={Colors.blue}
           content="تبدأ عند تجاوز حفظ جزئين فأكثر. للمتقدمين (من حفظوا 15 جزءاً مثلاً)، تكون مراجعة البعيد بمعدل جزئين يومياً."
@@ -269,7 +269,7 @@ const getStyles = (Colors: any) =>
       paddingBottom: Spacing.md,
     },
     headerTitle: {
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
       textAlign: "center",
@@ -306,14 +306,14 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.lg,
     },
     mainTitle: {
-      fontSize: Typography.xl,
+      fontFamily: Typography.heading, fontSize: Typography.xl,
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: Spacing.sm,
       textAlign: "center",
     },
     mainDescription: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textSecondary,
       lineHeight: Typography.base * 1.6,
       textAlign: "center",
@@ -340,7 +340,7 @@ const getStyles = (Colors: any) =>
       justifyContent: "center",
     },
     cardTitle: {
-      fontSize: Typography.md,
+      fontFamily: Typography.heading, fontSize: Typography.md,
       fontWeight: Typography.bold,
       flex: 1,
       textAlign: "left",
@@ -349,13 +349,13 @@ const getStyles = (Colors: any) =>
       paddingRight: 0,
     },
     paragraph: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textSecondary,
       lineHeight: Typography.base * 1.7,
       textAlign: "left",
     },
     subParagraph: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textSecondary,
       lineHeight: Typography.base * 1.7,
       textAlign: "left",
@@ -382,14 +382,14 @@ const getStyles = (Colors: any) =>
       flex: 1,
     },
     timeTitle: {
-      fontSize: Typography.md,
+      fontFamily: Typography.heading, fontSize: Typography.md,
       fontWeight: Typography.bold,
       color: Colors.primary,
       marginBottom: Spacing.xs,
       textAlign: "left",
     },
     timeText: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textSecondary,
       lineHeight: Typography.sm * 1.6,
       textAlign: "left",
@@ -419,14 +419,14 @@ const getStyles = (Colors: any) =>
       flex: 1,
     },
     presentationTitle: {
-      fontSize: Typography.md,
+      fontFamily: Typography.heading, fontSize: Typography.md,
       fontWeight: Typography.bold,
       color: Colors.gold,
       marginBottom: 2,
       textAlign: "left",
     },
     presentationSubtitle: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textSecondary,
       textAlign: "left",
     },
@@ -448,13 +448,13 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.primary,
     },
     devName: {
-      fontSize: Typography.base,
+      fontFamily: Typography.heading, fontSize: Typography.base,
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: 2,
     },
     devTitle: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.primary,
       fontWeight: Typography.medium,
       marginBottom: Spacing.lg,
@@ -468,13 +468,13 @@ const getStyles = (Colors: any) =>
       width: "100%",
     },
     sadaqahText: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.heading, fontSize: Typography.sm,
       fontWeight: Typography.bold,
       color: Colors.primary,
       marginBottom: 4,
     },
     duaText: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textSecondary,
       textAlign: "center",
       lineHeight: 18,

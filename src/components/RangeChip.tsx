@@ -56,7 +56,7 @@ const getStyles = (Colors: any) =>
       paddingVertical: 6,
     },
     chipText: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       fontWeight: Typography.medium,
       maxWidth: 180,
     },

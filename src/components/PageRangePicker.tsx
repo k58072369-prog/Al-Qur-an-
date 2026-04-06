@@ -70,7 +70,7 @@ const getStyles = (Colors: any) =>
       gap: Spacing.sm,
     },
     label: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textSecondary,
       textAlign: 'center',
     },
@@ -81,7 +81,7 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.border,
       paddingVertical: Spacing.md,
       paddingHorizontal: Spacing.md,
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },

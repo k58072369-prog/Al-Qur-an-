@@ -200,7 +200,7 @@ function appReducer(state: AppState, action: Action): AppState {
 
       // Build initial page progress for all pages
       const pageProgress: PageProgress[] = [];
-      for (let p = 1; p <= 604; p++) {
+      for (let p = 1; p <= editionData.totalPages; p++) {
         pageProgress.push({
           pageNumber: p,
           memorized: false,
@@ -449,10 +449,6 @@ function appReducer(state: AppState, action: Action): AppState {
       return { ...state, themeMode: newMode };
     }
 
-    case "RESET": {
-      return { ...initialState, isLoaded: true };
-    }
-
     case "UPDATE_USER": {
       if (!state.user) return state;
       const newUser = { ...state.user, ...action.payload };
@@ -622,19 +618,28 @@ export function AppProvider({ children }: PropsWithChildren) {
     }
   }, [state.isOnboarded]);
 
-  // Monitor notification settings changes and schedule reminders
+  // Schedule / update notifications whenever settings change.
+  // – Only fire after the app is fully loaded AND the user is onboarded
+  //   (avoids scheduling during the onboarding wizard or on a fresh install).
+  // – Debounced 800 ms to coalesce rapid Redux updates (e.g., template buttons).
+  // – The service itself uses a persistent AsyncStorage hash so it does nothing
+  //   if the settings haven't actually changed since the last schedule.
   useEffect(() => {
-    if (state.isLoaded && state.settings.notifications) {
-      // Use stringified version to ensure we only react to content changes, not reference changes
-      const settingsStr = JSON.stringify(state.settings.notifications);
-      
-      const timer = setTimeout(() => {
-        NotificationService.scheduleFortressReminders(state.settings.notifications);
-      }, 1000); // Increased debounce to 1s for stability
-      
-      return () => clearTimeout(timer);
-    }
-  }, [JSON.stringify(state.settings.notifications), state.isLoaded]);
+    if (!state.isLoaded || !state.isOnboarded) return;
+
+    const timer = setTimeout(() => {
+      NotificationService.scheduleFortressReminders(state.settings.notifications);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    state.isLoaded,
+    state.isOnboarded,
+    // Serialize only the notification sub-tree to avoid running on every unrelated state change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(state.settings.notifications),
+  ]);
 
   const getTodayProgress = useCallback((): DailyProgress | null => {
     const today = todayISO();

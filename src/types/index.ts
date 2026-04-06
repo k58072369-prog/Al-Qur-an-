@@ -1,5 +1,5 @@
 // ============================================================
-// الحصون الخمسة - Five Fortresses: Core Types
+// خماسية الحفظ - Fivefold Memorization: Core Types
 // ============================================================
 
 export type UserLevel = 'مبتدئ' | 'متوسط' | 'متقدم';
@@ -153,7 +153,7 @@ export type AppSettings = {
   memorizationMethod: 'standard' | 'linking';
   chunksPerPage: number;
   /** طبعة المصحف المختارة */
-  mushafEdition: 'madani_604' | 'madani_612' | 'warsh_622' | 'indopak_604' | 'tajweed_604';
+  mushafEdition: 'madani_604' | 'madani_612' | 'warsh_622' | 'indopak_604' | 'tajweed_604' | 'shamerly_522';
 };
 
 export type AppState = {

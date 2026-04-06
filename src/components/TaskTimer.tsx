@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["4xl"],
   },
   title: {
-    fontSize: Typography.xl,
+    fontFamily: Typography.heading, fontSize: Typography.xl,
     fontWeight: Typography.bold,
     marginBottom: Spacing.sm,
   },
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.05)',
   },
   badgeText: {
-    fontSize: Typography.xs,
+    fontFamily: Typography.heading, fontSize: Typography.xs,
     fontWeight: Typography.semibold,
   },
   timerContainer: {
@@ -207,13 +207,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   timeText: {
+    fontFamily: 'System', 
     fontSize: Typography["5xl"],
     fontWeight: '200',
-    fontFamily: 'System', // Use system thin font
     letterSpacing: -1,
   },
   remainingLabel: {
-    fontSize: Typography.sm,
+    fontFamily: Typography.body, fontSize: Typography.sm,
     marginTop: -5,
   },
   controls: {
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   btnText: {
-    fontSize: Typography.md,
+    fontFamily: Typography.heading, fontSize: Typography.md,
     fontWeight: Typography.bold,
     color: '#FFF',
   },
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     padding: Spacing.sm,
   },
   resetText: {
-    fontSize: Typography.sm,
+    fontFamily: Typography.body, fontSize: Typography.sm,
   },
   footer: {
     position: 'absolute',
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     maxWidth: '90%',
   },
   hint: {
-    fontSize: Typography.sm,
+    fontFamily: Typography.body, fontSize: Typography.sm,
     textAlign: 'center',
   }
 });

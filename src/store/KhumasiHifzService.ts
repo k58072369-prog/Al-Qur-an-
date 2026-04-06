@@ -2,9 +2,9 @@ import { Plan, PageProgress, TOTAL_QURAN_PAGES, DailyProgress } from '../types';
 import { todayISO, addDays } from '../utils/helpers';
 
 /**
- * Service to calculate daily tasks based on the "Five Fortresses" (الحصون الخمسة) method.
+ * Service to calculate daily tasks based on the "Fivefold Memorization" (خماسية الحفظ) method.
  */
-export const FiveFortressService = {
+export const KhumasiHifzService = {
   /**
    * Fortress 1A: Khatma Recitation (2 Juzs daily / 40 pages)
    * A full cycle of the Quran every 15 days.
@@ -36,12 +36,15 @@ export const FiveFortressService = {
    * Reading the pages scheduled for the NEXT 7 days of the plan.
    */
   getWeeklyPrepPages(plan: Plan | null): { start: number; end: number } | null {
-    if (!plan) return null;
-    const start = plan.currentPage + plan.pagesPerDay; // Start from tomorrow's page
+    if (!plan || plan.targetPages.length === 0) return null;
+    const currentPage = plan.targetPages[plan.currentPageIndex] || plan.targetPages[0];
+    const endPage = plan.targetPages[plan.targetPages.length - 1];
+    
+    const start = currentPage + plan.pagesPerDay; // Start from tomorrow's page
     const end = start + (plan.pagesPerDay * 7) - 1;
     return { 
-      start: Math.min(start, plan.endPage), 
-      end: Math.min(end, plan.endPage) 
+      start: Math.min(start, endPage), 
+      end: Math.min(end, endPage) 
     };
   },
 
@@ -49,8 +52,10 @@ export const FiveFortressService = {
    * Fortress 2B: Night Preparation (Page of tomorrow)
    */
   getNightPrepPage(plan: Plan | null): number | null {
-    if (!plan) return null;
-    return Math.min(plan.currentPage + plan.pagesPerDay, plan.endPage);
+    if (!plan || plan.targetPages.length === 0) return null;
+    const currentPage = plan.targetPages[plan.currentPageIndex] || plan.targetPages[0];
+    const endPage = plan.targetPages[plan.targetPages.length - 1];
+    return Math.min(currentPage + plan.pagesPerDay, endPage);
   },
 
   /**

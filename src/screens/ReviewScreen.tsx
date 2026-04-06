@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Shadow, Spacing, useTheme } from "../theme";
+import { Shadow, Spacing, useTheme, Typography } from "../theme";
 
 const { width } = Dimensions.get("window");
 
@@ -279,13 +279,12 @@ const getStyles = (Colors: any) =>
     },
     heroTextContent: { flex: 1, alignItems: "flex-start" },
     heroTitle: {
-      fontSize: 24,
-      fontWeight: "bold",
+      fontFamily: Typography.heading, fontSize: 24,
       color: Colors.textPrimary,
       textAlign: "left",
     },
     heroSubtitle: {
-      fontSize: 12,
+      fontFamily: Typography.body, fontSize: 12,
       color: Colors.textSecondary,
       marginTop: 4,
       lineHeight: 18,
@@ -298,8 +297,7 @@ const getStyles = (Colors: any) =>
       marginTop: 10,
     },
     sectionTitle: {
-      fontSize: 18,
-      fontWeight: "bold",
+      fontFamily: Typography.heading, fontSize: 18,
       color: Colors.textPrimary,
       borderLeftWidth: 3,
       borderLeftColor: Colors.primary,
@@ -329,14 +327,13 @@ const getStyles = (Colors: any) =>
     },
     cardContent: { flex: 1, alignItems: "flex-start" },
     cardTitle: {
-      fontSize: 16,
-      fontWeight: "bold",
+      fontFamily: Typography.heading, fontSize: 16,
       color: Colors.textPrimary,
       marginBottom: 6,
       textAlign: "left",
     },
     cardDesc: {
-      fontSize: 13,
+      fontFamily: Typography.body, fontSize: 13,
       color: Colors.textSecondary,
       lineHeight: 22,
       textAlign: "left",
@@ -367,14 +364,13 @@ const getStyles = (Colors: any) =>
       marginBottom: 16,
     },
     parentTitle: {
-      fontSize: 20,
-      fontWeight: "bold",
+      fontFamily: Typography.heading, fontSize: 20,
       color: Colors.textPrimary,
       marginBottom: 10,
       textAlign: "center",
     },
     parentDesc: {
-      fontSize: 14,
+      fontFamily: Typography.body, fontSize: 14,
       color: Colors.textSecondary,
       textAlign: "center",
       lineHeight: 22,
@@ -393,11 +389,10 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.glassBorder,
     },
     quoteText: {
-      fontSize: 15,
+      fontFamily: Typography.body, fontSize: 15,
       color: Colors.textPrimary,
       lineHeight: 25,
       textAlign: "left",
-      fontWeight: "500",
     },
     quoteMeta: {
       flexDirection: "row",
@@ -412,9 +407,8 @@ const getStyles = (Colors: any) =>
       backgroundColor: Colors.textTertiary,
     },
     quoteAuthor: {
-      fontSize: 12,
+      fontFamily: Typography.heading, fontSize: 12,
       color: Colors.textTertiary,
-      fontWeight: "600",
       textAlign: "left",
     },
 
@@ -440,13 +434,12 @@ const getStyles = (Colors: any) =>
       alignItems: "flex-start",
     },
     actionTitle: {
-      fontSize: 18,
-      fontWeight: "bold",
+      fontFamily: Typography.heading, fontSize: 18,
       color: Colors.textPrimary,
       textAlign: "left",
     },
     actionDesc: {
-      fontSize: 12,
+      fontFamily: Typography.body, fontSize: 12,
       color: Colors.textSecondary,
       marginTop: 4,
       textAlign: "left",

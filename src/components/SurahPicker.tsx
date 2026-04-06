@@ -217,7 +217,7 @@ const getStyles = (Colors: any) =>
       gap: Spacing.sm,
     },
     surahNumber: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.heading, fontSize: Typography.sm,
       color: Colors.primary,
       fontWeight: Typography.semibold,
       backgroundColor: Colors.primaryMuted,
@@ -229,16 +229,16 @@ const getStyles = (Colors: any) =>
       overflow: 'hidden',
     },
     surahName: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       fontWeight: Typography.medium,
       color: Colors.textPrimary,
     },
     ayahInfo: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textTertiary,
     },
     placeholder: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textTertiary,
     },
 
@@ -253,7 +253,7 @@ const getStyles = (Colors: any) =>
       gap: 4,
     },
     ayahLabel: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textTertiary,
       textAlign: 'center',
     },
@@ -264,7 +264,7 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.glassBorder,
       paddingVertical: Spacing.sm + 2,
       paddingHorizontal: Spacing.md,
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       fontWeight: Typography.medium,
       color: Colors.textPrimary,
     },
@@ -294,7 +294,7 @@ const getStyles = (Colors: any) =>
       borderBottomColor: Colors.border,
     },
     modalTitle: {
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
@@ -313,7 +313,7 @@ const getStyles = (Colors: any) =>
     searchInput: {
       flex: 1,
       paddingVertical: Spacing.sm + 2,
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textPrimary,
     },
     surahList: {
@@ -348,17 +348,17 @@ const getStyles = (Colors: any) =>
       justifyContent: 'center',
     },
     surahNumberText: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       fontWeight: Typography.medium,
       color: Colors.textSecondary,
     },
     surahItemName: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       fontWeight: Typography.medium,
       color: Colors.textPrimary,
     },
     surahItemMeta: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textTertiary,
       marginTop: 2,
     },

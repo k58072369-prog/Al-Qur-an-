@@ -208,13 +208,13 @@ const getStyles = (Colors: any) =>
       gap: Spacing.xl,
     },
     title: {
-      fontSize: Typography.xl,
+      fontFamily: Typography.heading, fontSize: Typography.xl,
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
       textAlign: 'center',
     },
     subtitle: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textSecondary,
       textAlign: 'center',
       marginTop: -Spacing.lg, // slightly pull up due to gap
@@ -237,7 +237,7 @@ const getStyles = (Colors: any) =>
       elevation: 4,
     },
     addBtnText: {
-      fontSize: Typography.base,
+      fontFamily: Typography.heading, fontSize: Typography.base,
       fontWeight: Typography.bold,
       color: '#ffffff',
     },
@@ -255,12 +255,12 @@ const getStyles = (Colors: any) =>
       justifyContent: 'space-between',
     },
     draftTitle: {
-      fontSize: Typography.base,
+      fontFamily: Typography.heading, fontSize: Typography.base,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
     draftCount: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.heading, fontSize: Typography.xs,
       fontWeight: Typography.bold,
       color: Colors.primary,
       backgroundColor: Colors.primaryMuted,
@@ -286,7 +286,7 @@ const getStyles = (Colors: any) =>
       alignItems: 'center',
     },
     cancelBtnText: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       fontWeight: Typography.medium,
       color: Colors.textTertiary,
     },

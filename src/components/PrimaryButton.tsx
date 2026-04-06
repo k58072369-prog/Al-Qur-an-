@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
   },
   label: {
-    fontSize: Typography.base,
+    fontFamily: Typography.heading, fontSize: Typography.base,
     fontWeight: Typography.semibold,
     color: '#FFFFFF',
     textAlign: 'center',
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   secondaryLabel: {
-    fontSize: Typography.base,
+    fontFamily: Typography.body, fontSize: Typography.base,
     fontWeight: Typography.medium,
     textAlign: 'center',
   },
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
   },
   ghostLabel: {
-    fontSize: Typography.base,
+    fontFamily: Typography.body, fontSize: Typography.base,
     fontWeight: Typography.medium,
     textAlign: 'center',
   },

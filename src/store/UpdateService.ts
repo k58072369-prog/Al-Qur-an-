@@ -27,7 +27,7 @@ export const UpdateService = {
    * Main check function that handles remote fetching and local caching.
    */
   async checkForUpdate(): Promise<UpdateInfo | null> {
-    const freshUrl = `https://raw.githubusercontent.com/mustafa-ahmad-work/alhousonalkhamsa/main/version.json?cb=${Date.now()}`;
+    const freshUrl = `https://raw.githubusercontent.com/mustafa-ahmad-work/khumasiat-al-hifz/main/version.json?cb=${Date.now()}`;
     
     try {
       // 1. Try to fetch from remote
@@ -80,7 +80,7 @@ export const UpdateService = {
       disabledMessage: data.disabledMessage || "التطبيق يخضع للصيانة، نعتذر عن الإزعاج.",
       latestVersion,
       changelog: data.changelog,
-      link: data.link || "https://github.com/mustafa-ahmad-work/alhousonalkhamsa/releases",
+      link: data.link || "https://github.com/mustafa-ahmad-work/khumasiat-al-hifz/releases",
       minRequiredVersion,
     };
   },

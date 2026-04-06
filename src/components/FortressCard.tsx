@@ -141,14 +141,14 @@ const getStyles = (Colors: any) => StyleSheet.create({
     gap: 2,
   },
   name: {
-    fontSize: Typography.base,
+    fontFamily: Typography.body, fontSize: Typography.base,
     fontWeight: Typography.medium,
     color: Colors.textPrimary,
     textAlign: 'left',
     writingDirection: 'rtl',
   },
   description: {
-    fontSize: Typography.xs,
+    fontFamily: Typography.body, fontSize: Typography.xs,
     color: Colors.textTertiary,
     textAlign: 'left',
     writingDirection: 'rtl',
@@ -163,7 +163,7 @@ const getStyles = (Colors: any) => StyleSheet.create({
     gap: 3,
   },
   xp: {
-    fontSize: Typography.xs,
+    fontFamily: Typography.heading, fontSize: Typography.xs,
     fontWeight: Typography.semibold,
   },
   checkBox: {

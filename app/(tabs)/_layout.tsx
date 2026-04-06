@@ -242,15 +242,14 @@ const getStyles = (Colors: any) =>
     },
 
     tabText: {
+      fontFamily: Typography.body,
       fontSize: 10,
       color: Colors.textSecondary,
-      fontWeight: Typography.medium,
       textAlign: "center",
       marginTop: 2,
     },
 
     tabTextActive: {
       color: Colors.primary,
-      fontWeight: Typography.semibold,
     },
   });

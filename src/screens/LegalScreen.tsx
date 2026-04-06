@@ -53,7 +53,7 @@ export default function LegalScreen() {
           <Text style={styles.sectionTitle}>شروط الاستخدام</Text>
           <View style={styles.paragraphContainer}>
             <Text style={styles.paragraph}>
-              مرحباً بكم في تطبيق "الحصون الخمسة". باستخدامه، فإنكم توافقون على
+              مرحباً بكم في تطبيق "خماسية الحفظ". باستخدامه، فإنكم توافقون على
               الشروط التالية:
             </Text>
           </View>
@@ -114,7 +114,7 @@ const getStyles = (Colors: any) =>
       paddingBottom: Spacing.md,
     },
     headerTitle: {
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
@@ -144,7 +144,7 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.glassBorder,
     },
     sectionTitle: {
-      fontSize: Typography.base,
+      fontFamily: Typography.heading, fontSize: Typography.base,
       fontWeight: Typography.bold,
       color: Colors.primary,
       marginBottom: Spacing.md,
@@ -154,7 +154,7 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.md,
     },
     paragraph: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textPrimary,
       lineHeight: Typography.sm * 1.6,
       textAlign: "left",
@@ -174,7 +174,7 @@ const getStyles = (Colors: any) =>
     },
     bulletText: {
       flex: 1,
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       lineHeight: Typography.sm * 1.5,
       textAlign: "left",
       color: Colors.textSecondary,
@@ -190,7 +190,7 @@ const getStyles = (Colors: any) =>
     },
     contactBtnText: {
       color: Colors.primary,
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       fontWeight: Typography.medium,
     },
   });

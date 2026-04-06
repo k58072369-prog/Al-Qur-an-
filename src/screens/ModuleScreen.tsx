@@ -335,12 +335,12 @@ const getStyles = (Colors: any) =>
       flex: 1,
     },
     headerTitle: {
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
     },
     headerSubtitle: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textSecondary,
     },
     scroll: {
@@ -351,7 +351,7 @@ const getStyles = (Colors: any) =>
       gap: Spacing.md,
     },
     sectionTitle: {
-      fontSize: Typography.md,
+      fontFamily: Typography.heading, fontSize: Typography.md,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
       marginBottom: Spacing.xs,
@@ -367,7 +367,7 @@ const getStyles = (Colors: any) =>
       gap: Spacing.md,
     },
     emptyText: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       color: Colors.textSecondary,
     },
     backBtn: {
@@ -400,7 +400,7 @@ const getStyles = (Colors: any) =>
       paddingBottom: Spacing.sm,
     },
     taskDate: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textTertiary,
     },
     rangesContainer: {
@@ -417,7 +417,7 @@ const getStyles = (Colors: any) =>
       gap: Spacing.sm,
     },
     completeBtnText: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.heading, fontSize: Typography.sm,
       fontWeight: Typography.semibold,
     },
     startBtn: {
@@ -431,7 +431,7 @@ const getStyles = (Colors: any) =>
       marginTop: Spacing.xs,
     },
     startBtnText: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       fontWeight: Typography.medium,
     },
   });

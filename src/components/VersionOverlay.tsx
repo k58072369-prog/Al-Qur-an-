@@ -127,13 +127,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   title: {
-    fontSize: Typography.xl,
+    fontFamily: Typography.heading, fontSize: Typography.xl,
     fontWeight: Typography.bold,
     textAlign: "center",
     marginBottom: Spacing.md,
   },
   message: {
-    fontSize: Typography.sm,
+    fontFamily: Typography.body, fontSize: Typography.sm,
     textAlign: "center",
     lineHeight: 22,
     marginBottom: Spacing.xl,
@@ -146,13 +146,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   changelogTitle: {
-    fontSize: 10,
+    fontFamily: Typography.heading, fontSize: 10,
     fontWeight: "bold",
     marginBottom: 4,
     textTransform: "uppercase",
   },
   changelogText: {
-    fontSize: 12,
+    fontFamily: Typography.body, fontSize: 12,
     lineHeight: 18,
   },
   actions: {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: {
     color: "#FFFFFF",
-    fontSize: Typography.base,
+    fontFamily: Typography.heading, fontSize: Typography.base,
     fontWeight: Typography.bold,
   },
   secondaryBtn: {
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   secondaryBtnText: {
-    fontSize: Typography.sm,
+    fontFamily: Typography.body, fontSize: Typography.sm,
     fontWeight: Typography.medium,
   },
 });

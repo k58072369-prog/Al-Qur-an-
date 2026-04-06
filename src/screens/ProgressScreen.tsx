@@ -296,7 +296,7 @@ export default function ProgressScreen() {
 
         {/* Fortress Performance */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>أداء الحصون</Text>
+          <Text style={styles.sectionTitle}>أداء الأقسام اليومية</Text>
           <View style={styles.fortressStatsRow}>
             {fortressStats.map((fs) => (
               <View key={fs.id} style={styles.fortressStatCard}>
@@ -341,44 +341,44 @@ export default function ProgressScreen() {
 const getStyles = (Colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: { paddingTop: 56, paddingHorizontal: Spacing.xl, paddingBottom: Spacing.md },
-  headerTitle: { fontSize: Typography.xl, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'left' },
-  headerSubtitle: { fontSize: Typography.sm, color: Colors.textTertiary, textAlign: 'left', marginTop: 3 },
+  headerTitle: { fontFamily: Typography.heading, fontSize: Typography.xl, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'left' },
+  headerSubtitle: { fontFamily: Typography.body, fontSize: Typography.sm, color: Colors.textTertiary, textAlign: 'left', marginTop: 3 },
   scroll: { padding: Spacing.base, gap: Spacing.lg },
 
   levelCard: { borderRadius: BorderRadius.xl, overflow: 'hidden', borderWidth: 1, borderColor: `${Colors.primary}15` },
   levelGradient: { flexDirection: 'row', alignItems: 'center', padding: Spacing.lg, gap: Spacing.base },
   levelLeft: { backgroundColor: `${Colors.primary}0A`, width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: `${Colors.primary}10` },
   levelInfo: { flex: 1, alignItems: 'flex-start', gap: 4 },
-  levelTitle: { fontSize: Typography.lg, fontWeight: Typography.bold, color: Colors.primary },
-  levelSubtitle: { fontSize: Typography.sm, color: Colors.textSecondary },
+  levelTitle: { fontFamily: Typography.heading, fontSize: Typography.lg, fontWeight: Typography.bold, color: Colors.primary },
+  levelSubtitle: { fontFamily: Typography.body, fontSize: Typography.sm, color: Colors.textSecondary },
   xpBar: { width: '100%', gap: 4, marginTop: 4 },
   xpBarBg: { height: 6, backgroundColor: Colors.borderLight, borderRadius: 3, overflow: 'hidden' },
   xpBarFill: { height: 6, backgroundColor: Colors.primary, borderRadius: 3 },
-  xpText: { fontSize: 10, color: Colors.textTertiary },
+  xpText: { fontFamily: Typography.body, fontSize: 10, color: Colors.textTertiary },
 
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md },
   gridCard: { width: '100%', backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, flexDirection: 'row', alignItems: 'center', gap: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder },
   gridIcon: { width: 50, height: 50, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   gridInfo: { flex: 1, alignItems: 'flex-start' },
-  gridValue: { fontSize: Typography.lg, fontWeight: Typography.bold, marginTop: 2 },
-  gridLabel: { fontSize: 13, color: Colors.textSecondary, fontWeight: Typography.semibold },
-  gridSub: { fontSize: 11, color: Colors.textTertiary, marginTop: 2 },
+  gridValue: { fontFamily: Typography.heading, fontSize: Typography.lg, fontWeight: Typography.bold, marginTop: 2 },
+  gridLabel: { fontFamily: Typography.heading, fontSize: 13, color: Colors.textSecondary, fontWeight: Typography.semibold },
+  gridSub: { fontFamily: Typography.body, fontSize: 11, color: Colors.textTertiary, marginTop: 2 },
 
   section: { gap: Spacing.md },
-  sectionTitle: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'left', paddingHorizontal: 4 },
-  sectionSubtitle: { fontSize: 11, color: Colors.textTertiary, textAlign: 'left', marginTop: 2, paddingHorizontal: 4 },
+  sectionTitle: { fontFamily: Typography.heading, fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'left', paddingHorizontal: 4 },
+  sectionSubtitle: { fontFamily: Typography.body, fontSize: 11, color: Colors.textTertiary, textAlign: 'left', marginTop: 2, paddingHorizontal: 4 },
 
   advancedCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.md },
   advancedHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  advancedTitle: { fontSize: Typography.base, fontWeight: Typography.semibold, color: Colors.textPrimary },
-  advancedSub: { fontSize: Typography.xs, color: Colors.textSecondary },
+  advancedTitle: { fontFamily: Typography.heading, fontSize: Typography.base, fontWeight: Typography.semibold, color: Colors.textPrimary },
+  advancedSub: { fontFamily: Typography.body, fontSize: Typography.xs, color: Colors.textSecondary },
   advancedBigPct: { fontSize: Typography['2xl'], fontWeight: Typography.bold, color: Colors.primary },
   bigBarBg: { height: 10, backgroundColor: Colors.borderLight, borderRadius: 5, overflow: 'hidden' },
   bigBarFill: { height: 10, backgroundColor: Colors.primary, borderRadius: 5 },
   advancedMetaRow: { flexDirection: 'row', gap: Spacing.lg },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   metaDot: { width: 8, height: 8, borderRadius: 4 },
-  metaText: { fontSize: 11, color: Colors.textSecondary },
+  metaText: { fontFamily: Typography.body, fontSize: 11, color: Colors.textSecondary },
   
   juzGrid: { 
     flexDirection: 'row', 
@@ -409,19 +409,19 @@ const getStyles = (Colors: any) => StyleSheet.create({
     right: 0,
   },
   juzCardNumber: {
-    fontSize: Typography.base,
+    fontFamily: Typography.body, fontSize: Typography.base,
     fontWeight: '800',
     zIndex: 10,
   },
   juzPctSmall: {
-    fontSize: 8,
+    fontFamily: Typography.heading, fontSize: 8,
     fontWeight: 'bold',
     position: 'absolute',
     bottom: 4,
     zIndex: 10,
   },
   juzCardLabel: {
-    fontSize: 9,
+    fontFamily: Typography.heading, fontSize: 9,
     marginTop: 6,
     fontWeight: '600',
   },
@@ -441,28 +441,28 @@ const getStyles = (Colors: any) => StyleSheet.create({
   
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 4 },
   sectionBadge: { backgroundColor: `${Colors.primary}10`, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  sectionBadgeText: { fontSize: 11, color: Colors.primary, fontWeight: 'bold' },
+  sectionBadgeText: { fontFamily: Typography.heading, fontSize: 11, color: Colors.primary, fontWeight: 'bold' },
   
   emptyText: { textAlign: 'center', color: Colors.textTertiary, paddingVertical: 20 },
 
   surahCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.md },
   surahRow: { gap: 6 },
   surahHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  surahName: { fontSize: Typography.sm, fontWeight: Typography.medium, color: Colors.textPrimary },
-  surahPctText: { fontSize: Typography.xs, color: Colors.primary, fontWeight: Typography.bold },
+  surahName: { fontFamily: Typography.body, fontSize: Typography.sm, fontWeight: Typography.medium, color: Colors.textPrimary },
+  surahPctText: { fontFamily: Typography.heading, fontSize: Typography.xs, color: Colors.primary, fontWeight: Typography.bold },
   surahBarBg: { height: 4, backgroundColor: Colors.borderLight, borderRadius: 2, overflow: 'hidden' },
   surahBarFill: { height: 4, borderRadius: 2 },
 
   fortressStatsRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
   fortressStatCard: { flex: 1, minWidth: '30%', backgroundColor: Colors.glass, borderRadius: BorderRadius.lg, padding: Spacing.md, alignItems: 'center', gap: Spacing.xs, borderWidth: 1, borderColor: Colors.glassBorder },
   fortressStatIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  fortressStatCount: { fontSize: Typography.md, fontWeight: Typography.bold },
-  fortressStatLabel: { fontSize: 10, color: Colors.textSecondary },
+  fortressStatCount: { fontFamily: Typography.heading, fontSize: Typography.md, fontWeight: Typography.bold },
+  fortressStatLabel: { fontFamily: Typography.body, fontSize: 10, color: Colors.textSecondary },
 
   strengthCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.sm },
   strengthRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.base },
-  strengthLabel: { width: 64, fontSize: 10, color: Colors.textSecondary, textAlign: 'left' },
+  strengthLabel: { width: 64, fontFamily: Typography.body, fontSize: 10, color: Colors.textSecondary, textAlign: 'left' },
   strengthBarBg: { flex: 1, height: 6, backgroundColor: Colors.borderLight, borderRadius: 3, overflow: 'hidden' },
   strengthBarFill: { height: 6, borderRadius: 3 },
-  strengthValueText: { width: 20, fontSize: 11, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'center' },
+  strengthValueText: { width: 20, fontFamily: Typography.heading, fontSize: 11, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'center' },
 });

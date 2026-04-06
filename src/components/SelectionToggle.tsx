@@ -67,7 +67,7 @@ const getStyles = (Colors: any) =>
       borderColor: `${Colors.primary}30`,
     },
     optionText: {
-      fontSize: Typography.base,
+      fontFamily: Typography.body, fontSize: Typography.base,
       fontWeight: Typography.medium,
       color: Colors.textTertiary,
     },

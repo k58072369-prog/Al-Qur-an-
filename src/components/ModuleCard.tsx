@@ -66,7 +66,7 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
           <Text style={styles.title} numberOfLines={1}>
             {moduleInfo.nameAr}
           </Text>
-          <Text style={styles.subtitle} numberOfLines={2}>
+          <Text style={styles.subtitle}>
             {moduleInfo.description}
           </Text>
         </View>
@@ -145,8 +145,7 @@ const getStyles = (Colors: any) =>
       borderColor: `${Colors.primary}30`,
     },
     badgeText: {
-      fontSize: 10,
-      fontWeight: "600",
+      fontFamily: Typography.heading, fontSize: 10,
       color: Colors.primary,
     },
     content: {
@@ -154,14 +153,13 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.md,
     },
     title: {
-      fontSize: Typography.base,
-      fontWeight: Typography.semibold,
+      fontFamily: Typography.heading, fontSize: Typography.base,
       color: Colors.textPrimary,
       marginBottom: 2,
       textAlign: "left",
     },
     subtitle: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textSecondary,
       lineHeight: Typography.xs * 1.5,
       textAlign: "left",
@@ -181,7 +179,7 @@ const getStyles = (Colors: any) =>
       flex: 1,
     },
     metaText: {
-      fontSize: 8,
+      fontFamily: Typography.body, fontSize: 8,
       color: Colors.textTertiary,
     },
   });

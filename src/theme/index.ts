@@ -1,6 +1,6 @@
 import { useAppStore } from "../store/AppStore";
 
-// Design Tokens for الحصون الخمسة (Five Fortresses)
+// Design Tokens for خماسية الحفظ (Fivefold Memorization)
 // Refined, minimal, premium dark-first design system
 
 export const darkColors = {
@@ -170,9 +170,9 @@ export const Colors = darkColors;
 
 export const Typography = {
   // Font families
-  arabic: "System",
-  heading: "System",
-  body: "System",
+  arabic: "Tajawal_700Bold",
+  heading: "Tajawal_700Bold",
+  body: "Tajawal_500Medium",
 
   // Font sizes — refined scale with more breathing room
   xs: 11,

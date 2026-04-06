@@ -104,7 +104,7 @@ export default function DashboardScreen() {
     router.push({ pathname: "/module", params: { id } } as any);
   };
 
-  // Calculate daily completion for the Five Fortresses (Housons)
+  // Calculate daily completion for the Fivefold Memorization (Housons)
   const todayStr = new Date().toDateString();
   const dailySelections = taskSelections.filter((s: TaskSelection) => new Date(s.createdAt).toDateString() === todayStr);
   const completedHousons = dailySelections.filter((s: TaskSelection) => s.isCompleted).length;
@@ -173,7 +173,7 @@ export default function DashboardScreen() {
               onPress={() =>
                 Linking.openURL(
                   updateInfo.link ||
-                    "https://github.com/mustafa-ahmad-work/alhousonalkhamsa/releases",
+                    "https://github.com/mustafa-ahmad-work/khumasiat-al-hifz/releases",
                 )
               }
             >
@@ -267,7 +267,7 @@ export default function DashboardScreen() {
             <View style={{ flex: 1, alignItems: "flex-start" }}>
               <Text style={styles.explanationTitle}>شرح التطبيق</Text>
               <Text style={styles.explanationDesc}>
-                تعرف على كيفية استخدام نظام الحصون الخمسة...
+                تعرف على كيفية استخدام نظام خماسية الحفظ...
               </Text>
             </View>
             <Ionicons
@@ -287,7 +287,7 @@ export default function DashboardScreen() {
                   <Ionicons name="shield-checkmark-outline" size={20} color={Colors.primary} />
                 </View>
                 <View style={styles.statInfo}>
-                  <Text style={styles.statLabel}>حصون اليوم</Text>
+                  <Text style={styles.statLabel}>مراحل اليوم</Text>
                   <Text style={styles.statValue}>{completedHousons} / {totalHousonsCount}</Text>
                 </View>
               </View>
@@ -336,7 +336,7 @@ export default function DashboardScreen() {
 
         {/* Dynamic Modules Section */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>منهج الحصون</Text>
+          <Text style={styles.sectionTitle}>منهج خماسية الحفظ</Text>
           <View style={styles.sectionBadge}>
             <Text style={styles.sectionBadgeText}>{MODULES.length} أقسام</Text>
           </View>
@@ -356,9 +356,9 @@ export default function DashboardScreen() {
         {completedHousons >= totalHousonsCount && (
           <View style={styles.allDoneBox}>
             <Ionicons name="medal-outline" size={40} color={Colors.primary} />
-            <Text style={styles.allDoneTitle}>أحسنت! أتممت حصون اليوم</Text>
+            <Text style={styles.allDoneTitle}>أحسنت! أتممت مراحل اليوم</Text>
             <Text style={styles.allDoneSubtitle}>
-              لقد أتممت نظام الحصون الخمسة لليوم بنجاح
+              لقد أتممت نظام خماسية الحفظ لليوم بنجاح
             </Text>
           </View>
         )}
@@ -450,12 +450,12 @@ const getStyles = (Colors: any) =>
       flex: 1,
     },
     updateTitle: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.heading, fontSize: Typography.sm,
       fontWeight: Typography.bold,
       color: "#FFF",
     },
     updateDesc: {
-      fontSize: 10,
+      fontFamily: Typography.body, fontSize: 10,
       color: "rgba(255,255,255,0.8)",
     },
     updateBtn: {
@@ -466,7 +466,7 @@ const getStyles = (Colors: any) =>
       flexShrink: 0,
     },
     updateBtnText: {
-      fontSize: 10,
+      fontFamily: Typography.heading, fontSize: 10,
       fontWeight: Typography.bold,
       color: Colors.primary,
     },
@@ -475,7 +475,7 @@ const getStyles = (Colors: any) =>
       gap: 3,
     },
     userTitle: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.gold,
       fontWeight: Typography.semibold,
       backgroundColor: Colors.goldMuted,
@@ -492,18 +492,17 @@ const getStyles = (Colors: any) =>
       gap: 3,
     },
     xpText: {
-      fontSize: 10,
+      fontFamily: Typography.body, fontSize: 10,
       color: Colors.textTertiary,
     },
     greeting: {
-      fontSize: Typography.xl,
-      fontWeight: Typography.bold,
+      fontFamily: Typography.heading, fontSize: Typography.xl,
       color: Colors.textPrimary,
       textAlign: "left",
       width: "100%",
     },
     date: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textTertiary,
       textAlign: "left",
       marginTop: 2,
@@ -520,7 +519,7 @@ const getStyles = (Colors: any) =>
     },
     quoteText: {
       flex: 1,
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.primary,
       lineHeight: Typography.sm * 1.7,
       textAlign: "left",
@@ -550,14 +549,14 @@ const getStyles = (Colors: any) =>
       justifyContent: "center",
     },
     explanationTitle: {
-      fontSize: Typography.md,
+      fontFamily: Typography.heading, fontSize: Typography.md,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
       marginBottom: 2,
       textAlign: "left",
     },
     explanationDesc: {
-      fontSize: Typography.xs,
+      fontFamily: Typography.body, fontSize: Typography.xs,
       color: Colors.textSecondary,
       textAlign: "left",
     },
@@ -593,12 +592,12 @@ const getStyles = (Colors: any) =>
       alignItems: "flex-start",
     },
     statLabel: {
-      fontSize: 10,
+      fontFamily: Typography.body, fontSize: 10,
       color: Colors.textSecondary,
       fontWeight: "500",
     },
     statValue: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.heading, fontSize: Typography.sm,
       fontWeight: "bold",
       color: Colors.textPrimary,
       marginTop: 2,
@@ -632,21 +631,21 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.xl,
     },
     overlayTitle: {
-      fontSize: 24,
+      fontFamily: Typography.heading, fontSize: 24,
       fontWeight: "bold",
       color: Colors.textPrimary,
       textAlign: "center",
       marginBottom: Spacing.md,
     },
     overlayDesc: {
-      fontSize: 14,
+      fontFamily: Typography.body, fontSize: 14,
       color: Colors.textSecondary,
       textAlign: "center",
       lineHeight: 22,
       marginBottom: Spacing.xl,
     },
     overlayVersion: {
-      fontSize: 16,
+      fontFamily: Typography.heading, fontSize: 16,
       fontWeight: "600",
       marginBottom: Spacing.xl,
     },
@@ -658,12 +657,12 @@ const getStyles = (Colors: any) =>
       ...Shadow.md,
     },
     overlayUpdateBtnText: {
-      fontSize: 16,
+      fontFamily: Typography.heading, fontSize: 16,
       fontWeight: "bold",
       color: Colors.primary,
     },
     overlayHint: {
-      fontSize: 12,
+      fontFamily: Typography.body, fontSize: 12,
       color: Colors.textTertiary,
       marginTop: Spacing.xl,
       textAlign: "center",
@@ -678,7 +677,7 @@ const getStyles = (Colors: any) =>
       marginTop: Spacing.xs,
     },
     sectionTitle: {
-      fontSize: Typography.md,
+      fontFamily: Typography.heading, fontSize: Typography.md,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
@@ -692,7 +691,7 @@ const getStyles = (Colors: any) =>
     },
     sectionBadgeText: {
       color: Colors.primary,
-      fontSize: Typography.xs,
+      fontFamily: Typography.heading, fontSize: Typography.xs,
       fontWeight: Typography.semibold,
     },
     modulesGrid: {
@@ -712,13 +711,13 @@ const getStyles = (Colors: any) =>
       marginTop: Spacing.sm,
     },
     allDoneTitle: {
-      fontSize: Typography.lg,
+      fontFamily: Typography.heading, fontSize: Typography.lg,
       fontWeight: Typography.semibold,
       color: Colors.primary,
       textAlign: "center",
     },
     allDoneSubtitle: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.body, fontSize: Typography.sm,
       color: Colors.textSecondary,
       textAlign: "center",
     },
@@ -738,7 +737,7 @@ const getStyles = (Colors: any) =>
       height: 48,
     },
     brandingText: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.heading, fontSize: Typography.sm,
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
       letterSpacing: 0.5,
@@ -758,7 +757,7 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.md,
     },
     communityTitle: {
-      fontSize: Typography.sm,
+      fontFamily: Typography.heading, fontSize: Typography.sm,
       fontWeight: Typography.semibold,
       color: Colors.textSecondary,
     },
@@ -772,12 +771,12 @@ const getStyles = (Colors: any) =>
       alignItems: "center",
     },
     communityValue: {
-      fontSize: Typography.md,
+      fontFamily: Typography.heading, fontSize: Typography.md,
       fontWeight: Typography.bold,
       color: Colors.primary,
     },
     communityLabel: {
-      fontSize: 10,
+      fontFamily: Typography.body, fontSize: 10,
       color: Colors.textTertiary,
       marginTop: 2,
     },

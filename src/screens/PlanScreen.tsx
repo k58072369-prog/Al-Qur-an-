@@ -16,7 +16,7 @@ import type { MushafEdition } from "../data/mushafEditions";
 import { SURAHS } from "../data/quranMeta";
 import { useAppStore } from "../store/AppStore";
 import { useSelectionStore } from "../store/selectionStore";
-import { BorderRadius, Shadow, Spacing, useTheme } from "../theme";
+import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../theme";
 import { toArabicNumerals } from "../utils/helpers";
 
 const { width } = Dimensions.get("window");
@@ -199,7 +199,7 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
 
         <Text
           style={{
-            fontSize: 26,
+            fontFamily: Typography.heading, fontSize: 26,
             fontWeight: "bold",
             color: Colors.textPrimary,
             textAlign: "center",
@@ -210,7 +210,7 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
         </Text>
         <Text
           style={{
-            fontSize: 14,
+            fontFamily: Typography.body, fontSize: 14,
             color: Colors.textSecondary,
             textAlign: "center",
             lineHeight: 22,
@@ -234,7 +234,7 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
           <Text
             style={{
               color: Colors.textPrimary,
-              fontSize: 14,
+              fontFamily: Typography.body, fontSize: 14,
               lineHeight: 24,
               textAlign: "center",
               fontWeight: "500",
@@ -257,7 +257,7 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
             ...Shadow.emerald,
           }}
         >
-          <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "bold" }}>
+          <Text style={{ color: "#FFFFFF", fontFamily: Typography.heading, fontSize: 16, fontWeight: "bold" }}>
             الحمد لله، استمرار
           </Text>
         </TouchableOpacity>
@@ -620,6 +620,7 @@ export default function PlanScreen() {
   const { state, dispatch } = useAppStore();
   const selectionStore = useSelectionStore();
   const { plan, pageProgress } = state;
+  const reviewStrategy = state.settings.reviewStrategy ?? 'spaced';
 
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -703,27 +704,55 @@ export default function PlanScreen() {
             formatRanges(buildRanges(weeklyPages))
           : null;
 
+      // ─── Near / Far review using reviewStrategy ─────────────────
+      // Pages already memorized before today's lesson (previous days' pages)
       const alreadyDone = plan.targetPages.slice(0, startIdx);
-      const nearReview = alreadyDone.slice(-20);
-      const distantReview = alreadyDone.slice(-60, -20);
+
+      // Near: last 20 pages memorized before today (most recent)
+      // Far: the 40 pages before those (older)
+      let nearPages: number[];
+      let farPages: number[];
+
+      if (reviewStrategy === 'spaced') {
+        // Spaced repetition: near = last 20 pages, far = 40 pages before that
+        nearPages = alreadyDone.length > 0
+          ? alreadyDone.slice(Math.max(0, alreadyDone.length - 20))
+          : [];
+        farPages = alreadyDone.length > 20
+          ? alreadyDone.slice(Math.max(0, alreadyDone.length - 60), alreadyDone.length - 20)
+          : [];
+      } else if (reviewStrategy === 'random') {
+        // Random: shuffle all prior pages and take slices
+        const shuffled = [...alreadyDone].sort(() => Math.sin(i * 31 + 7) - 0.5);
+        nearPages = shuffled.slice(0, Math.min(20, shuffled.length));
+        farPages = shuffled.slice(20, Math.min(60, shuffled.length));
+      } else {
+        // recency: most recent first (same as spaced but explicit)
+        nearPages = alreadyDone.length > 0
+          ? alreadyDone.slice(Math.max(0, alreadyDone.length - 20))
+          : [];
+        farPages = alreadyDone.length > 20
+          ? alreadyDone.slice(Math.max(0, alreadyDone.length - 60), alreadyDone.length - 20)
+          : [];
+      }
 
       const nearSegments =
-        nearReview.length > 0 ? getSurahSegments(nearReview, edition) : [];
+        nearPages.length > 0 ? getSurahSegments(nearPages, edition) : [];
       const nearLabel =
         nearSegments.length > 0
           ? nearSegments.map((s) => s.nameAr).slice(0, 2).join(" + ") +
             " (ص " +
-            formatRanges(buildRanges(nearReview)) +
+            formatRanges(buildRanges(nearPages)) +
             ")"
           : "لا يوجد (بداية الخطة)";
 
       const distantSegments =
-        distantReview.length > 0 ? getSurahSegments(distantReview, edition) : [];
+        farPages.length > 0 ? getSurahSegments(farPages, edition) : [];
       const distantLabel =
         distantSegments.length > 0
           ? distantSegments.map((s) => s.nameAr).slice(0, 2).join(" + ") +
             " (ص " +
-            formatRanges(buildRanges(distantReview)) +
+            formatRanges(buildRanges(farPages)) +
             ")"
           : "لا يوجد بعد";
 
@@ -744,6 +773,12 @@ export default function PlanScreen() {
           : `${toArabicNumerals(listenStart)} - ${toArabicNumerals(
               edition.totalPages
             )} و ١ - ${toArabicNumerals(listenEnd)}`;
+
+      const strategyLabel = reviewStrategy === 'spaced'
+        ? 'تكرار متباعد'
+        : reviewStrategy === 'random'
+        ? 'عشوائي'
+        : 'الأحدث أولاً';
 
       const tasks: DayTask[] = [
         {
@@ -782,13 +817,13 @@ export default function PlanScreen() {
         },
         {
           id: "rev_s",
-          label: `المراجعة القريبة: ${nearLabel}`,
+          label: `المراجعة القريبة (${strategyLabel}): ${nearLabel}`,
           icon: "refresh",
           color: Colors.success,
         },
         {
           id: "rev_l",
-          label: `المراجعة البعيدة: ${distantLabel}`,
+          label: `المراجعة البعيدة (${strategyLabel}): ${distantLabel}`,
           icon: "sync",
           color: Colors.purple,
         },
@@ -814,7 +849,7 @@ export default function PlanScreen() {
     }
 
     return days;
-  }, [plan, pageProgress, edition, Colors]);
+  }, [plan, pageProgress, edition, Colors, reviewStrategy]);
 
   const initialScrollIndex = useMemo(() => {
     if (!roadmap.length) return 0;
@@ -967,6 +1002,10 @@ export default function PlanScreen() {
           index,
         })}
         onScrollToIndexFailed={() => {}}
+        initialNumToRender={8}
+        maxToRenderPerBatch={8}
+        windowSize={5}
+        removeClippedSubviews={true}
       />
 
       {showCelebration && (
@@ -989,8 +1028,8 @@ const getStyles = (Colors: any) =>
       alignItems: "center",
       gap: Spacing.md,
     },
-    emptyText: { fontSize: 17, color: Colors.textSecondary, fontWeight: "600" },
-    emptySubText: { fontSize: 13, color: Colors.textTertiary },
+    emptyText: { fontFamily: Typography.heading, fontSize: 17, color: Colors.textSecondary, fontWeight: "600" },
+    emptySubText: { fontFamily: Typography.body, fontSize: 13, color: Colors.textTertiary },
 
     listContent: { paddingHorizontal: Spacing.lg, paddingBottom: 120 },
 
@@ -1002,13 +1041,13 @@ const getStyles = (Colors: any) =>
     },
     headerTop: { marginBottom: Spacing.xl },
     headerTitle: {
-      fontSize: 28,
+      fontFamily: Typography.heading, fontSize: 28,
       fontWeight: "bold",
       color: Colors.textPrimary,
       marginBottom: Spacing.xs,
     },
     headerSubtitle: {
-      fontSize: 12,
+      fontFamily: Typography.body, fontSize: 12,
       color: Colors.textTertiary,
       marginTop: 4,
     },
@@ -1021,7 +1060,7 @@ const getStyles = (Colors: any) =>
       paddingVertical: 4,
       borderRadius: 20,
     },
-    headerChipText: { fontSize: 11, fontWeight: "600" },
+    headerChipText: { fontFamily: Typography.heading, fontSize: 11, fontWeight: "600" },
 
     statsGrid: {
       flexDirection: "row",
@@ -1035,8 +1074,8 @@ const getStyles = (Colors: any) =>
       paddingVertical: Spacing.md,
       alignItems: "center",
     },
-    statValue: { fontSize: 22, fontWeight: "bold" },
-    statLabel: { fontSize: 10, color: Colors.textTertiary, marginTop: 2 },
+    statValue: { fontFamily: Typography.heading, fontSize: 22, fontWeight: "bold" },
+    statLabel: { fontFamily: Typography.body, fontSize: 10, color: Colors.textTertiary, marginTop: 2 },
 
     progressSection: { marginBottom: Spacing.md },
     progressRow: {
@@ -1045,11 +1084,11 @@ const getStyles = (Colors: any) =>
       alignItems: "center",
     },
     progressLabel: {
-      fontSize: 13,
+      fontFamily: Typography.body, fontSize: 13,
       color: Colors.textSecondary,
       fontWeight: "500",
     },
-    progressPercent: { fontSize: 14, fontWeight: "bold" },
+    progressPercent: { fontFamily: Typography.heading, fontSize: 14, fontWeight: "bold" },
     progressBarBg: { backgroundColor: Colors.border, overflow: "hidden" },
     progressBarFill: {},
 
@@ -1059,7 +1098,7 @@ const getStyles = (Colors: any) =>
       gap: 6,
       marginTop: Spacing.md,
     },
-    durationText: { fontSize: 12, color: Colors.textTertiary },
+    durationText: { fontFamily: Typography.body, fontSize: 12, color: Colors.textTertiary },
 
     // ─── Day Row ───────────────────────────────────────────────
     rowWrap: { flexDirection: "row", marginBottom: 0 },
@@ -1121,7 +1160,7 @@ const getStyles = (Colors: any) =>
       flexShrink: 0,
     },
     dayNumText: {
-      fontSize: 13,
+      fontFamily: Typography.heading, fontSize: 13,
       fontWeight: "bold",
       color: Colors.textSecondary,
     },
@@ -1136,7 +1175,7 @@ const getStyles = (Colors: any) =>
       marginBottom: 4,
     },
     surahName: {
-      fontSize: 16,
+      fontFamily: Typography.heading, fontSize: 16,
       fontWeight: "bold",
       color: Colors.textPrimary,
       flexShrink: 1,
@@ -1146,7 +1185,7 @@ const getStyles = (Colors: any) =>
       paddingVertical: 2,
       borderRadius: 6,
     },
-    badgeText: { fontSize: 9, color: "#FFF", fontWeight: "bold" },
+    badgeText: { fontFamily: Typography.heading, fontSize: 9, color: "#FFF", fontWeight: "bold" },
 
     pageRangeRow: {
       flexDirection: "row",
@@ -1154,8 +1193,8 @@ const getStyles = (Colors: any) =>
       gap: 5,
       flexWrap: "wrap",
     },
-    pageRangeText: { fontSize: 11, color: Colors.textTertiary },
-    pageCountDot: { fontSize: 11, color: Colors.textTertiary },
+    pageRangeText: { fontFamily: Typography.body, fontSize: 11, color: Colors.textTertiary },
+    pageCountDot: { fontFamily: Typography.body, fontSize: 11, color: Colors.textTertiary },
 
     surahChips: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
     surahChip: {
@@ -1165,7 +1204,7 @@ const getStyles = (Colors: any) =>
       borderWidth: 1,
       backgroundColor: Colors.glass,
     },
-    surahChipText: { fontSize: 11, fontWeight: "600" },
+    surahChipText: { fontFamily: Typography.heading, fontSize: 11, fontWeight: "600" },
 
     // ─── Tasks ─────────────────────────────────────────────────
     tasksSection: { marginTop: Spacing.sm },
@@ -1175,7 +1214,7 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.md,
     },
     tasksTitle: {
-      fontSize: 11,
+      fontFamily: Typography.heading, fontSize: 11,
       fontWeight: "bold",
       color: Colors.textSecondary,
       marginBottom: Spacing.sm,
@@ -1193,7 +1232,7 @@ const getStyles = (Colors: any) =>
     },
     taskText: {
       flex: 1,
-      fontSize: 12,
+      fontFamily: Typography.body, fontSize: 12,
       color: Colors.textSecondary,
       textAlign: "left",
       lineHeight: 18,
@@ -1209,5 +1248,5 @@ const getStyles = (Colors: any) =>
       gap: Spacing.sm,
       ...Shadow.emerald,
     },
-    completeBtnText: { color: "#FFF", fontSize: 15, fontWeight: "bold" },
+    completeBtnText: { color: "#FFF", fontFamily: Typography.heading, fontSize: 15, fontWeight: "bold" },
   });

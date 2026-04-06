@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="./assets/images/logo.png" alt="الحصون الخمسة" width="120" />
+<img src="./assets/images/logo.png" alt="خماسية الحفظ" width="120" />
 
-# الحصون الخمسة
+# خماسية الحفظ
 
-### Al-Husoon Al-Khamsa — The Five Fortresses
+### Khumasiat Al-Hifz — Fivefold Memorization
 
 **نظام تراكمي متكامل لحفظ القرآن الكريم وإتقانه**
 _A Complete Cumulative System for Memorizing and Mastering the Holy Quran_
@@ -29,19 +29,19 @@ _A Complete Cumulative System for Memorizing and Mastering the Holy Quran_
 
 ## ما هو التطبيق؟
 
-**الحصون الخمسة** هو تطبيق مجاني متكامل مصمم خصيصاً لمساعدة الحافظ على بناء حفظ قوي وراسخ للقرآن الكريم، يصمد أمام النسيان ويثبت في الذاكرة البعيدة، تماماً كحفظ سورة الفاتحة.
+**خماسية الحفظ** هو تطبيق مجاني متكامل مصمم خصيصاً لمساعدة الحافظ على بناء حفظ قوي وراسخ للقرآن الكريم، يصمد أمام النسيان ويثبت في الذاكرة البعيدة، تماماً كحفظ سورة الفاتحة.
 
-التطبيق مبني على **نظام الحصون الخمسة** — منهجية علمية تراكمية تجمع بين التلاوة، والتحضير، والحفظ الجديد، ومراجعة القريب، ومراجعة البعيد في منظومة يومية متوازنة لا تزيد عن ساعة إلى ساعة ونصف.
+التطبيق مبني على **نظام خماسية الحفظ** — منهجية علمية تراكمية تجمع بين التلاوة، والتحضير، والحفظ الجديد، ومراجعة القريب، ومراجعة البعيد في منظومة يومية متوازنة لا تزيد عن ساعة إلى ساعة ونصف.
 
-### لماذا سمي "الحصون الخمسة"؟
+### لماذا سمي "خماسية الحفظ"؟
 
-لأن كل حصن يمثل جداراً دفاعياً ضد النسيان، وعندما تُبنى الحصون الخمسة معاً يومياً تتشكّل منظومة حماية متكاملة تضمن تثبيت الحفظ في الذاكرة البعيدة. تفويت حصن واحد يضعف الجدار، والإتيان بها جميعاً يحصّن الحفظ تحصيناً لا يُخترق.
+لأن كل حصن يمثل جداراً دفاعياً ضد النسيان، وعندما تُبنى خماسية الحفظ معاً يومياً تتشكّل منظومة حماية متكاملة تضمن تثبيت الحفظ في الذاكرة البعيدة. تفويت حصن واحد يضعف الجدار، والإتيان بها جميعاً يحصّن الحفظ تحصيناً لا يُخترق.
 
 ---
 
 ## المميزات الرئيسية
 
-### نظام الحصون الخمسة — قلب التطبيق
+### نظام خماسية الحفظ — قلب التطبيق
 
 التطبيق مبني حول خمسة حصون يومية تشكّل معاً جداراً منيعاً ضد النسيان:
 
@@ -112,7 +112,7 @@ _A Complete Cumulative System for Memorizing and Mastering the Holy Quran_
 - **نسبة الإتمام الكلية**: شريط تقدم رئيسي يعكس نسبتك الإجمالية من هدف الحفظ المحدد
 - **خريطة الأجزاء الثلاثين**: شبكة بصرية مربعة (6 أعمدة × 5 صفوف) تُظهر حالة كل جزء بألوان محددة: لم يبدأ / جاري الحفظ / مكتمل
 - **تقدم السور**: تتبع دقيق لكل سورة في خطتك مع عدد الصفحات المحفوظة من إجمالي صفحاتها
-- **أداء الحصون**: إحصاء عدد المرات التي أتممت فيها كل حصن منذ بداية استخدام التطبيق (تلاوة، استماع، تحضير، حفظ، مراجعة)
+- **أداء المراحل**: إحصاء عدد المرات التي أتممت فيها كل مرحلة منذ بداية استخدام التطبيق (تلاوة، استماع، تحضير، حفظ، مراجعة)
 - **ميزان القوة**: توزيع الصفحات المحفوظة حسب مستوى رسوخها في أربع فئات: تحتاج إعادة / متوسطة / قوية / راسخة — ويعتمد هذا التصنيف على عدد مرات المراجعة الفعلية لكل صفحة
 
 ---
@@ -233,14 +233,14 @@ alhousonalkhamsa/
 │   ├── (tabs)/                       # الشاشات الرئيسية (التبويبات)
 │   │   ├── _layout.tsx               # تخطيط شريط التبويبات
 │   │   ├── dashboard.tsx             # تبويب لوحة التحكم
-│   │   ├── memorization.tsx          # تبويب الحفظ والحصون
+│   │   ├── memorization.tsx          # تبويب الحفظ والمراحل
 │   │   ├── progress.tsx              # تبويب التحليلات والإحصائيات
 │   │   └── review.tsx                # تبويب فضائل القرآن
 │   ├── _layout.tsx                   # التخطيط الجذري للتطبيق (Splash + Init)
 │   ├── index.tsx                     # نقطة الدخول (التحقق من Onboarding)
 │   ├── onboarding.tsx                # شاشة الإعداد الأولي (5 خطوات)
 │   ├── module.tsx                    # شاشة الحصن الفردي (تستقبل id)
-│   ├── explanation.tsx               # شاشة شرح نظام الحصون
+│   ├── explanation.tsx               # شاشة شرح نظام الخماسية
 │   ├── settings.tsx                  # شاشة الإعدادات
 │   └── legal.tsx                     # شاشة الشروط والخصوصية
 │
@@ -253,7 +253,7 @@ alhousonalkhamsa/
 │   │   ├── ProgressScreen.tsx        # التحليلات المتقدمة
 │   │   ├── ReviewScreen.tsx          # فضائل القرآن والحافظ
 │   │   ├── SettingsScreen.tsx        # الإعدادات الشاملة
-│   │   ├── AppExplanationScreen.tsx  # شرح نظام الحصون الخمسة
+│   │   ├── AppExplanationScreen.tsx  # شرح نظام خماسية الحفظ
 │   │   └── LegalScreen.tsx           # الشروط والخصوصية
 │   │
 │   ├── components/                   # المكوّنات القابلة لإعادة الاستخدام
@@ -274,7 +274,7 @@ alhousonalkhamsa/
 │   │   ├── selectionStore.ts         # حالة اختيارات الأوراد اليومية
 │   │   ├── NotificationService.ts    # جدولة الإشعارات المحلية
 │   │   ├── UpdateService.ts          # خدمة التحقق من الإصدارات
-│   │   ├── FiveFortressService.ts    # منطق الحصون الخمسة
+│   │   ├── FiveFortressService.ts    # منطق خماسية الحفظ
 │   │   └── StatisticsService.ts      # حسابات الإحصائيات
 │   │
 │   ├── features/
@@ -385,7 +385,7 @@ alhousonalkhamsa/
 
 ## What Is This App?
 
-**Al-Husoon Al-Khamsa (The Five Fortresses)** is a free, comprehensive mobile application designed to help Quran memorizers build a strong, lasting memorization that resists forgetting and anchors itself in long-term memory — just like how you'll always remember Surah Al-Fatiha.
+**Al-Husoon Al-Khamsa (Fivefold Memorization)** is a free, comprehensive mobile application designed to help Quran memorizers build a strong, lasting memorization that resists forgetting and anchors itself in long-term memory — just like how you'll always remember Surah Al-Fatiha.
 
 The app is built around the **Five Fortresses System** — a scientifically structured, cumulative methodology that integrates five daily pillars: Recitation, Preparation, New Memorization, Short Review, and Long Review — into a balanced daily routine of just 1 to 1.5 hours.
 
@@ -397,7 +397,7 @@ Each fortress represents a defensive wall against forgetting. When all five are 
 
 ## Key Features
 
-### The Five Fortresses System — The Heart of the App
+### Fivefold Memorization System — The Heart of the App
 
 The entire app revolves around five daily "fortresses" that together form an impenetrable barrier against forgetting:
 

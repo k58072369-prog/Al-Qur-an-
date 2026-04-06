@@ -114,15 +114,15 @@ const getStyles = (Colors: any) => StyleSheet.create({
     position: 'absolute',
   },
   percentage: {
-    fontSize: Typography.xl,
+    fontFamily: Typography.heading, fontSize: Typography.xl,
     fontWeight: Typography.bold,
   },
   label: {
-    fontSize: Typography.lg,
+    fontFamily: Typography.heading, fontSize: Typography.lg,
     fontWeight: Typography.semibold,
   },
   sublabel: {
-    fontSize: 10,
+    fontFamily: Typography.body, fontSize: 10,
     color: Colors.textTertiary,
     marginTop: 2,
   },
