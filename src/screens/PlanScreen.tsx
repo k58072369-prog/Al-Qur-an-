@@ -643,6 +643,7 @@ export default function PlanScreen() {
 
     const days: DayItem[] = [];
     let foundCurrent = false;
+    let currentFarStartIndex = 0;
 
     for (let i = 0; i < plan.totalDays; i++) {
       const startIdx = i * plan.pagesPerDay;
@@ -714,13 +715,30 @@ export default function PlanScreen() {
       let farPages: number[];
 
       if (reviewStrategy === 'spaced') {
-        // Spaced repetition: near = last 20 pages, far = 40 pages before that
+        const NEAR_SIZE = 20;
+        const FAR_SIZE = 40;
+
         nearPages = alreadyDone.length > 0
-          ? alreadyDone.slice(Math.max(0, alreadyDone.length - 20))
+          ? alreadyDone.slice(Math.max(0, alreadyDone.length - NEAR_SIZE))
           : [];
-        farPages = alreadyDone.length > 20
-          ? alreadyDone.slice(Math.max(0, alreadyDone.length - 60), alreadyDone.length - 20)
+        
+        const olderPages = alreadyDone.length > NEAR_SIZE
+          ? alreadyDone.slice(0, alreadyDone.length - NEAR_SIZE)
           : [];
+
+        if (olderPages.length > 0) {
+          if (olderPages.length <= FAR_SIZE) {
+            farPages = [...olderPages];
+          } else {
+            farPages = [];
+            for (let j = 0; j < FAR_SIZE; j++) {
+              farPages.push(olderPages[(currentFarStartIndex + j) % olderPages.length]);
+            }
+            currentFarStartIndex = (currentFarStartIndex + FAR_SIZE) % olderPages.length;
+          }
+        } else {
+          farPages = [];
+        }
       } else if (reviewStrategy === 'random') {
         // Random: shuffle all prior pages and take slices
         const shuffled = [...alreadyDone].sort(() => Math.sin(i * 31 + 7) - 0.5);

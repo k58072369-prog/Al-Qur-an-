@@ -499,9 +499,25 @@ function appReducer(state: AppState, action: Action): AppState {
       const newPlan = generatePlan(pageNumbers, pagesPerDay, label, direction, editionData.surahPages);
       (newPlan as any).mushafEditionId = editionId;
 
+      // Ensure pageProgress covers all pages up to editionData.totalPages
+      let newPageProgress = [...state.pageProgress];
+      for (let p = 1; p <= editionData.totalPages; p++) {
+        if (!newPageProgress.find((pg) => pg.pageNumber === p)) {
+          newPageProgress.push({
+            pageNumber: p,
+            memorized: false,
+            strength: 1,
+            lastReviewed: "",
+            reviewCount: 0,
+            nextReviewDate: "",
+          });
+        }
+      }
+
       return {
         ...state,
         plan: newPlan,
+        pageProgress: newPageProgress,
       };
     }
 

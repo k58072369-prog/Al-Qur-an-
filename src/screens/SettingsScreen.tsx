@@ -227,12 +227,12 @@ export default function SettingsScreen() {
     setTimePickerVisible(false);
   };
 
-  const applyPlanChanges = () => {
+  const applyPlanChanges = (overrideEditionId?: string) => {
     let pages: number[] = [];
     let label = "";
 
     // جلب طبعة المصحف المختارة
-    const editionId = (state.settings as any).mushafEdition ?? 'madani_604';
+    const editionId = overrideEditionId ?? (state.settings as any).mushafEdition ?? 'madani_604';
     const edition = getMushafEdition(editionId);
     const totalPages = edition.totalPages;
 
@@ -417,10 +417,13 @@ export default function SettingsScreen() {
               <React.Fragment key={edition.id}>
                 <TouchableOpacity
                   style={[styles.infoRow, { alignItems: 'flex-start', paddingVertical: Spacing.md }]}
-                  onPress={() => dispatch({
-                    type: 'UPDATE_SETTINGS',
-                    payload: { mushafEdition: edition.id } as any,
-                  })}
+                  onPress={() => {
+                    dispatch({
+                      type: 'UPDATE_SETTINGS',
+                      payload: { mushafEdition: edition.id } as any,
+                    });
+                    applyPlanChanges(edition.id);
+                  }}
                 >
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 }}>
