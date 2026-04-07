@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -26,7 +25,12 @@ export default function LegalScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: Colors.background }]} />
+      <View
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: Colors.background },
+        ]}
+      />
 
       {/* Header */}
       <View style={styles.header}>
@@ -47,29 +51,39 @@ export default function LegalScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>شروط الاستخدام</Text>
+          <Text style={styles.sectionTitle}>
+            شروط وأحكام الاستخدام (Terms of Service)
+          </Text>
           <View style={styles.paragraphContainer}>
             <Text style={styles.paragraph}>
-              مرحباً بكم في تطبيق "خماسية الحفظ". باستخدامه، فإنكم توافقون على
-              الشروط التالية:
+              يُعد استخدامك لتطبيق "خماسية الحفظ" بمثابة موافقة صريحة على الشروط
+              والأحكام التالية. يرجى قراءتها بعناية قبل البدء:
             </Text>
           </View>
-          <BulletPoint text="التطبيق مخصص للاستخدام الشخصي وغير التجاري فقط لمساعدتكم في حفظ القرآن الكريم." />
-          <BulletPoint text="يُمنع استخدام محتوى التطبيق أو برمجياته لأغراض تجارية دون إذن مسبق." />
-          <BulletPoint text="نحن نسعى لتقديم أدق المعلومات، ولكننا لا نضمن خلو التطبيق من الأخطاء التقنية البسيطة." />
+          <BulletPoint text="١. الغرض من التطبيق: تم تطوير هذا التطبيق ليكون أداة مساعدة تقنية ومنهجية لطلاب القرآن الكريم لتنظيم خطط الحفظ والمراجعة وفق نظام خماسية الحفظ." />
+          <BulletPoint text="٢. الملكية الفكرية: جميع حقوق البرمجية، التصاميم، والشعارات خاصة بمطور التطبيق. يُمنع نسخ أو تعديل أو إعادة توزيع البرمجية لأغراض تجارية دون إذن كتابي." />
+          <BulletPoint text="٣. دقة البيانات: نحن نبذل قصارى جهدنا لضمان دقة نصوص القرآن الكريم والمعلومات المنهجية، ومع ذلك فإننا نسألك دائماً مراجعة حفظك على مشايخك المعتمدين، فالتطبيق وسيلة مساعدة وليس بديلاً عن التلقي والمشافهة." />
+          <BulletPoint text="٤. إخلاء المسؤولية: يتم توفير التطبيق 'كما هو' دون أي ضمانات صريحة أو ضمنية. المطور غير مسؤول عن أي فقدان للبيانات المخزنة محلياً نتيجة مسح التطبيق أو تعطل الجهاز." />
+          <BulletPoint text="٥. التحديثات: يحق لنا تحديث التطبيق أو تغيير خصائصه في أي وقت لتحسين تجربة المستخدم أو إصلاح المشكلات التقنية." />
         </View>
 
         <View style={[styles.card, { marginTop: Spacing.xl }]}>
-          <Text style={styles.sectionTitle}>سياسة الخصوصية</Text>
+          <Text style={styles.sectionTitle}>
+            سياسة الخصوصية وحماية البيانات (Privacy Policy)
+          </Text>
           <View style={styles.paragraphContainer}>
             <Text style={styles.paragraph}>
-              نحن نقدر خصوصيتكم ونلتزم بحمايتها وفقاً لسياسات متاجر التطبيقات (Google Play و App Store):
+              خصوصيتك هي أولويتنا القصوى، لذا قمنا بتصميم التطبيق ليعمل بأقصى
+              درجات الأمان والخصوصية وفقاً لمعايير المتاجر العالمية (Google Play
+              & App Store):
             </Text>
           </View>
-          <BulletPoint text="1. جمع البيانات: التطبيق يعمل بشكل كامل محلياً (Offline) ولا يجمع أو يرسل أي بيانات شخصية أو حساسة إلى أي خوادم خارجية." />
-          <BulletPoint text="2. أدوات التتبع: لا يحتوي التطبيق على أي أدوات تتبع أو إحصائيات من أطراف ثالثة لضمان الخصوصية التامة للعادات اليومية والمراجعة." />
-          <BulletPoint text="3. الأذونات: الإشعارات هي الصلاحية الوحيدة المطلوبة (بشكل اختياري) لتعمل داخلياً على الجهاز." />
-          <BulletPoint text="4. حماية الأطفال: التطبيق مناسب لجميع الأعمار (COPPA Compliant) ولا يحتوي على أي إعلانات أو روابط خارجية." />
+          <BulletPoint text="١. عدم جمع البيانات الشخصية: نحن لا نطلب منك إدخال اسمك الحقيقي، بريدك الإلكتروني، رقم هاتفك، أو أي بيانات تدل على هويتك الشخصية عند بدء الاستخدام." />
+          <BulletPoint text="٢. المعالجة المحلية (Offline Processing): جميع بيانات تقدمك في الحفظ، خططك اليومية، وإحصائياتك تُخزن 'محلياً' على ذاكرة جهازك فقط (AsyncStorage). لا يتم إرسال هذه البيانات إلى أي خوادم خارجية أو قواعد بيانات سحابية." />
+          <BulletPoint text="٣. الشفافية تجاه الأطراف الثالثة: التطبيق لا يحتوي على أدوات تتبع (Trackers) مثل Google Analytics أو Facebook SDK، ولا يتم مشاركة أي معلومات مع طرف ثالث لأغراض إعلانية أو إحصائية." />
+          <BulletPoint text="٤. الصلاحيات والأذونات: يطلب التطبيق إذن 'الإشعارات' فقط لتذكيرك بأورادك اليومية، وإذن 'الاهتزاز' (Haptics) لتحسين التفاعل اللمسي. كلا الإذنين اختياريان ويمكنك إلغاؤهما من الإعدادات في أي وقت." />
+          <BulletPoint text="٥. حماية القصر (Children's Privacy): تطبيقنا آمن تماماً للأطفال (COPPA Compliant)؛ حيث لا يطلب أي معلومات، ولا يحتوي على إعلانات، ولا يوجه المستخدمين لمواقع خارجية غير آمنة." />
+          <BulletPoint text="٦. حذف البيانات: يمكنك حذف المسار بالكامل وجميع بياناتك المخزنة ببساطة من خلال زر 'مسح البيانات' في إعدادات التطبيق أو من خلال حذف التطبيق من جهازك." />
         </View>
 
         <View
@@ -78,11 +92,11 @@ export default function LegalScreen() {
             { marginTop: Spacing.xl, marginBottom: Spacing["3xl"] },
           ]}
         >
-          <Text style={styles.sectionTitle}>التواصل معنا</Text>
+          <Text style={styles.sectionTitle}>التواصل الرسمي والدعم</Text>
           <View style={styles.paragraphContainer}>
             <Text style={styles.paragraph}>
-              إذا كان لديكم أي استفسار حول هذه السياسات، يمكنكم التواصل معنا عبر
-              البريد الإلكتروني المخصص للدعم الفني.
+              بصفتنا المطورين الرسميين لهذا العمل، نسعد بتلقي ملاحظاتكم أو
+              بلاغات الأخطاء لضمان استمرار تقديم الأفضل لخدمة كتاب الله:
             </Text>
           </View>
           <TouchableOpacity style={styles.contactBtn}>
@@ -111,7 +125,8 @@ const getStyles = (Colors: any) =>
       paddingBottom: Spacing.md,
     },
     headerTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.lg,
+      fontFamily: Typography.heading,
+      fontSize: Typography.lg,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
     },
@@ -141,7 +156,8 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.glassBorder,
     },
     sectionTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.base,
+      fontFamily: Typography.heading,
+      fontSize: Typography.base,
       fontWeight: Typography.bold,
       color: Colors.primary,
       marginBottom: Spacing.md,
@@ -151,7 +167,8 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.md,
     },
     paragraph: {
-      fontFamily: Typography.body, fontSize: Typography.sm,
+      fontFamily: Typography.body,
+      fontSize: Typography.sm,
       color: Colors.textPrimary,
       lineHeight: Typography.sm * 1.6,
       textAlign: "left",
@@ -171,7 +188,8 @@ const getStyles = (Colors: any) =>
     },
     bulletText: {
       flex: 1,
-      fontFamily: Typography.body, fontSize: Typography.sm,
+      fontFamily: Typography.body,
+      fontSize: Typography.sm,
       lineHeight: Typography.sm * 1.5,
       textAlign: "left",
       color: Colors.textSecondary,
@@ -187,7 +205,8 @@ const getStyles = (Colors: any) =>
     },
     contactBtnText: {
       color: Colors.primary,
-      fontFamily: Typography.body, fontSize: Typography.sm,
+      fontFamily: Typography.body,
+      fontSize: Typography.sm,
       fontWeight: Typography.medium,
     },
   });
