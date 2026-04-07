@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState, useEffect } from "react";
 import {
@@ -335,8 +334,8 @@ export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={[Colors.background, Colors.surface]}
+      <View
+        
         style={StyleSheet.absoluteFill}
       />
 

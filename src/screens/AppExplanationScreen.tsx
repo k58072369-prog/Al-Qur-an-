@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -49,8 +48,8 @@ export default function AppExplanationScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={[Colors.background, Colors.surface]}
+      <View
+        
         style={StyleSheet.absoluteFill}
       />
 
@@ -94,8 +93,8 @@ export default function AppExplanationScreen() {
             )
           }
         >
-          <LinearGradient
-            colors={[`${Colors.gold}20`, `${Colors.gold}05`]}
+          <View
+            
             style={styles.presentationGradient}
           >
             <View style={styles.presentationIconBox}>
@@ -114,7 +113,7 @@ export default function AppExplanationScreen() {
               size={18}
               color={Colors.textTertiary}
             />
-          </LinearGradient>
+          </View>
         </TouchableOpacity>
 
         <FortressCard
@@ -183,8 +182,8 @@ export default function AppExplanationScreen() {
         />
 
         <View style={styles.timeCard}>
-          <LinearGradient
-            colors={[`${Colors.primary}15`, `${Colors.primary}05`]}
+          <View
+            
             style={styles.timeGradient}
           >
             <View style={styles.timeInfo}>
@@ -195,7 +194,7 @@ export default function AppExplanationScreen() {
               </Text>
             </View>
             <Ionicons name="alarm-outline" size={24} color={Colors.primary} />
-          </LinearGradient>
+          </View>
         </View>
 
         {/* Developer Section */}

@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
 import React, { useEffect, useRef } from "react";
@@ -177,10 +176,10 @@ export default function DashboardScreen() {
                 )
               }
             >
-              <LinearGradient
-                colors={[Colors.primary, Colors.primaryDark]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+              <View
+                
+                
+                
                 style={styles.updateGradient}
               >
                 <View style={[styles.updateInfo, { flexShrink: 1 }]}>
@@ -205,7 +204,7 @@ export default function DashboardScreen() {
                 <View style={styles.updateBtn}>
                   <Text style={styles.updateBtnText}>تحديث</Text>
                 </View>
-              </LinearGradient>
+              </View>
             </TouchableOpacity>
           )}
           <View style={{ height: Spacing.sm }} />

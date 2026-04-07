@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
   Dimensions,
@@ -32,14 +31,9 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
     <TouchableOpacity
       onPress={() => onPress(moduleInfo.id)}
       activeOpacity={0.8}
-      style={{ width: "48%" }} // بس الحجم هنا
+      style={styles.card}
     >
-      <LinearGradient
-        colors={[Colors.glassElevated, Colors.glass]}
-        start={[0, 0]}
-        end={[1, 1]}
-        style={styles.gradient}
-      >
+      <View style={styles.gradient}>
         <View style={styles.header}>
           <View
             style={[
@@ -66,9 +60,7 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
           <Text style={styles.title} numberOfLines={1}>
             {moduleInfo.nameAr}
           </Text>
-          <Text style={styles.subtitle}>
-            {moduleInfo.description}
-          </Text>
+          <Text style={styles.subtitle}>{moduleInfo.description}</Text>
         </View>
 
         <View style={styles.footer}>
@@ -102,7 +94,7 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
 
           <Ionicons name="chevron-back" size={16} color={Colors.textTertiary} />
         </View>
-      </LinearGradient>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -112,12 +104,12 @@ const getStyles = (Colors: any) =>
     card: {
       width: "48%", // Flexible grid item width
       marginBottom: Spacing.md,
-      borderRadius: BorderRadius.xl,
-      backgroundColor: "transparent", // مهم
-      overflow: "hidden", // مهم جدا
+      borderRadius: 20, 
+      backgroundColor: Colors.glass, 
+      overflow: "hidden", 
       borderWidth: 1,
       borderColor: Colors.glassBorder,
-      ...Shadow.sm,
+      // Zero shadow as requested, matching the explanation button style
     },
     gradient: {
       flex: 1,
@@ -145,7 +137,8 @@ const getStyles = (Colors: any) =>
       borderColor: `${Colors.primary}30`,
     },
     badgeText: {
-      fontFamily: Typography.heading, fontSize: 10,
+      fontFamily: Typography.heading,
+      fontSize: 10,
       color: Colors.primary,
     },
     content: {
@@ -153,13 +146,15 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.md,
     },
     title: {
-      fontFamily: Typography.heading, fontSize: Typography.base,
+      fontFamily: Typography.heading,
+      fontSize: Typography.base,
       color: Colors.textPrimary,
       marginBottom: 2,
       textAlign: "left",
     },
     subtitle: {
-      fontFamily: Typography.body, fontSize: Typography.xs,
+      fontFamily: Typography.body,
+      fontSize: Typography.xs,
       color: Colors.textSecondary,
       lineHeight: Typography.xs * 1.5,
       textAlign: "left",
@@ -169,8 +164,9 @@ const getStyles = (Colors: any) =>
       justifyContent: "space-between",
       alignItems: "center",
       borderTopWidth: 1,
-      borderTopColor: Colors.border,
-      paddingTop: Spacing.sm,
+      borderTopColor: Colors.glassBorder,
+      paddingTop: Spacing.md,
+      marginTop: 2,
     },
     metaRow: {
       flexDirection: "row",
@@ -179,7 +175,8 @@ const getStyles = (Colors: any) =>
       flex: 1,
     },
     metaText: {
-      fontFamily: Typography.body, fontSize: 8,
+      fontFamily: Typography.body,
+      fontSize: 8,
       color: Colors.textTertiary,
     },
   });

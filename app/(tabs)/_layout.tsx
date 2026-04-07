@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
 import { Tabs } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import {
@@ -12,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { BlurView } from "expo-blur";
 import { useAppStore } from "../../src/store/AppStore";
 import { Typography, useTheme, Shadow, BorderRadius } from "../../src/theme";
 

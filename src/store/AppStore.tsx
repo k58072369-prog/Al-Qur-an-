@@ -29,7 +29,6 @@ import {
   todayISO,
 } from "../utils/helpers";
 import { getMushafEdition } from "../data/mushafEditions";
-import { StatisticsService } from "./StatisticsService";
 import { NotificationService } from "./NotificationService";
 // Storage Key ──────────────────────────────────────────
 const STORAGE_KEY = "husoon_app_state";
@@ -225,9 +224,6 @@ function appReducer(state: AppState, action: Action): AppState {
       // Create today's progress
       const todayProgress: DailyProgress = createEmptyDailyProgress();
 
-      // Track new user in Firebase (Only once)
-      StatisticsService.trackNewUser();
-
       return {
         ...cleanState,
         user,
@@ -281,10 +277,6 @@ function appReducer(state: AppState, action: Action): AppState {
       const isCompleted = todayProg
         ? (todayProg as Record<string, unknown>)[field]
         : false;
-
-      if (isCompleted) {
-        StatisticsService.trackTaskCompletion();
-      }
 
       // Update streak
       const completion = todayProg ? getDailyCompletionPercent(todayProg) : 0;
@@ -414,9 +406,6 @@ function appReducer(state: AppState, action: Action): AppState {
           currentPageIndex: Math.min(newIndex, state.plan.targetPages.length),
         };
       }
-
-      // Track memorized pages in Firebase
-      StatisticsService.trackPageMemorized(pages.length);
 
       return {
         ...state,
@@ -607,8 +596,6 @@ export function AppProvider({ children }: PropsWithChildren) {
   // Load state from storage on mount
   useEffect(() => {
     loadState();
-    StatisticsService.trackAppLaunch();
-    StatisticsService.trackUniqueInstallation();
     NotificationService.registerForPushNotificationsAsync();
   }, []);
 
@@ -624,15 +611,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     }
   }, [state]);
 
-  // Listen to Global Stats when onboarded
-  useEffect(() => {
-    if (state.isOnboarded) {
-      const unsub = StatisticsService.subscribeToStats((stats) => {
-        dispatch({ type: "UPDATE_GLOBAL_STATS", payload: stats });
-      });
-      return unsub;
-    }
-  }, [state.isOnboarded]);
+  // Legacy hook space removed
 
   // Schedule / update notifications whenever settings change.
   // – Only fire after the app is fully loaded AND the user is onboarded

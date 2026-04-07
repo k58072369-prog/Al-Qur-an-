@@ -7,7 +7,6 @@ import {
   StatusBar,
   Dimensions,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStore } from '../store/AppStore';
 import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../theme';
 import { MemorizationStrength } from '../types';
@@ -116,8 +115,8 @@ export default function ProgressScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={[Colors.background, Colors.surface]}
+      <View
+        
         style={StyleSheet.absoluteFill}
       />
 
@@ -132,8 +131,8 @@ export default function ProgressScreen() {
       >
         {/* Level & XP */}
         <View style={styles.levelCard}>
-          <LinearGradient
-            colors={[`${Colors.primary}12`, `${Colors.primary}04`]}
+          <View
+            
             style={styles.levelGradient}
           >
             <View style={styles.levelLeft}>
@@ -154,7 +153,7 @@ export default function ProgressScreen() {
                 <Text style={styles.xpText}>{xpProgress.current} / {xpProgress.required} XP للترقية</Text>
               </View>
             </View>
-          </LinearGradient>
+          </View>
         </View>
 
         {/* Quick Stats Grid */}

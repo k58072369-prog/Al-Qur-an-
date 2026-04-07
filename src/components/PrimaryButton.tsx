@@ -8,7 +8,6 @@ import {
   TextStyle,
   Animated,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../theme';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -61,11 +60,12 @@ export function PrimaryButton({
           activeOpacity={1}
           style={styles.wrapper}
         >
-          <LinearGradient
-            colors={disabled ? ['#1E2230', '#181C28'] : [Colors.primary, Colors.primaryDark]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.gradient, !disabled && Shadow.emerald]}
+          <View
+            style={[
+              styles.gradient,
+              !disabled && Shadow.md,
+              { backgroundColor: disabled ? Colors.surfaceElevated : Colors.primary }
+            ]}
           >
             {icon && (
               <Ionicons
@@ -77,7 +77,7 @@ export function PrimaryButton({
             <Text style={[styles.label, disabled && { color: Colors.textTertiary }, textStyle]}>
               {label}
             </Text>
-          </LinearGradient>
+          </View>
         </TouchableOpacity>
       </Animated.View>
     );

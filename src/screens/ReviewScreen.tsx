@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import {
   Dimensions,
@@ -100,8 +99,8 @@ export default function ReviewScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={[Colors.background, Colors.surface]}
+      <View
+        
         style={StyleSheet.absoluteFill}
       />
 
@@ -149,8 +148,8 @@ export default function ReviewScreen() {
 
         {/* Highlight Section for Parents */}
         <View style={styles.parentCard}>
-          <LinearGradient
-            colors={[`${Colors.primary}10`, `${Colors.background}`]}
+          <View
+            
             style={styles.parentContent}
           >
             <View style={styles.parentIconBadge}>
@@ -162,7 +161,7 @@ export default function ReviewScreen() {
             </View>
             <Text style={styles.parentTitle}>{PARENT_VIRTUE.title}</Text>
             <Text style={styles.parentDesc}>{PARENT_VIRTUE.desc}</Text>
-          </LinearGradient>
+          </View>
         </View>
 
         {/* Section: Worldly Benefits */}

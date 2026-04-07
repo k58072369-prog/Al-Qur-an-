@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated, Vibration } from 'r
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../theme';
 import { formatTime } from '../utils/helpers';
-import { LinearGradient } from 'expo-linear-gradient';
 
 type TaskTimerProps = {
   initialSeconds: number;
@@ -60,9 +59,9 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title }: TaskTime
 
   return (
     <View style={styles.overlay}>
-      <LinearGradient 
-        colors={[Colors.background, Colors.surface]} 
-        style={styles.container}
+      <View 
+         
+        style={[styles.container, { backgroundColor: Colors.background }]}
       >
         {/* Background Decorative Circles */}
         <View style={[styles.decorCircle, { top: -50, left: -50, backgroundColor: Colors.primarySubtle }]} />
@@ -135,7 +134,7 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title }: TaskTime
             {isActive ? "استمر في التركيز، الله يبارك في وقتك" : "اضغط ابدأ عندما تكون مستعداً للبدء"}
           </Text>
         </View>
-      </LinearGradient>
+      </View>
     </View>
   );
 }

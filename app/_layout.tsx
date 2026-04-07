@@ -1,25 +1,28 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useFonts, Tajawal_400Regular, Tajawal_500Medium, Tajawal_700Bold } from "@expo-google-fonts/tajawal";
 import { Amiri_400Regular } from "@expo-google-fonts/amiri";
+import {
+  Tajawal_400Regular,
+  Tajawal_500Medium,
+  Tajawal_700Bold,
+  useFonts,
+} from "@expo-google-fonts/tajawal";
+import { Ionicons } from "@expo/vector-icons";
 import { Stack, usePathname } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
   I18nManager,
+  Image,
   StatusBar,
   StyleSheet,
   Text,
   View,
-  Image,
 } from "react-native";
 import "../global.css";
-import { AppProvider } from "../src/store/AppStore";
-import { useTheme, Typography, Spacing, BorderRadius } from "../src/theme";
-import { StatisticsService } from "../src/store/StatisticsService";
-import { UpdateService, UpdateInfo } from "../src/store/UpdateService";
 import VersionOverlay from "../src/components/VersionOverlay";
+import { AppProvider } from "../src/store/AppStore";
+import { UpdateInfo, UpdateService } from "../src/store/UpdateService";
+import { Spacing, Typography, useTheme } from "../src/theme";
 
 // Force RTL for Arabic
 I18nManager.allowRTL(true);
@@ -43,10 +46,7 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Run stats in background - DO NOT AWAIT if you want immediate start
-        StatisticsService.trackUniqueInstallation();
-        StatisticsService.trackAppLaunch();
-        
+        // Removed stats
         // Just a small delay to ensure everything is mounted
         await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (e) {
@@ -56,7 +56,7 @@ export default function RootLayout() {
         setAppIsReady(true);
       }
     }
-    
+
     if (fontsLoaded) {
       prepare();
     }
@@ -68,7 +68,14 @@ export default function RootLayout() {
 
   if (!appIsReady || !fontsLoaded) {
     return (
-      <View style={{ flex: 1, backgroundColor: "#07090F", justifyContent: 'center', alignItems: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#07090F",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <StatusBar barStyle="light-content" />
       </View>
     );
@@ -113,25 +120,27 @@ function MainLayout({
 
   useEffect(() => {
     checkVersion();
-    
+
     // Global Status Polling: Only poll for updates if the app is currently showing a blocking overlay.
     // Otherwise, it only checks on app start.
     if (blockType === "disabled" || blockType === "force_update") {
-      const interval = setInterval(checkVersion, 45000); 
+      const interval = setInterval(checkVersion, 45000);
       return () => clearInterval(interval);
     }
   }, [checkVersion, blockType]);
 
-  // Track page views
+  // Track page views removed
   useEffect(() => {
-    if (pathname) {
-      StatisticsService.trackPageView(pathname);
-    }
+    // Stats removed
   }, [pathname]);
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
-      <StatusBar barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} />
+      <StatusBar
+        barStyle={
+          Colors.background === "#07090F" ? "light-content" : "dark-content"
+        }
+      />
       <Stack
         screenOptions={{
           headerShown: false,
@@ -180,7 +189,7 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
       Animated.timing(progressAnim, {
         toValue: 1,
         duration: 2500,
-        useNativeDriver: false, 
+        useNativeDriver: false,
       }),
     ]).start();
 
@@ -212,10 +221,7 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
 
   return (
     <Animated.View style={[styles.splash, { opacity: exitAnim }]}>
-      <LinearGradient
-        colors={[Colors.background, Colors.surface]}
-        style={StyleSheet.absoluteFill}
-      />
+      <View style={StyleSheet.absoluteFill} />
 
       {/* Background Decor */}
       <View style={styles.splashOrb1} />
@@ -234,9 +240,9 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
         >
           <View style={styles.outerRing}>
             <View style={styles.innerRing}>
-              <Image 
-                source={require("../assets/images/logo.png")} 
-                style={styles.logoImageSplash} 
+              <Image
+                source={require("../assets/images/logo.png")}
+                style={styles.logoImageSplash}
                 resizeMode="contain"
               />
             </View>
@@ -250,160 +256,133 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
         </Animated.View>
 
         {/* Progress Bar Section */}
-        <View style={styles.loadingContainer}>
-          <View style={styles.progressBarBg}>
-            <Animated.View style={[styles.progressBarFill, { width: progressWidth }]}>
-              <LinearGradient
-                colors={[Colors.primary, Colors.primaryLight]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={StyleSheet.absoluteFill}
-              />
-            </Animated.View>
-          </View>
-          <Text style={styles.loadingText}>جاري التحميل...</Text>
+        <View style={[styles.loadingContainer, { width: 100 }]}>
+          <Animated.View
+            style={[
+              styles.sleekLineFill,
+              {
+                width: progressWidth,
+              },
+            ]}
+          />
         </View>
       </View>
 
       {/* Bottom Quote */}
       <Animated.View style={[styles.bottomQuote, { opacity: starAnim }]}>
         <Text style={styles.quoteText}>"اقرأ وارقَ ورتِّل"</Text>
-        <View style={styles.starsRow}>
-          {["star", "star", "star"].map((s, i) => (
-            <Ionicons
-              key={i}
-              name={s as any}
-              size={12}
-              color={Colors.primary}
-              style={{ marginHorizontal: 4, opacity: 0.5 }}
-            />
-          ))}
-        </View>
       </Animated.View>
     </Animated.View>
   );
 }
 
-const getStyles = (Colors: any) => StyleSheet.create({
-  splash: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.background,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-  },
-  splashOrb1: {
-    position: "absolute",
-    width: 400,
-    height: 400,
-    borderRadius: 200,
-    backgroundColor: `${Colors.primary}05`,
-    top: -100,
-    right: -100,
-  },
-  splashOrb2: {
-    position: "absolute",
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: `${Colors.blue}03`,
-    bottom: -50,
-    left: -100,
-  },
-  centerContent: {
-    alignItems: "center",
-    width: "100%",
-    paddingHorizontal: 40,
-  },
-  logoContainer: {
-    marginBottom: Spacing.xl,
-  },
-  outerRing: {
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    borderWidth: 1,
-    borderColor: `${Colors.primary}15`,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: `${Colors.primary}03`,
-  },
-  innerRing: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: Colors.glass,
-    borderWidth: 1.5,
-    borderColor: `${Colors.primary}30`,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 5,
-  },
-  textBlock: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  splashTitle: {
-    fontFamily: "Tajawal_700Bold",
-    fontSize: Typography["3xl"],
-    fontWeight: Typography.extrabold,
-    color: Colors.textPrimary,
-    textAlign: "center",
-    letterSpacing: 1,
-  },
-  tagline: {
-    fontFamily: "Tajawal_400Regular",
-    fontSize: Typography.base,
-    color: Colors.textSecondary,
-    marginTop: 8,
-    textAlign: "center",
-    opacity: 0.8,
-  },
-  loadingContainer: {
-    width: "100%",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  progressBarBg: {
-    width: "80%",
-    height: 6,
-    backgroundColor: Colors.border,
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  progressBarFill: {
-    height: "100%",
-    borderRadius: 3,
-  },
-  loadingText: {
-    fontFamily: "Tajawal_400Regular",
-    marginTop: 12,
-    fontSize: 12,
-    color: Colors.textTertiary,
-    fontWeight: "500",
-    letterSpacing: 1,
-  },
-  bottomQuote: {
-    position: "absolute",
-    bottom: 60,
-    alignItems: "center",
-  },
-  quoteText: {
-    fontFamily: "Tajawal_700Bold",
-    fontSize: 16,
-    color: Colors.primary,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  starsRow: {
-    flexDirection: "row",
-  },
-  logoImageSplash: {
-    width: 120,
-    height: 120,
-  },
-});
+const getStyles = (Colors: any) =>
+  StyleSheet.create({
+    splash: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: Colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1000,
+    },
+    splashOrb1: {
+      position: "absolute",
+      width: 400,
+      height: 400,
+      borderRadius: 200,
+      backgroundColor: `${Colors.primary}05`,
+      top: -100,
+      right: -100,
+    },
+    splashOrb2: {
+      position: "absolute",
+      width: 300,
+      height: 300,
+      borderRadius: 150,
+      backgroundColor: `${Colors.blue}03`,
+      bottom: -50,
+      left: -100,
+    },
+    centerContent: {
+      alignItems: "center",
+      width: "100%",
+      paddingHorizontal: 40,
+    },
+    logoContainer: {
+      marginBottom: Spacing.xl,
+    },
+    outerRing: {
+      width: 220,
+      height: 220,
+      borderRadius: 110,
+      borderWidth: 1,
+      borderColor: `${Colors.primary}15`,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: `${Colors.primary}03`,
+    },
+    innerRing: {
+      width: 180,
+      height: 180,
+      borderRadius: 90,
+      backgroundColor: Colors.surface,
+      borderWidth: 1.5,
+      borderColor: `${Colors.primary}30`,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: Colors.primary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.15,
+      shadowRadius: 20,
+      elevation: 5,
+    },
+    textBlock: {
+      alignItems: "center",
+      marginBottom: 40,
+    },
+    splashTitle: {
+      fontFamily: "Tajawal_700Bold",
+      fontSize: Typography["3xl"],
+      fontWeight: Typography.extrabold,
+      color: Colors.textPrimary,
+      textAlign: "center",
+      letterSpacing: 1,
+    },
+    tagline: {
+      fontFamily: "Tajawal_400Regular",
+      fontSize: Typography.base,
+      color: Colors.textSecondary,
+      marginTop: 8,
+      textAlign: "center",
+      opacity: 0.8,
+    },
+    loadingContainer: {
+      alignItems: "center",
+      marginTop: 20,
+      height: 2,
+      backgroundColor: 'rgba(255,255,255,0.05)',
+      borderRadius: 2,
+      overflow: 'hidden',
+    },
+    sleekLineFill: {
+      height: "100%",
+      backgroundColor: Colors.primary,
+      borderRadius: 2,
+    },
+    bottomQuote: {
+      position: "absolute",
+      bottom: 60,
+      alignItems: "center",
+    },
+    quoteText: {
+      fontFamily: "Tajawal_700Bold",
+      fontSize: 16,
+      color: Colors.primary,
+      fontWeight: "600",
+      marginBottom: 8,
+    },
+    logoImageSplash: {
+      width: 120,
+      height: 120,
+    },
+  });

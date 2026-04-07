@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
@@ -169,12 +168,8 @@ export default function OnboardingScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={[
-          Colors.background,
-          Colors.surface, // Replaced hardcoded #0A0F18
-          Colors.background,
-        ]}
+      <View
+        
         style={StyleSheet.absoluteFill}
       />
 

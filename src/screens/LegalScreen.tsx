@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -26,10 +26,7 @@ export default function LegalScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={[Colors.background, Colors.surface]}
-        style={StyleSheet.absoluteFill}
-      />
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: Colors.background }]} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -66,13 +63,13 @@ export default function LegalScreen() {
           <Text style={styles.sectionTitle}>سياسة الخصوصية</Text>
           <View style={styles.paragraphContainer}>
             <Text style={styles.paragraph}>
-              نحن نقدر خصوصيتكم ونلتزم بحمايتها:
+              نحن نقدر خصوصيتكم ونلتزم بحمايتها وفقاً لسياسات متاجر التطبيقات (Google Play و App Store):
             </Text>
           </View>
-          <BulletPoint text="البيانات التي تدخلها (مثل الاسم والهدف اليومي) تُخزن محلياً على جهازك فقط لتقديم تجربة مخصصة." />
-          <BulletPoint text="لا نقوم ببيع بياناتك الشخصية لأي طرف ثالث." />
-          <BulletPoint text="في حال استخدام خدمات سحابية (مثل النسخ الاحتياطي مستقبلاً)، سنقوم بتشفير البيانات وضمان أمنها." />
-          <BulletPoint text="نستخدم firebase لحساب عدد التحميلات فقط لا غير ولا نخزن اي شيء أخر نهائياً" />
+          <BulletPoint text="1. جمع البيانات: التطبيق يعمل بشكل كامل محلياً (Offline) ولا يجمع أو يرسل أي بيانات شخصية أو حساسة إلى أي خوادم خارجية." />
+          <BulletPoint text="2. أدوات التتبع: لا يحتوي التطبيق على أي أدوات تتبع أو إحصائيات من أطراف ثالثة لضمان الخصوصية التامة للعادات اليومية والمراجعة." />
+          <BulletPoint text="3. الأذونات: الإشعارات هي الصلاحية الوحيدة المطلوبة (بشكل اختياري) لتعمل داخلياً على الجهاز." />
+          <BulletPoint text="4. حماية الأطفال: التطبيق مناسب لجميع الأعمار (COPPA Compliant) ولا يحتوي على أي إعلانات أو روابط خارجية." />
         </View>
 
         <View
