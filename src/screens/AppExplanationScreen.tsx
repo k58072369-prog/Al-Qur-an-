@@ -48,10 +48,7 @@ export default function AppExplanationScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <View
-        
-        style={StyleSheet.absoluteFill}
-      />
+      <View style={StyleSheet.absoluteFill} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -78,7 +75,7 @@ export default function AppExplanationScreen() {
               color={Colors.primary}
             />
           </View>
-          <Text style={styles.mainTitle}>نظام خماسية الحفظ</Text>
+          <Text style={styles.mainTitle}>نظام مفاتيح تثبيت القرآن</Text>
           <Text style={styles.mainDescription}>
             نظام تراكمي يهدف لجعل حفظ القرآن الكريم راسخاً كحفظ سورة الفاتحة،
             يتطلب الهمة العالية والالتزام بالوقت للوصول للإتقان التام.
@@ -93,16 +90,13 @@ export default function AppExplanationScreen() {
             )
           }
         >
-          <View
-            
-            style={styles.presentationGradient}
-          >
+          <View style={styles.presentationGradient}>
             <View style={styles.presentationIconBox}>
               <Ionicons name="play" size={20} color={Colors.gold} />
             </View>
             <View style={styles.presentationInfo}>
               <Text style={styles.presentationTitle}>
-                عرض تقديمي لطريقة خماسية الحفظ
+                عرض تقديمي لطريقة مفاتيح تثبيت القرآن
               </Text>
               <Text style={styles.presentationSubtitle}>
                 شاهد الشرح الكامل للطريقة بشكل احترافي
@@ -115,6 +109,15 @@ export default function AppExplanationScreen() {
             />
           </View>
         </TouchableOpacity>
+
+        {/* Section 1: Methodology */}
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionLine} />
+          <Text style={[styles.sectionTitle, { color: Colors.primary }]}>
+            منهجية الحصون الخمسة
+          </Text>
+          <View style={styles.sectionLine} />
+        </View>
 
         <FortressCard
           title="المرحلة الأولى: الختمة (التلاوة والاستماع)"
@@ -181,11 +184,258 @@ export default function AppExplanationScreen() {
           content="تبدأ عند تجاوز حفظ جزئين فأكثر. للمتقدمين (من حفظوا 15 جزءاً مثلاً)، تكون مراجعة البعيد بمعدل جزئين يومياً."
         />
 
+        {/* Section: How to Use */}
+        <View style={[styles.sectionHeader, { marginTop: Spacing.xl }]}>
+          <View style={styles.sectionLine} />
+          <Text style={[styles.sectionTitle, { color: Colors.secondary }]}>
+            طريقة استخدام التطبيق
+          </Text>
+          <View style={styles.sectionLine} />
+        </View>
+
+        <FortressCard
+          title="1. التفاعل مع أنواع المهام"
+          icon="options-outline"
+          color={Colors.secondary}
+          content={
+            <View>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>الحفظ الجديد:</Text> استخدم عداد التكرار والمؤقت لضمان قضاء 15 دقيقة على الأقل في الصفحة؛ التكرار هو سر الانتقال للذاكرة الدائمة.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>المراجعة (قريب/بعيد):</Text> هدفك هنا هو التثبيت. استخدم المؤقت لقياس سرعة استحضارك للآيات، وسجل تقييمك بدقة ليعرف التطبيق متى يسألك فيها مرة أخرى.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>الاستماع والتلاوة:</Text> استثمر مشغل الصوت المدمج مع النص العثماني لتصحيح التشكيل وتثبيت صورة الصفحة بصرياً قبل البدء بالحفظ.
+              </Text>
+            </View>
+          }
+        />
+
+        <FortressCard
+          title="2. خوض جلسة الحفظ الذكية"
+          icon="flash-outline"
+          color={Colors.secondary}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                بمجرد الضغط على "ابدأ"، ستدخل في جلسة تركيز كاملة.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • ابدأ بضبط <Text style={styles.bold}>رقم الآية والصفحة</Text> في خانة الإعداد.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • تابع مع المصحف المطبوع وقم بزيادة <Text style={styles.bold}>عداد التكرار</Text> في التطبيق مع كل مرة تنهي فيها الآية؛ هذا يحفزك ذهنياً ويقيس مجهودك.
+              </Text>
+            </View>
+          }
+        />
+
+        <FortressCard
+          title="3. فهم التقييم والنتائج"
+          icon="medal-outline"
+          color={Colors.secondary}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                بعد انتهاء كل جلسة، إنجازك لا ينتهي:
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>التقييم:</Text> يحدد خوارزمية التطبيق لمواعيد المراجعة القادمة.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>الإحصائيات:</Text> ستجد دوائر التقدم في الشاشة الرئيسية تكتمل ببطء لتعكس مدى قربك من ختم القرآن وإتقانه.
+              </Text>
+            </View>
+          }
+        />
+
+        {/* Section 2: App Features */}
+        <View style={[styles.sectionHeader, { marginTop: Spacing.xl }]}>
+          <View style={styles.sectionLine} />
+          <Text style={[styles.sectionTitle, { color: Colors.gold }]}>
+            مميزات التطبيق الذكية
+          </Text>
+          <View style={styles.sectionLine} />
+        </View>
+
+        <FortressCard
+          title="نظام المؤقت والتحكم الذكي"
+          icon="timer"
+          color={Colors.gold}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                المؤقت ليس مجرد وسيلة لحساب الوقت، بل هو أداة لضمان "جودة
+                التكرار" اللازمة لنقل الآيات إلى الذاكرة الدائمة.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>كيف تستفيد منه؟</Text> استخدم "إعداد
+                البداية" لتحديد الآية التي ستبدأ بها بدقة. عند بدء الجلسة، ابقِ
+                تركيزك كاملاً داخل التطبيق؛ فالمؤقت يمنع التشتت ويجبرك على إعطاء
+                كل صفحة حقها من الوقت حتى لو شعرت بأنك حفظتها سريعاً. تكرار
+                الآية والصفحة بالعداد الموجود يضمن لك رسوخاً لا يتزعزع.
+              </Text>
+            </View>
+          }
+        />
+
+        <FortressCard
+          title="ميزان الرسوخ (التقييم الذكي)"
+          icon="checkbox-outline"
+          color={Colors.success}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                هذا الميزان هو "البوصلة" التي تحدد جودة حفظك وتمنعك من "تراكم
+                النسيان".
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>كيف تستفيد منه؟</Text> بعد كل ورد،
+                كن صادقاً في التقييم (ضعيف، متوسط، قوي). إذا اخترت "ضعيف"، سيقوم
+                النظام بذكاء بتقريب موعد المراجعة القادم لتدارك الصفحة قبل
+                ضياعها. أما "قوي" فيجعل النظام يباعد الفترات لتركز مجهودك على
+                الجديد. هذا يوفر عليك الجهد الضائع في مراجعة ما هو محفوظ فعلاً.
+              </Text>
+            </View>
+          }
+        />
+
+        <FortressCard
+          title="مشغل الصوت بالنص العثماني"
+          icon="musical-notes-outline"
+          color={Colors.fortressRecitation}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                في قسم "الاستماع"، لا يقدم التطبيق صوتاً فقط، بل تجربة "تلقي"
+                كاملة.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>كيف تستفيد منه؟</Text> عند تشغيل
+                الاستماع بصوت الشيخ الحصري، يعرض التطبيق النص القرآني بالرسم
+                العثماني متزامناً مع القراءة. هذا الربط بين السمع والبصر هو أقوى
+                وسيلة لتثبيت شكل الصفحة في ذهنك ومنع أخطاء التشكيل.
+              </Text>
+            </View>
+          }
+        />
+
+        <FortressCard
+          title="خطط الحفظ المرنة"
+          icon="calendar-outline"
+          color={Colors.primary}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                يتكيف التطبيق مع قدراتك المختلفة، سواء كنت تحفظ صفحة أو اثنتين يومياً.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>كيف تستفيد منه؟</Text> يمكنك اختيار "خطة الحفظ" التي تناسب وقتك من شاشة الإعدادات، وسيقوم النظام تلقائياً بإعادة ترتيب مواعيد "مراجعة البعيد" و "ختمة التلاوة" لتتوافق مع سرعتك الجديدة في الإنجاز.
+              </Text>
+            </View>
+          }
+        />
+
+        <FortressCard
+          title="الخصوصية والتركيز التام"
+          icon="lock-closed-outline"
+          color={Colors.secondary}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                بيئة آمنة وخالية من المشتتات، مصممة خصيصاً لجلال القرآن الكريم.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>كيف تستفيد منه؟</Text> التطبيق يعمل بالكامل بدون إعلانات وبدون الحاجة لإنترنت في معظم وظائفه، مما يضمن لك "الخلوة" المطلوبة للحفظ دون إشعارات مزعجة أو تتبع لبياناتك الشخصية.
+              </Text>
+            </View>
+          }
+        />
+
+        <FortressCard
+          title="خريطة إنجاز الأجزاء"
+          icon="map-outline"
+          color={Colors.blue}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                عرض مرئي شامل لكل جزء وصفحة في القرآن الكريم، يحول رحلة الـ 604
+                صفحة إلى خطوات واضحة وملموسة.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>كيف تستفيد منه؟</Text> استخدم
+                الخريطة لرؤية "الصورة الكبيرة". عندما تلون الصفحات التي أتممتها
+                بالأخضر، سيعطيك ذلك دفعة معنوية هائلة للاستمرار. كما يمكنك
+                العودة لأي صفحة أو جزء بضغطة واحدة لمراجعته أو تعديل تقييمه.
+              </Text>
+            </View>
+          }
+        />
+
+        <FortressCard
+          title="سلسلة الإنجاز وتنبيهات الالتزام"
+          icon="flame-outline"
+          color={Colors.warning}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                يعمل التطبيق كمدرب شخصي (Personal Coach) يشجعك على الاستمرار
+                وبناء "عادة" التلاوة اليومية.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>كيف تستفيد منه؟</Text> حافظ على "رقم
+                السلسلة" (Streak) من الانقطاع؛ فرؤية رقم أيام التزامك يزداد
+                يوماً بعد يوم هو أكبر محفز لمنع التكاسل. بالإضافة لذلك، قم بضبط
+                التنبيهات في الأوقات التي تكون فيها فارغاً (كالتبكير بعد الفجر)،
+                ليرشدك التطبيق للبدء بوردك فوراً.
+              </Text>
+            </View>
+          }
+        />
+
+        <FortressCard
+          title="المحلل الذكي (قريب وبعيد)"
+          icon="analytics-outline"
+          color={Colors.secondary}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                يقوم التطبيق بـ "عملية حسابية معقدة" خلف الكواليس لتحديد ما يجب
+                عليك مراجعته يومياً.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>كيف تستفيد منه؟</Text> لا تشغل بالك
+                بحساب عدد الصفحات؛ فالتطبيق يعرف تلقائياً آخر ما حفظت ويصنفه كـ
+                "مراجعة صغرى/قريبة"، ويحسب الأجزاء القديمة كـ "مراجعة
+                كبرى/بعيدة" ليضمن لك تغطية المصحف كاملاً في الفترات المقررة.
+              </Text>
+            </View>
+          }
+        />
+
+        <FortressCard
+          title="مشغل الصوت بالنص العثماني"
+          icon="musical-notes-outline"
+          color={Colors.fortressRecitation}
+          content={
+            <View>
+              <Text style={styles.paragraph}>
+                في قسم "الاستماع"، لا يقدم التطبيق صوتاً فقط، بل تجربة "تلقي"
+                كاملة.
+              </Text>
+              <Text style={styles.subParagraph}>
+                • <Text style={styles.bold}>كيف تستفيد منه؟</Text> عند تشغيل
+                الاستماع بصوت الشيخ الحصري، يعرض التطبيق النص القرآني بالرسم
+                العثماني متزامناً مع القراءة. هذا الربط بين السمع والبصر هو أقوى
+                وسيلة لتثبيت شكل الصفحة في ذهنك ومنع أخطاء التشكيل.
+              </Text>
+            </View>
+          }
+        />
+
         <View style={styles.timeCard}>
-          <View
-            
-            style={styles.timeGradient}
-          >
+          <View style={styles.timeGradient}>
             <View style={styles.timeInfo}>
               <Text style={styles.timeTitle}>إدارة الوقت اليومي</Text>
               <Text style={styles.timeText}>
@@ -268,7 +518,8 @@ const getStyles = (Colors: any) =>
       paddingBottom: Spacing.md,
     },
     headerTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.lg,
+      fontFamily: Typography.heading,
+      fontSize: Typography.lg,
       fontWeight: Typography.semibold,
       color: Colors.textPrimary,
       textAlign: "center",
@@ -305,14 +556,16 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.lg,
     },
     mainTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.xl,
+      fontFamily: Typography.heading,
+      fontSize: Typography.xl,
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: Spacing.sm,
       textAlign: "center",
     },
     mainDescription: {
-      fontFamily: Typography.body, fontSize: Typography.base,
+      fontFamily: Typography.body,
+      fontSize: Typography.base,
       color: Colors.textSecondary,
       lineHeight: Typography.base * 1.6,
       textAlign: "center",
@@ -339,7 +592,8 @@ const getStyles = (Colors: any) =>
       justifyContent: "center",
     },
     cardTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.md,
+      fontFamily: Typography.heading,
+      fontSize: Typography.md,
       fontWeight: Typography.bold,
       flex: 1,
       textAlign: "left",
@@ -348,13 +602,15 @@ const getStyles = (Colors: any) =>
       paddingRight: 0,
     },
     paragraph: {
-      fontFamily: Typography.body, fontSize: Typography.base,
+      fontFamily: Typography.body,
+      fontSize: Typography.base,
       color: Colors.textSecondary,
       lineHeight: Typography.base * 1.7,
       textAlign: "left",
     },
     subParagraph: {
-      fontFamily: Typography.body, fontSize: Typography.base,
+      fontFamily: Typography.body,
+      fontSize: Typography.base,
       color: Colors.textSecondary,
       lineHeight: Typography.base * 1.7,
       textAlign: "left",
@@ -372,7 +628,7 @@ const getStyles = (Colors: any) =>
       borderColor: `${Colors.primary}20`,
     },
     timeGradient: {
-      flexDirection: "row-reverse",
+      flexDirection: "row",
       padding: Spacing.lg,
       alignItems: "center",
       gap: Spacing.lg,
@@ -381,14 +637,16 @@ const getStyles = (Colors: any) =>
       flex: 1,
     },
     timeTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.md,
+      fontFamily: Typography.heading,
+      fontSize: Typography.md,
       fontWeight: Typography.bold,
       color: Colors.primary,
       marginBottom: Spacing.xs,
       textAlign: "left",
     },
     timeText: {
-      fontFamily: Typography.body, fontSize: Typography.sm,
+      fontFamily: Typography.body,
+      fontSize: Typography.sm,
       color: Colors.textSecondary,
       lineHeight: Typography.sm * 1.6,
       textAlign: "left",
@@ -418,14 +676,16 @@ const getStyles = (Colors: any) =>
       flex: 1,
     },
     presentationTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.md,
+      fontFamily: Typography.heading,
+      fontSize: Typography.md,
       fontWeight: Typography.bold,
       color: Colors.gold,
       marginBottom: 2,
       textAlign: "left",
     },
     presentationSubtitle: {
-      fontFamily: Typography.body, fontSize: Typography.sm,
+      fontFamily: Typography.body,
+      fontSize: Typography.sm,
       color: Colors.textSecondary,
       textAlign: "left",
     },
@@ -447,13 +707,15 @@ const getStyles = (Colors: any) =>
       borderColor: Colors.primary,
     },
     devName: {
-      fontFamily: Typography.heading, fontSize: Typography.base,
+      fontFamily: Typography.heading,
+      fontSize: Typography.base,
       fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: 2,
     },
     devTitle: {
-      fontFamily: Typography.body, fontSize: Typography.sm,
+      fontFamily: Typography.body,
+      fontSize: Typography.sm,
       color: Colors.primary,
       fontWeight: Typography.medium,
       marginBottom: Spacing.lg,
@@ -467,13 +729,15 @@ const getStyles = (Colors: any) =>
       width: "100%",
     },
     sadaqahText: {
-      fontFamily: Typography.heading, fontSize: Typography.sm,
+      fontFamily: Typography.heading,
+      fontSize: Typography.sm,
       fontWeight: Typography.bold,
       color: Colors.primary,
       marginBottom: 4,
     },
     duaText: {
-      fontFamily: Typography.body, fontSize: Typography.xs,
+      fontFamily: Typography.body,
+      fontSize: Typography.xs,
       color: Colors.textSecondary,
       textAlign: "center",
       lineHeight: 18,
@@ -492,5 +756,25 @@ const getStyles = (Colors: any) =>
       justifyContent: "center",
       borderWidth: 1,
       borderColor: Colors.border,
+    },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginVertical: Spacing.lg,
+      width: "100%",
+    },
+    sectionLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: Colors.border,
+      opacity: 0.3,
+    },
+    sectionTitle: {
+      fontFamily: Typography.heading,
+      fontSize: 16,
+      fontWeight: "bold",
+      textAlign: "center",
+      paddingHorizontal: Spacing.md,
     },
   });

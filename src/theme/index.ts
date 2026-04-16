@@ -1,6 +1,6 @@
 import { useAppStore } from "../store/AppStore";
 
-// Design Tokens for خماسية الحفظ (Fivefold Memorization)
+// Design Tokens for مفاتيح تثبيت القرآن (Quran Anchoring Keys)
 // Refined, minimal, premium dark-first design system
 
 export const darkColors = {
@@ -12,10 +12,10 @@ export const darkColors = {
   border: "rgba(255, 255, 255, 0.06)",
   borderLight: "rgba(255, 255, 255, 0.10)",
 
-  // Glass effect tokens
-  glass: "rgba(255, 255, 255, 0.03)",
-  glassBorder: "rgba(255, 255, 255, 0.06)",
-  glassElevated: "rgba(255, 255, 255, 0.05)",
+  // Solid surface tokens (replacing glass for no blur)
+  glass: "#0F1218",
+  glassBorder: "rgba(255, 255, 255, 0.08)",
+  glassElevated: "#151920",
 
   // Primary (Muted Emerald — elegant, not vivid)
   primary: "#2DD4A0",
@@ -91,9 +91,9 @@ export const lightColors: typeof darkColors = {
   borderLight: "rgba(0, 0, 0, 0.10)",
 
   // Glass
-  glass: "rgba(255, 255, 255, 0.7)",
-  glassBorder: "rgba(0, 0, 0, 0.06)",
-  glassElevated: "rgba(255, 255, 255, 0.85)",
+  glass: "#FFFFFF",
+  glassBorder: "rgba(0, 0, 0, 0.08)",
+  glassElevated: "#F0F1F4",
 
   // Primary
   primary: "#1A9E77",

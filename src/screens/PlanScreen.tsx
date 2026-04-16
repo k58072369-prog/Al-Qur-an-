@@ -1038,7 +1038,7 @@ export default function PlanScreen() {
       // Night Prep
       const nextDayPages = plan.targetPages.slice(
         (i + 1) * plan.pagesPerDay,
-        (i + 2) * plan.pagesPerDay
+        (i + 2) * plan.pagesPerDay,
       );
       if (nextDayPages.length > 0) {
         modulesToSync.push({
@@ -1050,7 +1050,7 @@ export default function PlanScreen() {
       // Weekly Prep
       const weeklyPages = plan.targetPages.slice(
         (i + 7) * plan.pagesPerDay,
-        (i + 14) * plan.pagesPerDay
+        (i + 14) * plan.pagesPerDay,
       );
       if (weeklyPages.length > 0) {
         modulesToSync.push({
@@ -1066,12 +1066,14 @@ export default function PlanScreen() {
       if (reviewStrategy === "spaced") {
         const NEAR_SIZE = 20;
         const FAR_SIZE = 40;
-        nearPages = alreadyDone.length > 0
-          ? alreadyDone.slice(Math.max(0, alreadyDone.length - NEAR_SIZE))
-          : [];
-        const olderPages = alreadyDone.length > NEAR_SIZE
-          ? alreadyDone.slice(0, alreadyDone.length - NEAR_SIZE)
-          : [];
+        nearPages =
+          alreadyDone.length > 0
+            ? alreadyDone.slice(Math.max(0, alreadyDone.length - NEAR_SIZE))
+            : [];
+        const olderPages =
+          alreadyDone.length > NEAR_SIZE
+            ? alreadyDone.slice(0, alreadyDone.length - NEAR_SIZE)
+            : [];
         if (olderPages.length > 0) {
           if (olderPages.length <= FAR_SIZE) {
             farPages = [...olderPages];
@@ -1079,25 +1081,35 @@ export default function PlanScreen() {
             // Replicate the rotating far logic
             let rotatingStart = 0;
             for (let day = 0; day < i; day++) {
-               const dayStartIdx = day * plan.pagesPerDay;
-               const dayAlreadyDone = plan.targetPages.slice(0, dayStartIdx);
-               const dayOlder = dayAlreadyDone.length > NEAR_SIZE ? dayAlreadyDone.slice(0, dayAlreadyDone.length - NEAR_SIZE) : [];
-               if (dayOlder.length > FAR_SIZE) {
-                 rotatingStart = (rotatingStart + FAR_SIZE) % dayOlder.length;
-               }
+              const dayStartIdx = day * plan.pagesPerDay;
+              const dayAlreadyDone = plan.targetPages.slice(0, dayStartIdx);
+              const dayOlder =
+                dayAlreadyDone.length > NEAR_SIZE
+                  ? dayAlreadyDone.slice(0, dayAlreadyDone.length - NEAR_SIZE)
+                  : [];
+              if (dayOlder.length > FAR_SIZE) {
+                rotatingStart = (rotatingStart + FAR_SIZE) % dayOlder.length;
+              }
             }
             for (let j = 0; j < FAR_SIZE; j++) {
-              farPages.push(olderPages[(rotatingStart + j) % olderPages.length]);
+              farPages.push(
+                olderPages[(rotatingStart + j) % olderPages.length],
+              );
             }
           }
         }
       } else if (reviewStrategy === "random") {
-        const shuffled = [...alreadyDone].sort(() => Math.sin(i * 31 + 7) - 0.5);
+        const shuffled = [...alreadyDone].sort(
+          () => Math.sin(i * 31 + 7) - 0.5,
+        );
         nearPages = shuffled.slice(0, Math.min(20, shuffled.length));
         farPages = shuffled.slice(20, Math.min(60, shuffled.length));
       } else {
         nearPages = alreadyDone.slice(Math.max(0, alreadyDone.length - 20));
-        farPages = alreadyDone.slice(Math.max(0, alreadyDone.length - 60), Math.max(0, alreadyDone.length - 20));
+        farPages = alreadyDone.slice(
+          Math.max(0, alreadyDone.length - 60),
+          Math.max(0, alreadyDone.length - 20),
+        );
       }
 
       if (nearPages.length > 0) {

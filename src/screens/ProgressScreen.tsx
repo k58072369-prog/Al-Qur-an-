@@ -1,25 +1,26 @@
-import React from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
+  Dimensions,
   ScrollView,
   StatusBar,
-  Dimensions,
-} from 'react-native';
-import { useAppStore } from '../store/AppStore';
-import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../theme';
-import { MemorizationStrength } from '../types';
-import {
-  getDailyCompletionPercent,
-  getXPProgressToNextLevel,
-} from '../utils/helpers';
-import { Ionicons } from '@expo/vector-icons';
-import { JUZ_META, SURAHS } from '../data/quranMeta';
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { JUZ_META } from "../data/quranMeta";
+import { useAppStore } from "../store/AppStore";
+import { Shadow, Spacing, Typography, useTheme } from "../theme";
+import { MemorizationStrength } from "../types";
+import { getXPProgressToNextLevel } from "../utils/helpers";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
+const CIRCLE_SIZE = width * 0.45;
+const STROKE_WIDTH = 12;
 
-const getStrengthColors = (Colors: any): Record<MemorizationStrength, string> => ({
+const getStrengthColors = (
+  Colors: any,
+): Record<MemorizationStrength, string> => ({
   1: Colors.red,
   2: Colors.strength2,
   3: Colors.gold,
@@ -27,307 +28,388 @@ const getStrengthColors = (Colors: any): Record<MemorizationStrength, string> =>
   5: Colors.primary,
 });
 
+// Circular Progress Component (Internalized for better style access)
+// Professional Circular Progress Ring (Clipping Method)
+const CircularProgress = ({
+  percentage,
+  color,
+  size,
+  Colors,
+}: {
+  percentage: number;
+  color: string;
+  size: number;
+  Colors: any;
+}) => {
+  const pct = Math.max(0, Math.min(1, percentage));
+  const innerSize = size - STROKE_WIDTH * 2;
+
+  // Rotation logic: 0% is -180deg, 100% is 0deg for each half
+  const getRotation = (p: number) => {
+    return `${p * 180 - 180}deg`;
+  };
+
+  const rightHalfPct = pct <= 0.5 ? pct * 2 : 1;
+  const leftHalfPct = pct > 0.5 ? (pct - 0.5) * 2 : 0;
+
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      {/* Background Track Ring */}
+      <View
+        style={{
+          position: "absolute",
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          borderWidth: STROKE_WIDTH,
+          borderColor: Colors.border,
+        }}
+      />
+
+      {/* Right Half Container */}
+      <View
+        style={{
+          position: "absolute",
+          width: size,
+          height: size,
+          flexDirection: "row-reverse",
+        }}
+      >
+        <View style={{ width: size / 2, height: size, overflow: "hidden" }}>
+          <View
+            style={{
+              width: size,
+              height: size,
+              borderRadius: size / 2,
+              borderWidth: STROKE_WIDTH,
+              borderColor: "transparent",
+              borderRightColor: color,
+              borderTopColor: color,
+              transform: [
+                { rotate: "-45deg" },
+                { rotate: getRotation(rightHalfPct) },
+              ],
+              position: "absolute",
+              right: 0,
+            }}
+          />
+        </View>
+      </View>
+
+      {/* Left Half Container */}
+      <View
+        style={{
+          position: "absolute",
+          width: size,
+          height: size,
+          flexDirection: "row",
+        }}
+      >
+        <View style={{ width: size / 2, height: size, overflow: "hidden" }}>
+          <View
+            style={{
+              width: size,
+              height: size,
+              borderRadius: size / 2,
+              borderWidth: STROKE_WIDTH,
+              borderColor: "transparent",
+              borderLeftColor: leftHalfPct > 0 ? color : "transparent",
+              borderBottomColor: leftHalfPct > 0 ? color : "transparent",
+              transform: [
+                { rotate: "-45deg" },
+                { rotate: getRotation(leftHalfPct) },
+              ],
+              position: "absolute",
+              left: 0,
+            }}
+          />
+        </View>
+      </View>
+
+      {/* Center Background & Text */}
+      <View
+        style={{
+          width: innerSize + 2,
+          height: innerSize + 2,
+          borderRadius: (innerSize + 2) / 2,
+          backgroundColor: Colors.surface,
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 10,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: Typography.heading,
+            fontSize: 32,
+            fontWeight: "bold",
+            color: Colors.textPrimary,
+          }}
+        >
+          {Math.round(pct * 100)}%
+        </Text>
+        <Text
+          style={{
+            fontFamily: Typography.body,
+            fontSize: 12,
+            color: Colors.textSecondary,
+            marginTop: 2,
+          }}
+        >
+          إتمام الحفظ
+        </Text>
+      </View>
+    </View>
+  );
+};
+
 export default function ProgressScreen() {
   const Colors = useTheme();
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
-  const STRENGTH_COLORS = React.useMemo(() => getStrengthColors(Colors), [Colors]);
+  const STRENGTH_COLORS = React.useMemo(
+    () => getStrengthColors(Colors),
+    [Colors],
+  );
 
-  const { state, getMemorizedPages, getPagesDue } = useAppStore();
-  const { user, plan, dailyProgress, streak } = state;
+  const { state, getMemorizedPages } = useAppStore();
+  const { user, plan, streak } = state;
   const memorizedPages = getMemorizedPages();
-  const pagesDue = getPagesDue();
-
   const xpProgress = getXPProgressToNextLevel(user?.totalXP ?? 0);
+  const totalPages = plan ? plan.targetPages.length : 604;
+  const planPct = totalPages > 0 ? memorizedPages.length / totalPages : 0;
+  const totalXP = user?.totalXP ?? 0;
 
-  // Last 7 days completion
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (6 - i));
-    const dateStr = date.toISOString().split('T')[0];
-    const progress = dailyProgress.find((p) => p.date === dateStr);
-    const pct = progress ? getDailyCompletionPercent(progress) : 0;
-    const dayName = date.toLocaleDateString('ar-EG', { weekday: 'short' });
-    return { date: dateStr, pct, dayName };
+  const juzProgress = JUZ_META.map((juz) => {
+    const pagesInJuz = Array.from(
+      { length: juz.endPage - juz.startPage + 1 },
+      (_, i) => juz.startPage + i,
+    );
+    const memorizedInJuz = pagesInJuz.filter((p) =>
+      memorizedPages.some((mp) => mp.pageNumber === p),
+    );
+    const pct = memorizedInJuz.length / pagesInJuz.length;
+    return { ...juz, pct };
   });
 
-  // Strength distribution
   const strengthDist: Record<MemorizationStrength, number> = {
-    1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
   };
   memorizedPages.forEach((p) => {
     strengthDist[p.strength as MemorizationStrength]++;
   });
 
-  const totalPages = plan ? plan.targetPages.length : 604;
-  const planPct = totalPages > 0 ? memorizedPages.length / totalPages : 0;
-
-  const totalXP = user?.totalXP ?? 0;
-
-  // Juz progress calculation
-  const juzProgress = JUZ_META.map(juz => {
-    const pagesInJuz = Array.from({ length: juz.endPage - juz.startPage + 1 }, (_, i) => juz.startPage + i);
-    const memorizedInJuz = pagesInJuz.filter(p => memorizedPages.some(mp => mp.pageNumber === p));
-    const pct = memorizedInJuz.length / pagesInJuz.length;
-    return { ...juz, pct };
-  });
-
-  // Completion Estimation
-  const pagesCount = memorizedPages.length;
-  const targetPagesCount = plan?.targetPages.length || 604;
-  const remainingCount = targetPagesCount - pagesCount;
-  
-  // Use dailyPages setting as the baseline for estimation
-  const pagesPerDay = user?.dailyPages || 1;
-  const daysRemaining = Math.max(1, Math.ceil(remainingCount / pagesPerDay));
-  
+  const remainingCount = totalPages - memorizedPages.length;
+  const daysRemaining = Math.max(
+    1,
+    Math.ceil(remainingCount / (user?.dailyPages || 1)),
+  );
   const finishDate = new Date();
   finishDate.setDate(finishDate.getDate() + daysRemaining);
-  
-  // Surah progress calculation - only for surahs in the plan
-  const planPages = new Set(plan?.targetPages || []);
-  const surahsInPlan = SURAHS.filter(surah => {
-    for (let p = surah.startPage; p <= surah.endPage; p++) {
-      if (planPages.has(p)) return true;
-    }
-    return false;
-  });
-
-  const surahProgress = surahsInPlan.map(surah => {
-    const pagesInSurahInPlan = Array.from(
-      { length: surah.endPage - surah.startPage + 1 }, 
-      (_, i) => surah.startPage + i
-    ).filter(p => planPages.has(p));
-    
-    const memorizedInSurah = pagesInSurahInPlan.filter(p => memorizedPages.some(mp => mp.pageNumber === p));
-    const pct = memorizedInSurah.length / pagesInSurahInPlan.length;
-    return { ...surah, pct, totalInPlan: pagesInSurahInPlan.length, memorizedCount: memorizedInSurah.length };
-  });
-
-  // Fortress consistency
-  const fortressStats = [
-    { id: 'recitation', label: 'التلاوة', color: Colors.fortressRecitation, count: dailyProgress.filter(p => p.recitation).length },
-    { id: 'listening', label: 'الاستماع', color: Colors.blue, count: dailyProgress.filter(p => p.listening).length },
-    { id: 'preparation', label: 'التهيؤ', color: Colors.fortressPreparation, count: dailyProgress.filter(p => p.preparation).length },
-    { id: 'memorization', label: 'الحفظ', color: Colors.fortressMemorization, count: dailyProgress.filter(p => p.memorization).length },
-    { id: 'review', label: 'المراجعة', color: Colors.fortressReview, count: dailyProgress.filter(p => p.shortReview || p.longReview).length },
-  ];
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <View
-        
-        style={StyleSheet.absoluteFill}
-      />
-
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>تحليلات متقدمة</Text>
-        <Text style={styles.headerSubtitle}>رؤية شاملة لرحلة الحفظ</Text>
-      </View>
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
-        {/* Level & XP */}
+        {/* Modern Hero Section */}
+        <View style={styles.heroCard}>
+          <CircularProgress
+            percentage={planPct}
+            color={Colors.primary}
+            size={CIRCLE_SIZE}
+            Colors={Colors}
+          />
+          <View style={styles.heroMeta}>
+            <View style={styles.metaItem}>
+              <Text style={styles.metaValue}>{memorizedPages.length}</Text>
+              <Text style={styles.metaLabel}>صفحة متممة</Text>
+            </View>
+            <View style={styles.metaDivider} />
+            <View style={styles.metaItem}>
+              <Text style={styles.metaValue}>{remainingCount}</Text>
+              <Text style={styles.metaLabel}>صفحة متبقية</Text>
+            </View>
+          </View>
+          <View style={styles.predictionBox}>
+            <Text style={styles.predictionText}>
+              تاريخ الختم المتوقع:{" "}
+              <Text style={{ fontWeight: "bold", color: Colors.gold }}>
+                {finishDate.toLocaleDateString("ar-EG", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Text>
+            </Text>
+          </View>
+        </View>
+
+        {/* Level Banner */}
         <View style={styles.levelCard}>
-          <View
-            
-            style={styles.levelGradient}
-          >
-            <View style={styles.levelLeft}>
-              <Ionicons name="medal-outline" size={32} color={Colors.gold} />
+          <View style={styles.levelIconBox}>
+            <Ionicons name="medal" size={24} color={Colors.primary} />
+          </View>
+          <View style={styles.levelInfo}>
+            <Text style={styles.levelTitle}>
+              {user?.name || "يا حامل القرآن"}
+            </Text>
+            <Text style={styles.levelSubtitle}>
+              المستوى {Math.floor(totalXP / 1000) + 1} —{" "}
+              {user?.title || "مبتدئ"}
+            </Text>
+            <View style={styles.xpTrack}>
+              <View
+                style={[
+                  styles.xpFill,
+                  { width: `${xpProgress.percentage * 100}%` },
+                ]}
+              />
             </View>
-            <View style={styles.levelInfo}>
-              <Text style={styles.levelTitle}>{user?.title ?? 'مبتدئ'}</Text>
-              <Text style={styles.levelSubtitle}>المستوى {Math.floor(totalXP / 1000) + 1}</Text>
-              <View style={styles.xpBar}>
-                <View style={styles.xpBarBg}>
-                  <View
-                    style={[
-                      styles.xpBarFill,
-                      { width: `${xpProgress.percentage * 100}%` },
-                    ]}
-                  />
-                </View>
-                <Text style={styles.xpText}>{xpProgress.current} / {xpProgress.required} XP للترقية</Text>
-              </View>
-            </View>
+            <Text style={styles.xpStatus}>
+              {xpProgress.current} / {xpProgress.required} XP للتالي
+            </Text>
           </View>
         </View>
 
-        {/* Quick Stats Grid */}
-        <View style={styles.statsGrid}>
-          {[
-            { label: 'الختم المتوقع', value: finishDate.toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' }), sub: `${daysRemaining} يوم متبقي`, icon: 'calendar', color: Colors.primary },
-            { label: 'التقدم الحالي', value: `${Math.round(planPct * 100)}%`, sub: `${memorizedPages.length} من ${targetPagesCount} صفحة`, icon: 'analytics', color: Colors.success },
-            { label: 'السلسلة', value: `${streak.currentStreak} يوم`, sub: `الأطول: ${streak.longestStreak}`, icon: 'flame', color: Colors.gold },
-            { label: 'إجمالي النقاط', value: `${user?.totalXP ?? 0}`, sub: `اللقب: ${user?.title}`, icon: 'star', color: Colors.purple },
-          ].map((item, i) => (
-            <View key={i} style={styles.gridCard}>
-              <View style={[styles.gridIcon, { backgroundColor: `${item.color}15` }]}>
-                <Ionicons name={item.icon as any} size={24} color={item.color} />
-              </View>
-              <View style={styles.gridInfo}>
-                <Text style={styles.gridLabel}>{item.label}</Text>
-                <Text style={[styles.gridValue, { color: Colors.textPrimary }]}>{item.value}</Text>
-                <Text style={styles.gridSub}>{item.sub}</Text>
-              </View>
-            </View>
-          ))}
+        {/* Detailed Stats Row */}
+        <View style={styles.statsRow}>
+          <View style={styles.statMiniCard}>
+            <Ionicons name="flame" size={18} color={Colors.gold} />
+            <Text style={styles.statMiniValue}>{streak.currentStreak}</Text>
+            <Text style={styles.statMiniLabel}>يوم متواصل</Text>
+          </View>
+          <View style={styles.statMiniCard}>
+            <Ionicons name="analytics" size={18} color={Colors.blue} />
+            <Text style={styles.statMiniValue}>{user?.dailyPages || 1}</Text>
+            <Text style={styles.statMiniLabel}>صفحة/يوم</Text>
+          </View>
+          <View style={styles.statMiniCard}>
+            <Ionicons name="trophy" size={18} color={Colors.success} />
+            <Text style={styles.statMiniValue}>{totalXP}</Text>
+            <Text style={styles.statMiniLabel}>نقاط الخبرة</Text>
+          </View>
         </View>
 
-        {/* Advanced Progress Chart (Placeholder-like bar) */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>مؤشرات الإنجاز</Text>
-          <View style={styles.advancedCard}>
-            <View style={styles.advancedHeader}>
-              <View>
-                <Text style={styles.advancedTitle}>نسبة الإتمام الكلية</Text>
-                <Text style={styles.advancedSub}>{Math.round(planPct * 100)}% من الورق الكلي</Text>
-              </View>
-              <Text style={styles.advancedBigPct}>{Math.round(planPct * 100)}%</Text>
-            </View>
-            <View style={styles.bigBarBg}>
-              <View style={[styles.bigBarFill, { width: `${planPct * 100}%` }]} />
-            </View>
-            <View style={styles.advancedMetaRow}>
-              <View style={styles.metaItem}>
-                <View style={[styles.metaDot, { backgroundColor: Colors.primary }]} />
-                <Text style={styles.metaText}>محفوظ: {memorizedPages.length}</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <View style={[styles.metaDot, { backgroundColor: Colors.border }]} />
-                <Text style={styles.metaText}>متبقي: {remainingCount}</Text>
-              </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md }}>
+            <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>رحلة الختام (٣٠ جزء)</Text>
+            <View style={{ backgroundColor: Colors.primaryMuted, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 }}>
+               <Text style={{ fontSize: 13, color: Colors.primary, fontWeight: 'bold' }}>
+                 {juzProgress.filter(j => j.pct >= 1).length} / ٣٠ جزء
+               </Text>
             </View>
           </View>
-        </View>
-
-        {/* Juz completion Map */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View>
-              <Text style={styles.sectionTitle}>خريطة الأجزاء الثلاثين</Text>
-              <Text style={styles.sectionSubtitle}>تتبع تقدمك في كل جزء على حدة</Text>
-            </View>
-            <View style={styles.sectionBadge}>
-              <Text style={styles.sectionBadgeText}>{juzProgress.filter(j => j.pct >= 1).length} مكتمل</Text>
-            </View>
-          </View>
-
-          <View style={styles.juzGrid}>
-            {juzProgress.map((j) => {
-              const info = j;
-              const isCompleted = info.pct >= 1;
-              const isStarted = info.pct > 0;
-              
-              return (
-                <View key={info.id} style={styles.juzCardWrapper}>
+          
+          <View style={styles.roadmapContainer}>
+            {juzProgress.map((j, index) => (
+              <View key={j.id} style={styles.roadmapNode}>
+                {/* Connection Line */}
+                {index < juzProgress.length - 1 && (
                   <View 
                     style={[
-                      styles.juzCard, 
-                      { 
-                        backgroundColor: isCompleted ? Colors.success : Colors.surface,
-                        borderColor: isCompleted ? Colors.success : isStarted ? Colors.primary : Colors.borderLight,
-                        ...Shadow.sm,
-                      }
-                    ]}
-                  >
-                    {/* Progress Fill Background for partially started Juz */}
-                    {isStarted && !isCompleted && (
-                      <View style={[styles.juzCardProgress, { height: `${info.pct * 100}%`, backgroundColor: `${Colors.primary}15` }]} />
-                    )}
-
-                    <Text style={[
-                      styles.juzCardNumber, 
-                      { color: isCompleted ? '#FFF' : isStarted ? Colors.primary : Colors.textTertiary }
-                    ]}>
-                      {info.id}
-                    </Text>
-
-                    {isCompleted ? (
-                      <View style={styles.completedIconBox}>
-                        <Ionicons name="checkmark-sharp" size={10} color="#FFF" />
-                      </View>
-                    ) : isStarted ? (
-                      <Text style={[styles.juzPctSmall, { color: Colors.primary }]}>{Math.round(info.pct * 100)}%</Text>
-                    ) : null}
-                  </View>
-                  <Text style={[styles.juzCardLabel, { color: isStarted ? Colors.textSecondary : Colors.textMuted }]}>
-                    جزء {info.id}
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Surah Progress List */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>تقدم السور الحالية</Text>
-          <View style={styles.surahCard}>
-            {surahProgress.length > 0 ? surahProgress.map((surah) => (
-              <View key={surah.id} style={styles.surahRow}>
-                <View style={styles.surahHeader}>
-                  <Text style={styles.surahName}>{surah.nameAr}</Text>
-                  <Text style={styles.surahPctText}>
-                    {surah.memorizedCount} / {surah.totalInPlan} صفحة
-                  </Text>
-                </View>
-                <View style={styles.surahBarBg}>
-                  <View 
-                    style={[
-                      styles.surahBarFill, 
-                      { 
-                        width: `${surah.pct * 100}%`, 
-                        backgroundColor: surah.pct === 1 ? Colors.success : Colors.primary 
-                      }
+                      styles.roadmapLine, 
+                      { backgroundColor: j.pct >= 1 ? Colors.success : Colors.border }
                     ]} 
                   />
+                )}
+                
+                {/* Milestone Node */}
+                <View 
+                  style={[
+                    styles.milestoneIcon, 
+                    j.pct >= 1 ? styles.milestoneDone : j.pct > 0 ? styles.milestoneActive : styles.milestoneEmpty
+                  ]}
+                >
+                  <Text style={[styles.milestoneNum, { color: j.pct >= 1 ? '#FFF' : Colors.textPrimary }]}>{j.id}</Text>
+                  {j.pct >= 1 && <Ionicons name="checkmark" size={12} color="#FFF" style={styles.nodeCheck} />}
                 </View>
-              </View>
-            )) : (
-              <Text style={styles.emptyText}>لا توجد سور في الخطة الحالية</Text>
-            )}
-          </View>
-        </View>
 
-        {/* Fortress Performance */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>أداء الأقسام اليومية</Text>
-          <View style={styles.fortressStatsRow}>
-            {fortressStats.map((fs) => (
-              <View key={fs.id} style={styles.fortressStatCard}>
-                <View style={[styles.fortressStatIcon, { backgroundColor: `${fs.color}15` }]}>
-                  <Text style={[styles.fortressStatCount, { color: fs.color }]}>{fs.count}</Text>
+                {/* Progress Details */}
+                <View style={styles.nodeContent}>
+                  <Text style={styles.nodeTitle}>الجزء {j.id}</Text>
+                  <View style={styles.nodeProgressTrack}>
+                    <View style={[styles.nodeProgressFill, { width: `${j.pct * 100}%`, backgroundColor: j.pct >= 1 ? Colors.success : Colors.primary }]} />
+                  </View>
+                  <Text style={styles.nodeStat}>
+                    {Math.round(j.pct * 100)}% متمم
+                  </Text>
                 </View>
-                <Text style={styles.fortressStatLabel}>{fs.label}</Text>
               </View>
             ))}
           </View>
         </View>
 
-        {/* Strength Balance */}
+        {/* Strength Metrics */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ميزان القوة</Text>
-          <View style={styles.strengthCard}>
+          <Text style={styles.sectionTitle}>ميزان الرسوخ (الجودة)</Text>
+          <View style={styles.strengthScale}>
             {([5, 4, 3, 2, 1] as MemorizationStrength[]).map((s) => {
               const count = strengthDist[s];
-              const pct = memorizedPages.length > 0 ? count / memorizedPages.length : 0;
-              const labels: Record<MemorizationStrength, string> = {
-                1: 'تحتاج إعادة', 2: 'غير مستقرة', 3: 'متوسطة', 4: 'قوية', 5: 'راسخة'
-              };
+              const pct =
+                (memorizedPages.length > 0
+                  ? count / memorizedPages.length
+                  : 0) * 100;
+              if (pct === 0) return null;
               return (
-                <View key={s} style={styles.strengthRow}>
-                  <Text style={styles.strengthLabel}>{labels[s]}</Text>
-                  <View style={styles.strengthBarBg}>
-                    <View style={[styles.strengthBarFill, { width: `${pct * 100}%`, backgroundColor: STRENGTH_COLORS[s] }]} />
-                  </View>
-                  <Text style={styles.strengthValueText}>{count}</Text>
-                </View>
+                <View
+                  key={s}
+                  style={[
+                    styles.strengthChunk,
+                    { width: `${pct}%`, backgroundColor: STRENGTH_COLORS[s] },
+                  ]}
+                />
               );
             })}
+          </View>
+          <View style={styles.legend}>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.dot, { backgroundColor: STRENGTH_COLORS[5] }]}
+              />
+              <Text style={styles.legendText}>راسخ</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.dot, { backgroundColor: STRENGTH_COLORS[3] }]}
+              />
+              <Text style={styles.legendText}>متوسط</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.dot, { backgroundColor: STRENGTH_COLORS[1] }]}
+              />
+              <Text style={styles.legendText}>ضعيف</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Bottom Estimation Card */}
+        <View style={styles.detailedCard}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailTitle}>إجمالي الصفحات المتبقية</Text>
+            <Text style={styles.detailValue}>{remainingCount} صفحة</Text>
+          </View>
+          <View style={styles.detailDivider} />
+          <View style={styles.detailRow}>
+            <Text style={styles.detailTitle}>أيام الإنجاز المتبقية</Text>
+            <Text style={styles.detailValue}>{daysRemaining} يوم</Text>
+          </View>
+          <View style={styles.detailDivider} />
+          <View style={styles.detailRow}>
+            <Text style={styles.detailTitle}>أطول سلسلة إنجاز</Text>
+            <Text style={styles.detailValue}>{streak.longestStreak} يوم</Text>
           </View>
         </View>
 
@@ -337,131 +419,240 @@ export default function ProgressScreen() {
   );
 }
 
-const getStyles = (Colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  header: { paddingTop: 56, paddingHorizontal: Spacing.xl, paddingBottom: Spacing.md },
-  headerTitle: { fontFamily: Typography.heading, fontSize: Typography.xl, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'left' },
-  headerSubtitle: { fontFamily: Typography.body, fontSize: Typography.sm, color: Colors.textTertiary, textAlign: 'left', marginTop: 3 },
-  scroll: { padding: Spacing.base, gap: Spacing.lg },
+const getStyles = (Colors: any) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: Colors.background },
+    scroll: { padding: Spacing.xl, paddingTop: 50 },
 
-  levelCard: { borderRadius: BorderRadius.xl, overflow: 'hidden', borderWidth: 1, borderColor: `${Colors.primary}15` },
-  levelGradient: { flexDirection: 'row', alignItems: 'center', padding: Spacing.lg, gap: Spacing.base },
-  levelLeft: { backgroundColor: `${Colors.primary}0A`, width: 54, height: 54, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: `${Colors.primary}10` },
-  levelInfo: { flex: 1, alignItems: 'flex-start', gap: 4 },
-  levelTitle: { fontFamily: Typography.heading, fontSize: Typography.lg, fontWeight: Typography.bold, color: Colors.primary },
-  levelSubtitle: { fontFamily: Typography.body, fontSize: Typography.sm, color: Colors.textSecondary },
-  xpBar: { width: '100%', gap: 4, marginTop: 4 },
-  xpBarBg: { height: 6, backgroundColor: Colors.borderLight, borderRadius: 3, overflow: 'hidden' },
-  xpBarFill: { height: 6, backgroundColor: Colors.primary, borderRadius: 3 },
-  xpText: { fontFamily: Typography.body, fontSize: 10, color: Colors.textTertiary },
+    heroCard: {
+      backgroundColor: Colors.surface,
+      borderRadius: 32,
+      padding: Spacing.xl,
+      alignItems: "center",
+      borderWidth: 1.5,
+      borderColor: Colors.border,
+      marginBottom: Spacing.xl,
+    },
+    heroMeta: {
+      flexDirection: "row",
+      width: "100%",
+      justifyContent: "space-around",
+      marginVertical: Spacing.lg,
+    },
+    metaItem: { alignItems: "center" },
+    metaValue: { fontSize: 24, fontWeight: "bold", color: Colors.textPrimary },
+    metaLabel: { fontSize: 11, color: Colors.textSecondary, marginTop: 4 },
+    metaDivider: { width: 1, height: 30, backgroundColor: Colors.glassBorder },
+    predictionBox: {
+      backgroundColor: `${Colors.gold}10`,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 12,
+    },
+    predictionText: {
+      fontSize: 13,
+      color: Colors.textSecondary,
+      textAlign: "left",
+    },
 
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md },
-  gridCard: { width: '100%', backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, flexDirection: 'row', alignItems: 'center', gap: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder },
-  gridIcon: { width: 50, height: 50, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
-  gridInfo: { flex: 1, alignItems: 'flex-start' },
-  gridValue: { fontFamily: Typography.heading, fontSize: Typography.lg, fontWeight: Typography.bold, marginTop: 2 },
-  gridLabel: { fontFamily: Typography.heading, fontSize: 13, color: Colors.textSecondary, fontWeight: Typography.semibold },
-  gridSub: { fontFamily: Typography.body, fontSize: 11, color: Colors.textTertiary, marginTop: 2 },
+    levelCard: {
+      backgroundColor: Colors.surface,
+      borderRadius: 24,
+      padding: Spacing.lg,
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: Spacing.xl,
+      borderWidth: 1,
+      borderColor: Colors.border,
+    },
+    levelIconBox: {
+      width: 50,
+      height: 50,
+      borderRadius: 16,
+      backgroundColor: `${Colors.primary}10`,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: Spacing.md,
+    },
+    levelInfo: { flex: 1, alignItems: "flex-start" },
+    levelTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+      textAlign: "left",
+      width: "100%",
+    },
+    levelSubtitle: {
+      fontSize: 12,
+      color: Colors.textSecondary,
+      marginBottom: 8,
+      textAlign: "left",
+      width: "100%",
+    },
+    xpTrack: {
+      height: 6,
+      width: "100%",
+      backgroundColor: Colors.border,
+      borderRadius: 3,
+      overflow: "hidden",
+    },
+    xpFill: { height: "100%", backgroundColor: Colors.primary },
+    xpStatus: {
+      fontSize: 10,
+      color: Colors.textTertiary,
+      marginTop: 4,
+      textAlign: "left",
+      width: "100%",
+    },
 
-  section: { gap: Spacing.md },
-  sectionTitle: { fontFamily: Typography.heading, fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'left', paddingHorizontal: 4 },
-  sectionSubtitle: { fontFamily: Typography.body, fontSize: 11, color: Colors.textTertiary, textAlign: 'left', marginTop: 2, paddingHorizontal: 4 },
+    statsRow: {
+      flexDirection: "row",
+      gap: Spacing.md,
+      marginBottom: Spacing.xl,
+    },
+    statMiniCard: {
+      flex: 1,
+      backgroundColor: Colors.surface,
+      borderRadius: 20,
+      padding: Spacing.md,
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: Colors.border,
+    },
+    statMiniValue: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+      marginVertical: 4,
+    },
+    statMiniLabel: { fontSize: 9, color: Colors.textSecondary },
 
-  advancedCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.md },
-  advancedHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  advancedTitle: { fontFamily: Typography.heading, fontSize: Typography.base, fontWeight: Typography.semibold, color: Colors.textPrimary },
-  advancedSub: { fontFamily: Typography.body, fontSize: Typography.xs, color: Colors.textSecondary },
-  advancedBigPct: { fontSize: Typography['2xl'], fontWeight: Typography.bold, color: Colors.primary },
-  bigBarBg: { height: 10, backgroundColor: Colors.borderLight, borderRadius: 5, overflow: 'hidden' },
-  bigBarFill: { height: 10, backgroundColor: Colors.primary, borderRadius: 5 },
-  advancedMetaRow: { flexDirection: 'row', gap: Spacing.lg },
-  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  metaDot: { width: 8, height: 8, borderRadius: 4 },
-  metaText: { fontFamily: Typography.body, fontSize: 11, color: Colors.textSecondary },
-  
-  juzGrid: { 
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    gap: 12, 
-    justifyContent: 'flex-start',
-    paddingVertical: Spacing.md,
-  },
-  juzCardWrapper: {
-    width: (width - Spacing.base * 2 - 48) / 5,
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  juzCard: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  juzCardProgress: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  juzCardNumber: {
-    fontFamily: Typography.body, fontSize: Typography.base,
-    fontWeight: '800',
-    zIndex: 10,
-  },
-  juzPctSmall: {
-    fontFamily: Typography.heading, fontSize: 8,
-    fontWeight: 'bold',
-    position: 'absolute',
-    bottom: 4,
-    zIndex: 10,
-  },
-  juzCardLabel: {
-    fontFamily: Typography.heading, fontSize: 9,
-    marginTop: 6,
-    fontWeight: '600',
-  },
-  completedIconBox: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    backgroundColor: '#FFF',
-    borderRadius: 8,
-    width: 16,
-    height: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.success,
-  },
-  
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 4 },
-  sectionBadge: { backgroundColor: `${Colors.primary}10`, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  sectionBadgeText: { fontFamily: Typography.heading, fontSize: 11, color: Colors.primary, fontWeight: 'bold' },
-  
-  emptyText: { textAlign: 'center', color: Colors.textTertiary, paddingVertical: 20 },
+    section: { marginBottom: Spacing.lg },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: "900",
+      color: Colors.textPrimary,
+      marginBottom: Spacing.sm,
+      textAlign: "left",
+    },
+    roadmapContainer: {
+      paddingLeft: 10,
+      marginTop: Spacing.md,
+    },
+    roadmapNode: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginBottom: 30,
+      position: 'relative',
+    },
+    roadmapLine: {
+      position: 'absolute',
+      left: 20,
+      top: 40,
+      width: 2,
+      height: 30, // Connects to next node
+      zIndex: 0,
+    },
+    milestoneIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: Colors.surface,
+      borderWidth: 2,
+      borderColor: Colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 2,
+    },
+    milestoneDone: {
+      backgroundColor: Colors.success,
+      borderColor: Colors.success,
+    },
+    milestoneActive: {
+      borderColor: Colors.primary,
+      backgroundColor: Colors.surfaceElevated,
+    },
+    milestoneEmpty: {
+      opacity: 0.8,
+    },
+    milestoneNum: {
+      fontSize: 14,
+      fontWeight: 'bold',
+      includeFontPadding: false,
+    },
+    nodeCheck: {
+      position: 'absolute',
+      bottom: -2,
+      right: -2,
+      backgroundColor: Colors.success,
+      borderRadius: 8,
+      padding: 1,
+      borderWidth: 1,
+      borderColor: '#FFF',
+    },
+    nodeContent: {
+      flex: 1,
+      marginLeft: Spacing.lg,
+      paddingTop: 4,
+    },
+    nodeTitle: {
+      fontSize: 15,
+      fontWeight: 'bold',
+      color: Colors.textPrimary,
+      textAlign: 'left',
+    },
+    nodeProgressTrack: {
+      height: 6,
+      backgroundColor: Colors.border,
+      borderRadius: 3,
+      marginTop: 8,
+      overflow: 'hidden',
+    },
+    nodeProgressFill: {
+      height: '100%',
+    },
+    nodeStat: {
+      fontSize: 11,
+      color: Colors.textSecondary,
+      marginTop: 4,
+      textAlign: 'left',
+    },
 
-  surahCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.md },
-  surahRow: { gap: 6 },
-  surahHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  surahName: { fontFamily: Typography.body, fontSize: Typography.sm, fontWeight: Typography.medium, color: Colors.textPrimary },
-  surahPctText: { fontFamily: Typography.heading, fontSize: Typography.xs, color: Colors.primary, fontWeight: Typography.bold },
-  surahBarBg: { height: 4, backgroundColor: Colors.borderLight, borderRadius: 2, overflow: 'hidden' },
-  surahBarFill: { height: 4, borderRadius: 2 },
+    strengthScale: {
+      height: 12,
+      width: "100%",
+      backgroundColor: Colors.border,
+      borderRadius: 6,
+      flexDirection: "row",
+      overflow: "hidden",
+      marginBottom: Spacing.md,
+    },
+    strengthChunk: { height: "100%" },
+    legend: { flexDirection: "row", justifyContent: "flex-start", gap: 20 },
+    legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+    dot: { width: 10, height: 10, borderRadius: 5 },
+    legendText: { fontSize: 11, color: Colors.textSecondary },
 
-  fortressStatsRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
-  fortressStatCard: { flex: 1, minWidth: '30%', backgroundColor: Colors.glass, borderRadius: BorderRadius.lg, padding: Spacing.md, alignItems: 'center', gap: Spacing.xs, borderWidth: 1, borderColor: Colors.glassBorder },
-  fortressStatIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  fortressStatCount: { fontFamily: Typography.heading, fontSize: Typography.md, fontWeight: Typography.bold },
-  fortressStatLabel: { fontFamily: Typography.body, fontSize: 10, color: Colors.textSecondary },
-
-  strengthCard: { backgroundColor: Colors.glass, borderRadius: BorderRadius.xl, padding: Spacing.lg, borderWidth: 1, borderColor: Colors.glassBorder, gap: Spacing.sm },
-  strengthRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.base },
-  strengthLabel: { width: 64, fontFamily: Typography.body, fontSize: 10, color: Colors.textSecondary, textAlign: 'left' },
-  strengthBarBg: { flex: 1, height: 6, backgroundColor: Colors.borderLight, borderRadius: 3, overflow: 'hidden' },
-  strengthBarFill: { height: 6, borderRadius: 3 },
-  strengthValueText: { width: 20, fontFamily: Typography.heading, fontSize: 11, fontWeight: Typography.bold, color: Colors.textPrimary, textAlign: 'center' },
-});
+    detailedCard: {
+      backgroundColor: Colors.surface,
+      borderRadius: 24,
+      padding: Spacing.lg,
+      borderWidth: 1,
+      borderColor: Colors.border,
+    },
+    detailRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingVertical: 12,
+    },
+    detailTitle: {
+      fontSize: 13,
+      color: Colors.textSecondary,
+      textAlign: "left",
+    },
+    detailValue: {
+      fontSize: 14,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+    },
+  });

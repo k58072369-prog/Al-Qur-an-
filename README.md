@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="./assets/images/logo.png" alt="خماسية الحفظ" width="120" />
+<img src="./assets/images/logo.png" alt="مفاتيح تثبيت القرآن" width="120" />
 
-# خماسية الحفظ
+# مفاتيح تثبيت القرآن
 
-### Khumasiat Al-Hifz — Fivefold Memorization
+### Mafatih Tathbeet Al-Quran — Quran Anchoring Keys
 
 **نظام تراكمي متكامل لحفظ القرآن الكريم وإتقانه**
 _A Complete Cumulative System for Memorizing and Mastering the Holy Quran_
@@ -29,19 +29,19 @@ _A Complete Cumulative System for Memorizing and Mastering the Holy Quran_
 
 ## ما هو التطبيق؟
 
-**خماسية الحفظ** هو تطبيق مجاني متكامل مصمم خصيصاً لمساعدة الحافظ على بناء حفظ قوي وراسخ للقرآن الكريم، يصمد أمام النسيان ويثبت في الذاكرة البعيدة، تماماً كحفظ سورة الفاتحة.
+**مفاتيح تثبيت القرآن** هو تطبيق مجاني متكامل مصمم خصيصاً لمساعدة الحافظ على بناء حفظ قوي وراسخ للقرآن الكريم، يصمد أمام النسيان ويثبت في الذاكرة البعيدة، تماماً كحفظ سورة الفاتحة.
 
-التطبيق مبني على **نظام خماسية الحفظ** — منهجية علمية تراكمية تجمع بين التلاوة، والتحضير، والحفظ الجديد، ومراجعة القريب، ومراجعة البعيد في منظومة يومية متوازنة لا تزيد عن ساعة إلى ساعة ونصف.
+التطبيق مبني على **نظام مفاتيح تثبيت القرآن** — منهجية علمية تراكمية تجمع بين التلاوة، والتحضير، والحفظ الجديد، ومراجعة القريب، ومراجعة البعيد في منظومة يومية متوازنة لا تزيد عن ساعة إلى ساعة ونصف.
 
-### لماذا سمي "خماسية الحفظ"؟
+### لماذا سمي "مفاتيح تثبيت القرآن"؟
 
-لأن كل حصن يمثل جداراً دفاعياً ضد النسيان، وعندما تُبنى خماسية الحفظ معاً يومياً تتشكّل منظومة حماية متكاملة تضمن تثبيت الحفظ في الذاكرة البعيدة. تفويت حصن واحد يضعف الجدار، والإتيان بها جميعاً يحصّن الحفظ تحصيناً لا يُخترق.
+لأن كل حصن يمثل جداراً دفاعياً ضد النسيان، وعندما تُبنى مفاتيح تثبيت القرآن معاً يومياً تتشكّل منظومة حماية متكاملة تضمن تثبيت الحفظ في الذاكرة البعيدة. تفويت حصن واحد يضعف الجدار، والإتيان بها جميعاً يحصّن الحفظ تحصيناً لا يُخترق.
 
 ---
 
 ## المميزات الرئيسية
 
-### نظام خماسية الحفظ — قلب التطبيق
+### نظام مفاتيح تثبيت القرآن — قلب التطبيق
 
 التطبيق مبني حول خمسة حصون يومية تشكّل معاً جداراً منيعاً ضد النسيان:
 
@@ -253,7 +253,7 @@ alhousonalkhamsa/
 │   │   ├── ProgressScreen.tsx        # التحليلات المتقدمة
 │   │   ├── ReviewScreen.tsx          # فضائل القرآن والحافظ
 │   │   ├── SettingsScreen.tsx        # الإعدادات الشاملة
-│   │   ├── AppExplanationScreen.tsx  # شرح نظام خماسية الحفظ
+│   │   ├── AppExplanationScreen.tsx  # شرح نظام مفاتيح تثبيت القرآن
 │   │   └── LegalScreen.tsx           # الشروط والخصوصية
 │   │
 │   ├── components/                   # المكوّنات القابلة لإعادة الاستخدام
@@ -274,7 +274,7 @@ alhousonalkhamsa/
 │   │   ├── selectionStore.ts         # حالة اختيارات الأوراد اليومية
 │   │   ├── NotificationService.ts    # جدولة الإشعارات المحلية
 │   │   ├── UpdateService.ts          # خدمة التحقق من الإصدارات
-│   │   ├── FiveFortressService.ts    # منطق خماسية الحفظ
+│   │   ├── FiveFortressService.ts    # منطق مفاتيح تثبيت القرآن
 │   │   └── StatisticsService.ts      # حسابات الإحصائيات
 │   │
 │   ├── features/
@@ -385,11 +385,11 @@ alhousonalkhamsa/
 
 ## What Is This App?
 
-**Al-Husoon Al-Khamsa (Fivefold Memorization)** is a free, comprehensive mobile application designed to help Quran memorizers build a strong, lasting memorization that resists forgetting and anchors itself in long-term memory — just like how you'll always remember Surah Al-Fatiha.
+**Mafatih Tathbeet Al-Quran (Quran Anchoring Keys)** is a free, comprehensive mobile application designed to help Quran memorizers build a strong, lasting memorization that resists forgetting and anchors itself in long-term memory — just like how you'll always remember Surah Al-Fatiha.
 
-The app is built around the **Five Fortresses System** — a scientifically structured, cumulative methodology that integrates five daily pillars: Recitation, Preparation, New Memorization, Short Review, and Long Review — into a balanced daily routine of just 1 to 1.5 hours.
+The app is built around the **Quran Anchoring Keys System** — a scientifically structured, cumulative methodology that integrates five daily pillars: Recitation, Preparation, New Memorization, Short Review, and Long Review — into a balanced daily routine of just 1 to 1.5 hours.
 
-### Why "Five Fortresses"?
+### Why "Quran Anchoring Keys"?
 
 Each fortress represents a defensive wall against forgetting. When all five are built together daily, they form an integrated protection system that anchors memorization in long-term memory. Missing even one fortress weakens the wall; completing all five makes the memorization virtually unbreakable.
 
@@ -397,7 +397,7 @@ Each fortress represents a defensive wall against forgetting. When all five are 
 
 ## Key Features
 
-### Fivefold Memorization System — The Heart of the App
+### Quran Anchoring Keys System — The Heart of the App
 
 The entire app revolves around five daily "fortresses" that together form an impenetrable barrier against forgetting:
 
@@ -596,7 +596,7 @@ alhousonalkhamsa/
 │   ├── index.tsx                     # Entry point (Onboarding check)
 │   ├── onboarding.tsx                # First-time setup (5 steps)
 │   ├── module.tsx                    # Individual Fortress screen (receives id)
-│   ├── explanation.tsx               # Five Fortresses explanation screen
+│   ├── explanation.tsx               # Quran Anchoring Keys explanation screen
 │   ├── settings.tsx                  # Settings screen
 │   └── legal.tsx                     # Terms & Privacy screen
 │
@@ -609,7 +609,7 @@ alhousonalkhamsa/
 │   │   ├── ProgressScreen.tsx        # Advanced analytics
 │   │   ├── ReviewScreen.tsx          # Quran virtues & motivation
 │   │   ├── SettingsScreen.tsx        # Comprehensive settings
-│   │   ├── AppExplanationScreen.tsx  # Five Fortresses system explanation
+│   │   ├── AppExplanationScreen.tsx  # Quran Anchoring Keys system explanation
 │   │   └── LegalScreen.tsx           # Terms & Privacy
 │   │
 │   ├── components/                   # Reusable UI components
@@ -630,7 +630,7 @@ alhousonalkhamsa/
 │   │   ├── selectionStore.ts         # Daily ward selection state
 │   │   ├── NotificationService.ts    # Local notification scheduling
 │   │   ├── UpdateService.ts          # Remote version check service
-│   │   ├── FiveFortressService.ts    # Five Fortresses business logic
+│   │   ├── FiveFortressService.ts    # Quran Anchoring Keys business logic
 │   │   └── StatisticsService.ts      # Statistics calculations
 │   │
 │   ├── features/

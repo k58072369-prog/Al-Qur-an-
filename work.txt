@@ -1,15 +1,12 @@
+# Project Memory - Mafatih Tathbeet Al-Quran
 
-شيل المكاتب دي وحاول تخفف التطبيق عشان توفر اكبر قدر من المساحه 
-"expo-blur": "~15.0.8",
-"expo-linear-gradient": "^15.0.8",
-"expo-status-bar": "~3.0.9",
-"lucide-react-native": "^0.574.0",
-"@expo-google-fonts/cairo": "^0.4.2",
-"@react-navigation/elements": "^2.6.3",
-"expo-system-ui": "~6.0.9",
-"react-native-gesture-handler": "~2.28.0",
+## UI/UX Preferences
+- **Text Direction**: Handle all text as LTR (Left-to-Right), even Arabic. Align text to the left.
+- **Blur Effects**: Remove all blur effects (backdrop-filters, expo-blur, etc.) from dashboard cards and progress screens.
+- **Descriptions**: Ensure descriptions in cards are complete and not truncated with dots ("...").
+- **Layout**: Treat the entire application as LTR.
 
-
-"firebase": "^12.11.0",
- احذفه مع ازالة الاحصائيات وكمان شرطها في سياسيه الخصوصصيه في الاعدادت
-وحسن سياسه الخصوصيه معاك عشان تبقا متوافقه مع متجر جوجل وكمان ios 
+## Tasks & Logic
+- **Dashboard Completion**: Fix the completion marker (green dot) in dashboard cards to correctly reflect the storage state.
+- **Privacy Policy**: Keep the privacy policy updated for Google Play and App Store (already optimized in previous steps).
+- **Complexity**: Keep the app lightweight and avoid unnecessary libraries.

@@ -328,6 +328,7 @@ export default function ModuleScreen() {
         <TaskTimer
           title={`جلسة ${moduleInfo.nameAr}`}
           initialSeconds={getRecommendedTime(moduleInfo.id)}
+          task={selectedTask}
           onFinish={() => {
             // Logic after timer finish if needed
           }}

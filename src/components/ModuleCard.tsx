@@ -23,9 +23,21 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
 
   const taskSelections = useSelectionStore((state) => state.taskSelections);
-  const getModuleStats = useSelectionStore((state) => state.getModuleStats);
-  const stats = getModuleStats(moduleInfo.id);
-  const hasSelections = stats.totalSelections > 0;
+  const todayStr = new Date().toDateString();
+  
+  const dailyModuleSelections = taskSelections.filter(
+    (s) => s.module === moduleInfo.id && new Date(s.createdAt).toDateString() === todayStr
+  );
+  
+  const completedCount = dailyModuleSelections.filter((s) => s.isCompleted).length;
+  const totalSelections = dailyModuleSelections.length;
+  const hasSelections = totalSelections > 0;
+  const completionPct = hasSelections ? completedCount / totalSelections : 0;
+  
+  const stats = {
+    totalSelections,
+    completedCount,
+  };
 
   return (
     <TouchableOpacity
@@ -33,67 +45,54 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
       activeOpacity={0.8}
       style={styles.card}
     >
-      <View style={styles.gradient}>
-        <View style={styles.header}>
-          <View
-            style={[
-              styles.iconWrapper,
-              { backgroundColor: `${moduleInfo.color}15` },
-            ]}
-          >
-            <Ionicons
-              name={moduleInfo.icon as any}
-              size={24}
-              color={moduleInfo.color}
-            />
-          </View>
-          {hasSelections && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {stats.completedCount}/{stats.totalSelections}
-              </Text>
-            </View>
-          )}
+      <View style={styles.header}>
+        <View
+          style={[
+            styles.iconWrapper,
+            { backgroundColor: `${moduleInfo.color}12` },
+          ]}
+        >
+          <Ionicons
+            name={moduleInfo.icon as any}
+            size={22}
+            color={moduleInfo.color}
+          />
         </View>
-
-        <View style={styles.content}>
-          <Text style={styles.title} numberOfLines={1}>
-            {moduleInfo.nameAr}
-          </Text>
-          <Text style={styles.subtitle}>{moduleInfo.description}</Text>
-        </View>
-
-        <View style={styles.footer}>
-          {stats.lastActivity ? (
-            <View style={styles.metaRow}>
-              <Ionicons
-                name="time-outline"
-                size={12}
-                color={Colors.textTertiary}
-              />
-              <Text style={styles.metaText}>
-                النشاط الأخير:{" "}
-                {new Date(stats.lastActivity).toLocaleDateString("ar-EG", {
-                  month: "short",
-                  day: "numeric",
-                })}
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.metaRow}>
-              <Text
+        
+        {/* Modern Mini Circular Indicator */}
+        <View style={styles.miniRingBg}>
+            <View 
                 style={[
-                  styles.metaText,
-                  { color: Colors.textTertiary, fontStyle: "italic" },
-                ]}
-              >
-                لم يتم إضافة أوراد بعد
-              </Text>
-            </View>
-          )}
-
-          <Ionicons name="chevron-back" size={16} color={Colors.textTertiary} />
+                    styles.miniRingFill, 
+                    { 
+                        height: `${completionPct * 100}%`, 
+                        backgroundColor: completionPct === 1 ? Colors.success : moduleInfo.color 
+                    }
+                ]} 
+            />
+            {completionPct === 1 && (
+                <View style={styles.doneTick}>
+                    <Ionicons name="checkmark" size={8} color="#FFF" />
+                </View>
+            )}
         </View>
+      </View>
+
+      <View style={styles.content}>
+        <Text style={styles.title}>
+          {moduleInfo.nameAr}
+        </Text>
+        <Text style={styles.subtitle}>
+           {moduleInfo.description}
+        </Text>
+      </View>
+
+      <View style={styles.footer}>
+        <View style={styles.statsTextWrap}>
+            <Text style={styles.statsValue}>{stats.completedCount}/{stats.totalSelections}</Text>
+            <Text style={styles.statsLabel}>مكتمل</Text>
+        </View>
+        <Ionicons name="chevron-back" size={12} color={Colors.textTertiary} />
       </View>
     </TouchableOpacity>
   );
@@ -102,81 +101,71 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
 const getStyles = (Colors: any) =>
   StyleSheet.create({
     card: {
-      width: "48%", // Flexible grid item width
+      width: "48%",
+      backgroundColor: Colors.surface,
+      borderRadius: 24,
+      borderWidth: 1.5,
+      borderColor: Colors.border,
+      padding: Spacing.lg,
       marginBottom: Spacing.md,
-      borderRadius: 20, 
-      backgroundColor: Colors.glass, 
-      overflow: "hidden", 
-      borderWidth: 1,
-      borderColor: Colors.glassBorder,
-      // Zero shadow as requested, matching the explanation button style
-    },
-    gradient: {
-      flex: 1,
-      padding: Spacing.md,
     },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
-      alignItems: "flex-start",
+      alignItems: "center",
       marginBottom: Spacing.md,
     },
     iconWrapper: {
-      width: 44,
-      height: 44,
-      borderRadius: BorderRadius.lg,
+      width: 40,
+      height: 40,
+      borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
     },
-    badge: {
-      backgroundColor: Colors.primaryMuted,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: BorderRadius.sm,
-      borderWidth: 0.5,
-      borderColor: `${Colors.primary}30`,
+    miniRingBg: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: `${Colors.border}30`,
     },
-    badgeText: {
-      fontFamily: Typography.heading,
-      fontSize: 10,
-      color: Colors.primary,
+    miniRingFill: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 5,
     },
-    content: {
-      flex: 1,
-      marginBottom: Spacing.md,
+    doneTick: {
+        position: 'absolute',
+        top: -2,
+        right: -2,
+        backgroundColor: Colors.success,
+        borderRadius: 4,
+        padding: 1,
     },
+    content: { marginBottom: Spacing.md },
     title: {
       fontFamily: Typography.heading,
-      fontSize: Typography.base,
+      fontSize: 15,
+      fontWeight: 'bold',
       color: Colors.textPrimary,
       marginBottom: 2,
-      textAlign: "left",
+      textAlign: "left", // Force LTR
     },
     subtitle: {
       fontFamily: Typography.body,
-      fontSize: Typography.xs,
+      fontSize: 10,
       color: Colors.textSecondary,
-      lineHeight: Typography.xs * 1.5,
-      textAlign: "left",
+      lineHeight: 14,
+      textAlign: "left", // Force LTR
     },
     footer: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      borderTopWidth: 1,
-      borderTopColor: Colors.glassBorder,
       paddingTop: Spacing.md,
-      marginTop: 2,
+      borderTopWidth: 1,
+      borderTopColor: Colors.border,
     },
-    metaRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      flex: 1,
-    },
-    metaText: {
-      fontFamily: Typography.body,
-      fontSize: 8,
-      color: Colors.textTertiary,
-    },
+    statsTextWrap: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    statsValue: { fontSize: 10, fontWeight: 'bold', color: Colors.textPrimary },
+    statsLabel: { fontSize: 8, color: Colors.textTertiary },
   });

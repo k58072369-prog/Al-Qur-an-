@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Vibration } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../theme';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Vibration, View } from 'react-native';
+import { getSurahById, SURAHS } from '../data/quranMeta';
+import { BorderRadius, Shadow, Spacing, Typography, useTheme } from '../theme';
+import { TaskSelection } from '../types';
 import { formatTime } from '../utils/helpers';
 
 type TaskTimerProps = {
@@ -9,16 +11,54 @@ type TaskTimerProps = {
   onFinish: () => void;
   onClose: () => void;
   title: string;
+  task?: TaskSelection;
 };
 
-export function TaskTimer({ initialSeconds, onFinish, onClose, title }: TaskTimerProps) {
+const STROKE_WIDTH = 12;
+
+export function TaskTimer({ initialSeconds, onFinish, onClose, title, task }: TaskTimerProps) {
   const Colors = useTheme();
   const [seconds, setSeconds] = useState(initialSeconds);
   const [isActive, setIsActive] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   
+  // New States for enhanced session control
+  const [currentRep, setCurrentRep] = useState(0);
+  const [currentAyah, setCurrentAyah] = useState<{surahId: number, ayah: number} | null>(null);
+  const [currentPage, setCurrentPage] = useState<number | null>(null);
+  const [pageRange, setPageRange] = useState<{min: number, max: number}>({ min: 1, max: 604 });
+
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  // Initialize from task if available
+  useEffect(() => {
+    if (task && task.ranges.length > 0) {
+      const firstRange = task.ranges[0];
+      if (firstRange.type === 'surah' && firstRange.surahId) {
+        setCurrentAyah({ surahId: firstRange.surahId, ayah: firstRange.startAyah || 1 });
+      }
+      
+      // Calculate min/max pages from all ranges
+      const allPages: number[] = [];
+      task.ranges.forEach(r => {
+        if (r.type === 'page') {
+          for (let p = r.start; p <= r.end; p++) allPages.push(p);
+        } else if (r.type === 'surah' && r.surahId) {
+          const surah = getSurahById(r.surahId);
+          if (surah) {
+            for (let p = surah.startPage; p <= surah.endPage; p++) allPages.push(p);
+          }
+        }
+      });
+
+      if (allPages.length > 0) {
+        const minP = Math.min(...allPages);
+        const maxP = Math.max(...allPages);
+        setPageRange({ min: minP, max: maxP });
+        setCurrentPage(minP);
+      }
+    }
+  }, [task]);
 
   useEffect(() => {
     let interval: any = null;
@@ -53,15 +93,42 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title }: TaskTime
     setSeconds(initialSeconds);
     setIsActive(false);
     setIsFinished(false);
+    setCurrentRep(0);
   };
 
-  const currentProgress = initialSeconds > 0 ? (initialSeconds - seconds) / initialSeconds : 0;
+  const percentage = initialSeconds > 0 ? seconds / initialSeconds : 0;
+
+  // Circular progress clipping logic
+  const getRotation = (p: number) => `${p * 180 - 180}deg`;
+  const rightHalfPct = percentage <= 0.5 ? percentage * 2 : 1;
+  const leftHalfPct = percentage > 0.5 ? (percentage - 0.5) * 2 : 0;
+
+  const handleNextAyah = () => {
+    setCurrentAyah(prev => {
+      if (!prev) return { surahId: 1, ayah: 1 };
+      const surah = getSurahById(prev.surahId);
+      if (surah && prev.ayah < surah.ayahCount) {
+        return { ...prev, ayah: prev.ayah + 1 };
+      }
+      return prev;
+    });
+    setCurrentRep(0);
+  };
+
+  const handlePrevAyah = () => {
+    setCurrentAyah(prev => {
+      if (!prev || prev.ayah <= 1) return prev;
+      return { ...prev, ayah: prev.ayah - 1 };
+    });
+    setCurrentRep(0);
+  };
 
   return (
     <View style={styles.overlay}>
-      <View 
-         
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
         style={[styles.container, { backgroundColor: Colors.background }]}
+        showsVerticalScrollIndicator={false}
       >
         {/* Background Decorative Circles */}
         <View style={[styles.decorCircle, { top: -50, left: -50, backgroundColor: Colors.primarySubtle }]} />
@@ -79,27 +146,168 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title }: TaskTime
              </Text>
           </View>
         </View>
+
+        {/* Initial Setup Section - Only visible before start */}
+        {!isActive && !isFinished && (
+          <View style={styles.setupCard}>
+            <Text style={[styles.setupTitle, { color: Colors.textSecondary }]}>إعداد البداية</Text>
+            <View style={styles.setupRow}>
+              <View style={styles.setupItem}>
+                <Text style={styles.setupLabel}>رقم الآية</Text>
+                <TextInput
+                  style={[styles.setupInput, { color: Colors.textPrimary, borderColor: Colors.border }]}
+                  keyboardType="numeric"
+                  placeholder="رقم.."
+                  placeholderTextColor={Colors.textTertiary}
+                  value={currentAyah ? currentAyah.ayah.toString() : ""}
+                  onChangeText={(val) => {
+                    const num = parseInt(val);
+                    if (!isNaN(num)) {
+                      setCurrentAyah(prev => ({ surahId: prev?.surahId || 1, ayah: num }));
+                    } else if (val === "") {
+                      setCurrentAyah(prev => prev ? { ...prev, ayah: 0 } : null);
+                    }
+                  }}
+                />
+              </View>
+              <View style={styles.setupItem}>
+                <Text style={styles.setupLabel}>رقم الصفحة</Text>
+                <TextInput
+                  style={[styles.setupInput, { color: Colors.textPrimary, borderColor: Colors.border }]}
+                  keyboardType="numeric"
+                  placeholder="رقم.."
+                  placeholderTextColor={Colors.textTertiary}
+                  value={currentPage ? currentPage.toString() : ""}
+                  onChangeText={(val) => {
+                    const num = parseInt(val);
+                    if (!isNaN(num)) {
+                      setCurrentPage(num);
+                    } else if (val === "") {
+                      setCurrentPage(null);
+                    }
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        )}
         
         <Animated.View style={[
           styles.timerContainer, 
           { transform: [{ scale: pulseAnim }] }
         ]}>
-          <View style={[styles.progressBackground, { borderColor: Colors.borderLight }]}>
-             {/* Progress simulation with shadow/border */}
-             <View style={[
-                styles.timerCircle, 
-                { 
-                  borderColor: isActive ? Colors.primary : Colors.border,
-                  backgroundColor: Colors.glassElevated,
-                }
-              ]}>
-                <Text style={[styles.timeText, { color: isFinished ? Colors.success : Colors.textPrimary }]}>
-                  {formatTime(seconds)}
-                </Text>
-                <Text style={[styles.remainingLabel, { color: Colors.textTertiary }]}>المتبقي</Text>
+          <View style={styles.circularContainer}>
+            {/* Background Track Ring */}
+            <View style={[styles.trackRing, { borderColor: Colors.borderLight }]} />
+
+            {/* Right Half */}
+            <View style={styles.halfContainer}>
+              <View style={[styles.halfInner, { overflow: 'hidden' }]}>
+                <View style={[
+                  styles.progressHalf, 
+                  { 
+                    borderColor: 'transparent', 
+                    borderRightColor: Colors.primary, 
+                    borderTopColor: Colors.primary,
+                    transform: [{ rotate: '-45deg' }, { rotate: getRotation(rightHalfPct) }]
+                  }
+                ]} />
               </View>
+            </View>
+
+            {/* Left Half */}
+            <View style={[styles.halfContainer, { flexDirection: 'row' }]}>
+              <View style={[styles.halfInner, { overflow: 'hidden' }]}>
+                <View style={[
+                  styles.progressHalf, 
+                  { 
+                    borderColor: 'transparent', 
+                    borderLeftColor: leftHalfPct > 0 ? Colors.primary : 'transparent', 
+                    borderBottomColor: leftHalfPct > 0 ? Colors.primary : 'transparent',
+                    transform: [{ rotate: '-45deg' }, { rotate: getRotation(leftHalfPct) }],
+                    left: 0,
+                    right: undefined
+                  }
+                ]} />
+              </View>
+            </View>
+
+            {/* Center Content */}
+            <View style={[styles.timerCircle, { backgroundColor: Colors.surface }]}>
+              <Text style={[styles.timeText, { color: isFinished ? Colors.success : Colors.textPrimary }]}>
+                {formatTime(seconds)}
+              </Text>
+              <Text style={[styles.remainingLabel, { color: Colors.textTertiary }]}>المتبقي</Text>
+            </View>
           </View>
         </Animated.View>
+
+        {/* Dynamic controls for Hifz - Vertical Stack (Reordered) */}
+        <View style={styles.hifzControls}>
+          {currentAyah && (
+            <Text style={[styles.surahName, { color: Colors.primary }]}>
+              {getSurahById(currentAyah.surahId)?.nameAr}
+            </Text>
+          )}
+
+          <View style={styles.hifzStack}>
+             {/* 1. Page Control with Range Logic */}
+             <View style={styles.stackedItem}>
+                <Text style={[styles.hifzLabel, { color: Colors.textTertiary }]}>رقم الصفحة</Text>
+                <View style={styles.counterRow}>
+                  <TouchableOpacity 
+                    onPress={() => setCurrentPage(prev => prev ? Math.max(pageRange.min, prev - 1) : pageRange.min)} 
+                    style={[styles.largeMiniBtn, currentPage === pageRange.min && { opacity: 0.3 }]}
+                    disabled={currentPage === pageRange.min}
+                  >
+                    <Ionicons name="remove-circle-outline" size={24} color={Colors.textPrimary} />
+                  </TouchableOpacity>
+                  <Text style={[styles.hifzValueLarge, { color: Colors.textPrimary }]}>{currentPage || '-'}</Text>
+                  <TouchableOpacity 
+                    onPress={() => setCurrentPage(prev => prev ? Math.min(pageRange.max, prev + 1) : pageRange.min)} 
+                    style={[styles.largeMiniBtn, currentPage === pageRange.max && { opacity: 0.3 }]}
+                    disabled={currentPage === pageRange.max}
+                  >
+                    <Ionicons name="add-circle-outline" size={24} color={Colors.textPrimary} />
+                  </TouchableOpacity>
+                </View>
+             </View>
+
+             <View style={styles.stackDivider} />
+
+             {/* 2. Ayah Control */}
+             <View style={styles.stackedItem}>
+                <Text style={[styles.hifzLabel, { color: Colors.textTertiary }]}>رقم الآية</Text>
+                <View style={styles.counterRow}>
+                  <TouchableOpacity onPress={handlePrevAyah} style={styles.largeMiniBtn}>
+                    <Ionicons name="remove-circle-outline" size={24} color={Colors.textPrimary} />
+                  </TouchableOpacity>
+                  <Text style={[styles.hifzValueLarge, { color: Colors.textPrimary }]}>
+                    {currentAyah ? currentAyah.ayah : '-'}
+                  </Text>
+                  <TouchableOpacity onPress={handleNextAyah} style={styles.largeMiniBtn}>
+                    <Ionicons name="add-circle-outline" size={24} color={Colors.textPrimary} />
+                  </TouchableOpacity>
+                </View>
+             </View>
+
+             <View style={styles.stackDivider} />
+
+             {/* 3. Repetition Control */}
+             <View style={styles.stackedItem}>
+                <Text style={[styles.hifzLabel, { color: Colors.textTertiary }]}>عدد التكرار</Text>
+                <View style={styles.counterRow}>
+                  <TouchableOpacity onPress={() => setCurrentRep(prev => Math.max(0, prev - 1))} style={styles.largeMiniBtn}>
+                    <Ionicons name="remove-circle-outline" size={24} color={Colors.textPrimary} />
+                  </TouchableOpacity>
+                  <Text style={[styles.hifzValueLarge, { color: Colors.textPrimary }]}>{currentRep}x</Text>
+                  <TouchableOpacity onPress={() => setCurrentRep(prev => prev + 1)} style={styles.largeMiniBtn}>
+                    <Ionicons name="add-circle-outline" size={24} color={Colors.textPrimary} />
+                  </TouchableOpacity>
+                </View>
+             </View>
+          </View>
+        </View>
 
         <View style={styles.controls}>
           {!isFinished ? (
@@ -134,7 +342,8 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title }: TaskTime
             {isActive ? "استمر في التركيز، الله يبارك في وقتك" : "اضغط ابدأ عندما تكون مستعداً للبدء"}
           </Text>
         </View>
-      </View>
+        <View style={{ height: 100 }} />
+      </ScrollView>
     </View>
   );
 }
@@ -146,9 +355,11 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  scrollContent: {
     alignItems: 'center',
-    justifyContent: 'center',
     padding: Spacing.xl,
+    paddingTop: 80,
   },
   decorCircle: {
     position: 'absolute',
@@ -186,24 +397,49 @@ const styles = StyleSheet.create({
     fontWeight: Typography.semibold,
   },
   timerContainer: {
-    marginBottom: Spacing["5xl"],
+    marginBottom: Spacing.xl,
+    alignItems: 'center',
   },
-  progressBackground: {
+  circularContainer: {
+    width: 260,
+    height: 260,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  trackRing: {
+    position: 'absolute',
     width: 260,
     height: 260,
     borderRadius: 130,
-    borderWidth: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadow.lg,
+    borderWidth: STROKE_WIDTH,
+  },
+  halfContainer: {
+    position: 'absolute',
+    width: 260,
+    height: 260,
+    flexDirection: 'row-reverse',
+  },
+  halfInner: {
+    width: 130,
+    height: 260,
+  },
+  progressHalf: {
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    borderWidth: STROKE_WIDTH,
+    position: 'absolute',
+    right: 0,
   },
   timerCircle: {
-    width: 230,
-    height: 230,
-    borderRadius: 115,
-    borderWidth: 1,
+    width: 260 - STROKE_WIDTH * 2,
+    height: 260 - STROKE_WIDTH * 2,
+    borderRadius: (260 - STROKE_WIDTH * 2) / 2,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 10,
+    ...Shadow.lg,
   },
   timeText: {
     fontFamily: 'System', 
@@ -214,6 +450,60 @@ const styles = StyleSheet.create({
   remainingLabel: {
     fontFamily: Typography.body, fontSize: Typography.sm,
     marginTop: -5,
+  },
+  hifzControls: {
+    width: '90%',
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    padding: Spacing.lg,
+    borderRadius: 24,
+    marginBottom: Spacing.xl,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  hifzStack: {
+    width: '100%',
+    gap: Spacing.md,
+    marginTop: Spacing.sm,
+  },
+  stackedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingVertical: 4,
+  },
+  hifzLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  hifzValueLarge: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    minWidth: 50,
+    textAlign: 'center',
+  },
+  counterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  largeMiniBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stackDivider: {
+    height: 1,
+    width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.05)',
+  },
+  surahName: {
+    fontSize: 16,
+    fontWeight: '900',
+    marginBottom: Spacing.sm,
   },
   controls: {
     width: '100%',
@@ -243,8 +533,7 @@ const styles = StyleSheet.create({
     fontFamily: Typography.body, fontSize: Typography.sm,
   },
   footer: {
-    position: 'absolute',
-    bottom: 60,
+    marginTop: Spacing.xl,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
@@ -257,5 +546,42 @@ const styles = StyleSheet.create({
   hint: {
     fontFamily: Typography.body, fontSize: Typography.sm,
     textAlign: 'center',
+  },
+  setupCard: {
+    width: '90%',
+    backgroundColor: 'rgba(0,0,0,0.02)',
+    padding: Spacing.md,
+    borderRadius: 20,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  setupTitle: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+  setupRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  setupItem: {
+    flex: 1,
+  },
+  setupLabel: {
+    fontSize: 11,
+    color: '#888',
+    marginBottom: 4,
+  },
+  setupInput: {
+    height: 48,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    fontWeight: '700',
+    backgroundColor: 'rgba(255,255,255,0.5)',
   }
 });

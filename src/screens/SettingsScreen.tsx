@@ -755,38 +755,6 @@ export default function SettingsScreen() {
               color={Colors.primary}
             />
           </TouchableOpacity>
-          <View style={styles.divider} />
-          <TouchableOpacity
-            style={styles.infoRow}
-            onPress={() => {
-              const next =
-                state.settings.memorizationMethod === "standard"
-                  ? "linking"
-                  : "standard";
-              dispatch({
-                type: "UPDATE_SETTINGS",
-                payload: { memorizationMethod: next },
-              });
-            }}
-          >
-            <View>
-              <Text style={styles.label}>منهجية الحفظ</Text>
-              <Text style={styles.value}>
-                {state.settings.memorizationMethod === "standard"
-                  ? "النموذج التقليدي (صفحات)"
-                  : "نموذج الربط المتسلسل (للمتون)"}
-              </Text>
-            </View>
-            <Ionicons
-              name={
-                state.settings.memorizationMethod === "standard"
-                  ? "layers-outline"
-                  : "link-outline"
-              }
-              size={18}
-              color={Colors.primary}
-            />
-          </TouchableOpacity>
         </View>
 
         <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
@@ -814,7 +782,7 @@ export default function SettingsScreen() {
         </View>
 
         <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
-          تنبيهات خماسية الحفظ
+          تنبيهات مفاتيح تثبيت القرآن
         </Text>
 
         <View style={{ marginBottom: Spacing.md, paddingHorizontal: Spacing.xs }}>

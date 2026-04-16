@@ -2,7 +2,7 @@ import { Plan, PageProgress, TOTAL_QURAN_PAGES, DailyProgress } from '../types';
 import { todayISO, addDays } from '../utils/helpers';
 
 /**
- * Service to calculate daily tasks based on the "Fivefold Memorization" (خماسية الحفظ) method.
+ * Service to calculate daily tasks based on the "Quran Anchoring Keys" (مفاتيح تثبيت القرآن) method.
  */
 export const KhumasiHifzService = {
   /**

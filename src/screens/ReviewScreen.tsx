@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Shadow, Spacing, useTheme, Typography } from "../theme";
+import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
 
 const { width } = Dimensions.get("window");
 
@@ -19,53 +19,46 @@ const AKHIRA_VIRTUES = [
     id: "elevation",
     title: "رفع الدرجات يوم القيامة",
     desc: "عن النبي ﷺ: «اقرؤوا القرآن فإنه يأتي يوم القيامة شفيعاً لأصحابه» (رواه مسلم). التلاوة المتواصلة للقرآن في الدنيا ترفع منزلتك في أعلى الجنان.",
-    icon: "trending-up-outline",
-    color: "#6366F1",
+    icon: "trending-up",
+    color: "#8B5CF6", // Purple
   },
   {
     id: "intercession",
-    title: "شفاعة القرآن لأصحابه",
+    title: "القرآن شفيع لك",
     desc: "قال ﷺ: «يأتي القرآن يوم القيامة شفيعاً لصاحبه» (رواه مسلم). القرآن يكون ناصرك والمحاجج عنك ويشفع لك بين يدي الله عز وجل.",
-    icon: "shield-half-outline",
-    color: "#10B981",
+    icon: "shield-checkmark",
+    color: "#10B981", // Emerald
   },
   {
     id: "companions",
     title: "مع السفرة الكرام البررة",
-    desc: "قال ﷺ: «الماهر بالقرآن مع السفرة الكرام البررة» (رواه البخاري ومسلم). التمكن من تلاوة كتاب الله وحفظه يجعلك في أعظم المنازل مع الملائكة.",
-    icon: "star-outline",
-    color: "#8B5CF6",
+    desc: "قال ﷺ: «الماهر بالقرآن مع السفرة الكرام البررة» (رواه البخاري ومسلم). التمكن من التلاوة يجعلك في أعظم المنازل مع الملائكة.",
+    icon: "star",
+    color: "#F59E0B", // Amber
   },
 ];
 
 const PARENT_VIRTUE = {
-  title: "سوار الكرامة وشرف الوالدين",
+  title: "سوار الكرامة للوالدين",
   desc: "أبهى صور البر وأسمى درجات الوفاء لمن ربيّاك؛ أن تقرأ القرآن وتعمل به حتى يُلبس والديك تاجاً من نور يوم القيامة، ضياؤه يفوق ضياء الشمس.",
-  icon: "ribbon-outline",
-  color: "#F59E0B",
+  icon: "ribbon",
+  color: "#EC4899", // Pink
 };
 
 const DUNYA_VIRTUES = [
   {
     id: "intellect",
     title: "صفاء الذهن وقوة العقل",
-    desc: "عن عبد الله بن مسعود رضي الله عنه: «من قرأ القرآن فحفظه وتدبره فهو أعقل الناس». حفظ الوحي يورث نوراً في العقل وقوة في الفهم.",
-    icon: "flash-outline",
-    color: "#3B82F6",
+    desc: "«من قرأ القرآن فحفظه وتدبره فهو أعقل الناس». حفظ الوحي يورث نوراً في العقل وقوة في الفهم لا تضاهى.",
+    icon: "bulb",
+    color: "#3B82F6", // Blue
   },
   {
     id: "peace",
-    title: "سكينة القلب وطمأنينة النفس",
-    desc: "قال تعالى: «ألا بذكر الله تطمئن القلوب».. القرآن هو أعظم ذكر الله، وهو الدواء الوحيد للقلق والشتات النفسي في هذا العصر.",
-    icon: "heart-outline",
-    color: "#EC4899",
-  },
-  {
-    id: "barakah",
-    title: "بركة العلم وتيسير العمل",
-    desc: "قال ﷺ: «خيركم من تعلم القرآن وعلمه». الانشغال بالقرآن يبارك لك في حياتك ووقتك ويفتح لك أبواب الخير والرزق من حيث لا تحتسب.",
-    icon: "leaf-outline",
-    color: "#22C55E",
+    title: "سكينة القلب والطمأنينة",
+    desc: "«ألا بذكر الله تطمئن القلوب».. القرآن هو أعظم ذكر الله، وهو الدواء الشافي للقلق والشتات النفسي.",
+    icon: "heart",
+    color: "#06B6D4", // Cyan
   },
 ];
 
@@ -76,11 +69,7 @@ const SCHOLAR_SAYINGS = [
   },
   {
     text: "القلوب أوعية، فاشغلوها بالقرآن منذ الصغر، فإنه نقش في القلب ونور لا يزول بمرور الزمان.",
-    author: "عبد الله بن مسعود رضي الله عنه",
-  },
-  {
-    text: "من داوم على القرآن لم يرد إلى أرذل العمر، ويمتاز بحضور الذهن وسهولة البيان ما دام حياً.",
-    author: "الإمام عكرمة رحمه الله",
+    author: "ابن مسعود رضي الله عنه",
   },
 ];
 
@@ -100,148 +89,163 @@ export default function ReviewScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View
-        
-        style={StyleSheet.absoluteFill}
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: Colors.background },
+        ]}
       />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Modern Minimal Header */}
+        {/* Creative Hero Section */}
         <View style={styles.heroSection}>
-          <View style={styles.heroHeader}>
-            <View style={styles.heroIconBox}>
-              <Ionicons
-                name="bookmark-outline"
-                size={30}
-                color={Colors.primary}
-              />
-            </View>
-            <View style={styles.heroTextContent}>
-              <Text style={styles.heroTitle}>مقامات حملة القرآن الكريم</Text>
-              <Text style={styles.heroSubtitle}>
-                بشائر وحقائق إيمانية حول المنزلة الرفيعة لحافظ كتاب الله عز وجل
-              </Text>
-            </View>
+          <View style={styles.heroIconWrap}>
+            <Ionicons name="sparkles" size={32} color={Colors.gold} />
           </View>
+          <Text style={styles.heroTitle}>مقامات أهل القرآن</Text>
+          <Text style={styles.heroSubtitle}>
+            بشائر وحقائق إيمانية حول المنزلة الرفيعة لحافظ كتاب الله عز وجل في
+            الدنيا والآخرة
+          </Text>
         </View>
 
-        {/* Section: Rewards */}
+        {/* List of Akhira Virtues */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>أجور الآخرة والرفعة</Text>
         </View>
 
-        {AKHIRA_VIRTUES.map((v, i) => (
-          <View key={v.id} style={styles.virtueCard}>
-            <View
-              style={[styles.cardIconBox, { backgroundColor: `${v.color}10` }]}
-            >
-              <Ionicons name={v.icon as any} size={24} color={v.color} />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{v.title}</Text>
-              <Text style={styles.cardDesc}>{v.desc}</Text>
-            </View>
-          </View>
-        ))}
-
-        {/* Highlight Section for Parents */}
-        <View style={styles.parentCard}>
-          <View
-            
-            style={styles.parentContent}
-          >
-            <View style={styles.parentIconBadge}>
-              <Ionicons
-                name={PARENT_VIRTUE.icon as any}
-                size={34}
-                color={PARENT_VIRTUE.color}
-              />
-            </View>
-            <Text style={styles.parentTitle}>{PARENT_VIRTUE.title}</Text>
-            <Text style={styles.parentDesc}>{PARENT_VIRTUE.desc}</Text>
-          </View>
-        </View>
-
-        {/* Section: Worldly Benefits */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>بركة القرآن في حياتك</Text>
-        </View>
-
-        {DUNYA_VIRTUES.map((v, idx) => (
-          <View key={v.id} style={styles.virtueCard}>
-            <View
-              style={[styles.cardIconBox, { backgroundColor: `${v.color}10` }]}
-            >
-              <Ionicons name={v.icon as any} size={24} color={v.color} />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{v.title}</Text>
-              <Text style={styles.cardDesc}>{v.desc}</Text>
-            </View>
-          </View>
-        ))}
-
-        {/* Quotes Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>آثار السلف وأقوالهم</Text>
-        </View>
-
-        <View style={styles.quotesWrap}>
-          {SCHOLAR_SAYINGS.map((quote, idx) => (
-            <View key={idx} style={styles.quoteBox}>
-              <Text style={styles.quoteText}>{quote.text}</Text>
-              <View style={styles.quoteMeta}>
-                <View style={styles.quoteLine} />
-                <Text style={styles.quoteAuthor}>{quote.author}</Text>
+        <View style={styles.virtuesContainer}>
+          {AKHIRA_VIRTUES.map((v, i) => (
+            <View key={v.id} style={styles.flatRow}>
+              <View
+                style={[styles.iconCircle, { backgroundColor: `${v.color}15` }]}
+              >
+                <Ionicons name={v.icon as any} size={24} color={v.color} />
+              </View>
+              <View style={styles.flatContent}>
+                <Text style={styles.flatTitle}>{v.title}</Text>
+                <Text style={styles.flatDesc}>{v.desc}</Text>
               </View>
             </View>
           ))}
         </View>
 
-        {/* Bottom Action Card */}
-        <View style={styles.actionSection}>
-          <TouchableOpacity
+        {/* Special Parents Highlight */}
+        <View style={styles.parentFeature}>
+          <View style={[StyleSheet.absoluteFill, styles.glassOverlay]} />
+          <View
             style={[
-              styles.actionButton,
-              tappedIntention && { borderColor: Colors.success },
+              styles.parentIconBadge,
+              { backgroundColor: `${PARENT_VIRTUE.color}20` },
             ]}
-            onPress={handleRenewIntention}
-            activeOpacity={0.8}
           >
-            <View style={styles.actionInner}>
-              <Ionicons
-                name={
-                  tappedIntention
-                    ? "checkmark-circle"
-                    : "refresh-circle-outline"
-                }
-                size={34}
-                color={tappedIntention ? Colors.success : Colors.primary}
-              />
-              <View style={styles.actionTextWrap}>
-                <Text
-                  style={[
-                    styles.actionTitle,
-                    tappedIntention && { color: Colors.success },
-                  ]}
-                >
-                  {tappedIntention
-                    ? "تم تجديد النية لله"
-                    : "تحديد النية والإخلاص"}
-                </Text>
-                <Text style={styles.actionDesc}>
-                  {tappedIntention
-                    ? "جزاك الله خيراً، استمر على هذا الطريق."
-                    : "اضغط هنا لتذكر نفسك بالإخلاص في حفظك."}
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+            <Ionicons
+              name={PARENT_VIRTUE.icon as any}
+              size={28}
+              color={PARENT_VIRTUE.color}
+            />
+          </View>
+          <View style={styles.parentTextWrap}>
+            <Text style={[styles.parentTitle, { color: PARENT_VIRTUE.color }]}>
+              {PARENT_VIRTUE.title}
+            </Text>
+            <Text style={styles.parentDesc}>{PARENT_VIRTUE.desc}</Text>
+          </View>
         </View>
 
-        <View style={{ height: 120 }} />
+        {/* Dunya Virtues - Minimal Cards Row */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>بركة القرآن في دنياك</Text>
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.horizontalScroll}
+        >
+          {DUNYA_VIRTUES.map((v) => (
+            <View key={v.id} style={styles.miniCard}>
+              <View
+                style={[styles.miniIcon, { backgroundColor: `${v.color}15` }]}
+              >
+                <Ionicons name={v.icon as any} size={22} color={v.color} />
+              </View>
+              <Text style={styles.miniTitle}>{v.title}</Text>
+              <Text style={styles.miniDesc}>{v.desc}</Text>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Quotes Section */}
+        <View style={[styles.sectionHeader, { marginTop: Spacing.xl }]}>
+          <Text style={styles.sectionTitle}>آثار السلف وأقوالهم</Text>
+        </View>
+
+        <View style={styles.quotesWrap}>
+          {SCHOLAR_SAYINGS.map((quote, idx) => (
+            <View key={idx} style={styles.quoteRow}>
+              <Ionicons
+                name="chatbubbles"
+                size={24}
+                color={`${Colors.primary}40`}
+                style={styles.quoteIcon}
+              />
+              <View style={styles.quoteContent}>
+                <Text style={styles.quoteText}>{quote.text}</Text>
+                <Text style={styles.quoteAuthor}>— {quote.author}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Intention Action */}
+        <TouchableOpacity
+          style={[
+            styles.intentionBtn,
+            tappedIntention && {
+              backgroundColor: `${Colors.success}15`,
+              borderColor: Colors.success,
+            },
+          ]}
+          onPress={handleRenewIntention}
+          activeOpacity={0.7}
+        >
+          <View
+            style={[
+              styles.intentionIcon,
+              tappedIntention
+                ? { backgroundColor: Colors.success }
+                : { backgroundColor: Colors.primary },
+            ]}
+          >
+            <Ionicons
+              name={tappedIntention ? "checkmark" : "leaf"}
+              size={20}
+              color="#FFF"
+            />
+          </View>
+          <View style={styles.intentionTextWrap}>
+            <Text
+              style={[
+                styles.intentionTitle,
+                tappedIntention && { color: Colors.success },
+              ]}
+            >
+              {tappedIntention
+                ? "تم تجديد النية لله"
+                : "تجديد النية لكتاب الله"}
+            </Text>
+            <Text style={styles.intentionDesc}>
+              {tappedIntention
+                ? "تقبل الله منك، سدد الله خطاك."
+                : "اضغط هنا لتذكر نفسك بالإخلاص في حفظك."}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <View style={{ height: 100 }} />
       </ScrollView>
     </View>
   );
@@ -250,197 +254,250 @@ export default function ReviewScreen() {
 const getStyles = (Colors: any) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: Colors.background },
-    scrollContent: { paddingBottom: 60 },
+    scrollContent: { paddingBottom: 40 },
 
     heroSection: {
       paddingHorizontal: Spacing.xl,
-      paddingTop: 70,
-      marginBottom: 30,
-    },
-    heroHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: Colors.surface,
-      padding: 20,
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: Colors.glassBorder,
-      ...Shadow.sm,
-    },
-    heroIconBox: {
-      width: 56,
-      height: 56,
-      borderRadius: 20,
-      backgroundColor: `${Colors.primary}08`,
+      paddingTop: 80,
+      paddingBottom: Spacing.xl,
       alignItems: "center",
       justifyContent: "center",
-      marginRight: 16,
     },
-    heroTextContent: { flex: 1, alignItems: "flex-start" },
+    heroIconWrap: {
+      width: 64,
+      height: 64,
+      borderRadius: 20,
+      backgroundColor: `${Colors.gold}15`,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: Spacing.md,
+    },
     heroTitle: {
-      fontFamily: Typography.heading, fontSize: 24,
+      fontFamily: Typography.heading,
+      fontSize: 26,
+      fontWeight: Typography.bold,
       color: Colors.textPrimary,
-      textAlign: "left",
+      textAlign: "center",
+      marginBottom: Spacing.sm,
     },
     heroSubtitle: {
-      fontFamily: Typography.body, fontSize: 12,
+      fontFamily: Typography.body,
+      fontSize: 14,
       color: Colors.textSecondary,
-      marginTop: 4,
-      lineHeight: 18,
-      textAlign: "left",
+      textAlign: "center",
+      lineHeight: 22,
+      paddingHorizontal: Spacing.md,
     },
 
     sectionHeader: {
       paddingHorizontal: Spacing.xl,
-      marginBottom: 16,
-      marginTop: 10,
+      marginBottom: Spacing.md,
+      marginTop: Spacing.lg,
     },
     sectionTitle: {
-      fontFamily: Typography.heading, fontSize: 18,
-      color: Colors.textPrimary,
-      borderLeftWidth: 3,
-      borderLeftColor: Colors.primary,
-      paddingLeft: 10,
+      fontFamily: Typography.heading,
+      fontSize: 18,
+      fontWeight: Typography.bold,
+      color: Colors.primary,
       textAlign: "left",
     },
 
-    virtueCard: {
-      marginHorizontal: Spacing.xl,
-      backgroundColor: Colors.surface,
-      borderRadius: 20,
-      padding: 20,
-      flexDirection: "row",
-      alignItems: "center",
-      borderWidth: 1,
-      borderColor: Colors.borderLight,
-      marginBottom: 12,
-      ...Shadow.sm,
+    virtuesContainer: {
+      paddingHorizontal: Spacing.xl,
     },
-    cardIconBox: {
-      width: 48,
-      height: 48,
-      borderRadius: 14,
+    flatRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      paddingVertical: Spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: Colors.borderLight,
+    },
+    iconCircle: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
       alignItems: "center",
       justifyContent: "center",
-      marginRight: 16,
+      marginRight: Spacing.md,
     },
-    cardContent: { flex: 1, alignItems: "flex-start" },
-    cardTitle: {
-      fontFamily: Typography.heading, fontSize: 16,
+    flatContent: {
+      flex: 1,
+      alignItems: "flex-start",
+    },
+    flatTitle: {
+      fontFamily: Typography.heading,
+      fontSize: 16,
+      fontWeight: Typography.bold,
+      color: Colors.textPrimary,
+      marginBottom: 4,
+      textAlign: "left",
+      width: "100%",
+    },
+    flatDesc: {
+      fontFamily: Typography.body,
+      fontSize: 13,
+      color: Colors.textSecondary,
+      lineHeight: 22,
+      textAlign: "left",
+      width: "100%",
+    },
+
+    parentFeature: {
+      marginHorizontal: Spacing.xl,
+      marginTop: Spacing.xl,
+      marginBottom: Spacing.md,
+      padding: Spacing.lg,
+      borderRadius: BorderRadius.xl,
+      flexDirection: "row",
+      alignItems: "center",
+      overflow: "hidden",
+      borderWidth: 1,
+      borderColor: Colors.glassBorder,
+      backgroundColor: Colors.glass,
+    },
+    glassOverlay: {
+      backgroundColor: Colors.glass,
+      opacity: 0.5,
+    },
+    parentIconBadge: {
+      width: 56,
+      height: 56,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: Spacing.md,
+    },
+    parentTextWrap: {
+      flex: 1,
+      alignItems: "flex-start",
+    },
+    parentTitle: {
+      fontFamily: Typography.heading,
+      fontSize: 17,
+      fontWeight: Typography.bold,
+      marginBottom: 4,
+      textAlign: "left",
+      width: "100%",
+    },
+    parentDesc: {
+      fontFamily: Typography.body,
+      fontSize: 13,
+      color: Colors.textSecondary,
+      lineHeight: 20,
+      textAlign: "left",
+    },
+
+    horizontalScroll: {
+      paddingHorizontal: Spacing.xl,
+      gap: Spacing.md,
+      flexDirection: "row",
+    },
+    miniCard: {
+      width: width * 0.7,
+      backgroundColor: Colors.glass,
+      borderWidth: 1,
+      borderColor: Colors.glassBorder,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      alignItems: "flex-start",
+    },
+    miniIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: Spacing.md,
+    },
+    miniTitle: {
+      fontFamily: Typography.heading,
+      fontSize: 15,
+      fontWeight: Typography.bold,
       color: Colors.textPrimary,
       marginBottom: 6,
       textAlign: "left",
+      width: "100%",
     },
-    cardDesc: {
-      fontFamily: Typography.body, fontSize: 13,
+    miniDesc: {
+      fontFamily: Typography.body,
+      fontSize: 13,
       color: Colors.textSecondary,
-      lineHeight: 22,
+      lineHeight: 20,
       textAlign: "left",
-    },
-
-    parentCard: {
-      marginVertical: 20,
-      marginHorizontal: Spacing.xl,
-      borderRadius: 24,
-      backgroundColor: Colors.surface,
-      borderWidth: 1,
-      borderColor: Colors.borderLight,
-      overflow: "hidden",
-      ...Shadow.sm,
-    },
-    parentContent: {
-      padding: 24,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    parentIconBadge: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      backgroundColor: `${PARENT_VIRTUE.color}10`,
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: 16,
-    },
-    parentTitle: {
-      fontFamily: Typography.heading, fontSize: 20,
-      color: Colors.textPrimary,
-      marginBottom: 10,
-      textAlign: "center",
-    },
-    parentDesc: {
-      fontFamily: Typography.body, fontSize: 14,
-      color: Colors.textSecondary,
-      textAlign: "center",
-      lineHeight: 22,
-      paddingHorizontal: 10,
+      width: "100%",
     },
 
     quotesWrap: {
       paddingHorizontal: Spacing.xl,
-      gap: 16,
+      marginTop: Spacing.sm,
     },
-    quoteBox: {
-      backgroundColor: Colors.glass,
-      padding: 20,
-      borderRadius: 20,
+    quoteRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginBottom: Spacing.lg,
+      backgroundColor: Colors.surface,
+      padding: Spacing.md,
+      borderRadius: BorderRadius.lg,
       borderWidth: 1,
-      borderColor: Colors.glassBorder,
+      borderColor: Colors.borderLight,
+    },
+    quoteIcon: {
+      marginRight: Spacing.sm,
+      marginTop: 2,
+    },
+    quoteContent: {
+      flex: 1,
     },
     quoteText: {
-      fontFamily: Typography.body, fontSize: 15,
+      fontFamily: Typography.body,
+      fontSize: 14,
       color: Colors.textPrimary,
-      lineHeight: 25,
+      lineHeight: 24,
       textAlign: "left",
-    },
-    quoteMeta: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "flex-start",
-      marginTop: 12,
-      gap: 8,
-    },
-    quoteLine: {
-      width: 14,
-      height: 1,
-      backgroundColor: Colors.textTertiary,
     },
     quoteAuthor: {
-      fontFamily: Typography.heading, fontSize: 12,
-      color: Colors.textTertiary,
+      fontFamily: Typography.body,
+      fontSize: 12,
+      color: Colors.primary,
+      marginTop: 8,
       textAlign: "left",
+      fontWeight: "bold",
     },
 
-    actionSection: {
-      marginTop: 40,
-      paddingHorizontal: Spacing.xl,
-    },
-    actionButton: {
-      borderRadius: 24,
+    intentionBtn: {
+      marginHorizontal: Spacing.xl,
+      marginTop: Spacing.xl,
+      padding: Spacing.lg,
+      borderRadius: BorderRadius.xl,
       borderWidth: 1,
-      borderColor: Colors.border,
-      backgroundColor: Colors.surface,
-      overflow: "hidden",
-    },
-    actionInner: {
-      padding: 20,
+      borderColor: `${Colors.primary}30`,
+      backgroundColor: Colors.glass,
       flexDirection: "row",
       alignItems: "center",
     },
-    actionTextWrap: {
+    intentionIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: Spacing.md,
+    },
+    intentionTextWrap: {
       flex: 1,
-      marginLeft: 16,
-      alignItems: "flex-start",
     },
-    actionTitle: {
-      fontFamily: Typography.heading, fontSize: 18,
-      color: Colors.textPrimary,
+    intentionTitle: {
+      fontFamily: Typography.heading,
+      fontSize: 16,
+      fontWeight: Typography.bold,
+      color: Colors.primary,
       textAlign: "left",
+      marginBottom: 2,
     },
-    actionDesc: {
-      fontFamily: Typography.body, fontSize: 12,
+    intentionDesc: {
+      fontFamily: Typography.body,
+      fontSize: 12,
       color: Colors.textSecondary,
-      marginTop: 4,
       textAlign: "left",
     },
   });

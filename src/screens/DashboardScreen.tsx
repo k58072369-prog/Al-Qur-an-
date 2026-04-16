@@ -5,23 +5,23 @@ import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Dimensions,
+  Image,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Image,
 } from "react-native";
+import VersionOverlay from "../components/VersionOverlay";
 import { ModuleCard } from "../components/ModuleCard";
 import { StreakBadge } from "../components/StreakBadge";
 import { useAppStore } from "../store/AppStore";
-import { useSelectionStore } from "../store/selectionStore";
 import { UpdateService, UpdateInfo } from "../store/UpdateService";
+import { useSelectionStore } from "../store/selectionStore";
 import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../theme";
 import { MODULES, TaskSelection } from "../types";
 import { getMotivationalMessage } from "../utils/helpers";
-import VersionOverlay from "../components/VersionOverlay";
 
 const { width } = Dimensions.get("window");
 
@@ -33,7 +33,9 @@ export default function DashboardScreen() {
   const { user, streak, plan } = state;
 
   const [updateInfo, setUpdateInfo] = React.useState<UpdateInfo | null>(null);
-  const [blockType, setBlockType] = React.useState<"disabled" | "force_update" | "optional_update" | null>(null);
+  const [blockType, setBlockType] = React.useState<
+    "disabled" | "force_update" | "optional_update" | null
+  >(null);
 
   const checkVersion = React.useCallback(async () => {
     try {
@@ -52,22 +54,16 @@ export default function DashboardScreen() {
 
   React.useEffect(() => {
     checkVersion();
-    
-    // Optimized Polling: Only poll if the app is currently blocked (Maintenance/Force Update)
-    // This avoids unnecessary network requests during normal usage.
-    if (blockType === 'disabled' || blockType === 'force_update') {
-      const interval = setInterval(checkVersion, 30000); // Check every 30s while blocked
+    if (blockType === "disabled" || blockType === "force_update") {
+      const interval = setInterval(checkVersion, 30000);
       return () => clearInterval(interval);
     }
   }, [checkVersion, blockType]);
-
-
 
   const isLoaded = useSelectionStore((state) => state.isLoaded);
   const loadFromStorage = useSelectionStore((state) => state.loadFromStorage);
   const taskSelections = useSelectionStore((state) => state.taskSelections);
 
-  // Load selections when Dashboard mounts
   useEffect(() => {
     if (!isLoaded) {
       loadFromStorage();
@@ -84,32 +80,33 @@ export default function DashboardScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 500,
+        duration: 800,
         useNativeDriver: true,
       }),
-      Animated.timing(slideAnim, {
+      Animated.spring(slideAnim, {
         toValue: 0,
-        duration: 500,
+        friction: 8,
+        tension: 40,
         useNativeDriver: true,
       }),
     ]).start();
   }, []);
 
-
-
-
   const handleModulePress = (id: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     router.push({ pathname: "/module", params: { id } } as any);
   };
 
-  // Calculate daily completion for the Fivefold Memorization (Housons)
   const todayStr = new Date().toDateString();
-  const dailySelections = taskSelections.filter((s: TaskSelection) => new Date(s.createdAt).toDateString() === todayStr);
-  const completedHousons = dailySelections.filter((s: TaskSelection) => s.isCompleted).length;
-  const totalHousonsCount = 5; // The 5 core system modules
-  const dailyCompletionPct = dailySelections.length > 0 ? completedHousons / dailySelections.length : 0;
-  // Expected Completion Logic
+  const dailySelections = taskSelections.filter(
+    (s: TaskSelection) => new Date(s.createdAt).toDateString() === todayStr,
+  );
+  const completedHousons = dailySelections.filter(
+    (s: TaskSelection) => s.isCompleted,
+  ).length;
+  const totalHousonsCount = 5;
+  const dailyCompletionPct =
+    dailySelections.length > 0 ? completedHousons / dailySelections.length : 0;
+
   const memorizedCount = memorizedPages.length;
   const targetPagesCount = plan?.targetPages.length || 604;
   const remainingCount = targetPagesCount - memorizedCount;
@@ -122,222 +119,118 @@ export default function DashboardScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Subtle background orbs */}
-      <View style={styles.orb1} />
-      <View style={styles.orb2} />
+      {/* Modern Background Accents */}
+      <View style={styles.backgroundAccent} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
-        {/* Header */}
+        {/* New Creative Header */}
         <Animated.View
           style={[
             styles.header,
             { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
           ]}
         >
-          <View style={styles.brandingHeader}>
-            <View style={styles.headerLogoBox}>
-              <Image 
-                source={require("../../assets/images/logo.png")} 
-                style={styles.logoImageHeader} 
-                resizeMode="contain"
-              />
-            </View>
-            <TouchableOpacity
-              style={styles.settingsBtn}
-              onPress={() => router.push("/settings")}
-            >
-              <Ionicons
-                name="settings-outline"
-                size={18}
-                color={Colors.textTertiary}
-              />
-            </TouchableOpacity>
-          </View>
-
-          {updateInfo && blockType && (
-            <VersionOverlay
-              type={blockType}
-              info={updateInfo}
-              onDismiss={() => setBlockType(null)}
-              onRefresh={checkVersion}
+          <View style={styles.topRow}>
+            <Image
+              source={require("../../assets/images/logo.png")}
+              style={styles.headerLogo}
+              resizeMode="contain"
             />
-          )}
-
-          {updateInfo?.hasUpdate && !blockType && (
-            <TouchableOpacity
-              style={styles.updateBanner}
-              onPress={() =>
-                Linking.openURL(
-                  updateInfo.link ||
-                    "https://github.com/mustafa-ahmad-work/khumasiat-al-hifz/releases",
-                )
-              }
-            >
-              <View
-                
-                
-                
-                style={styles.updateGradient}
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                style={styles.iconBtn}
+                onPress={() => router.push("/settings")}
               >
-                <View style={[styles.updateInfo, { flexShrink: 1 }]}>
-                  <Ionicons
-                    name="cloud-download-outline"
-                    size={20}
-                    color="#FFF"
-                  />
-                  <View style={styles.updateTexts}>
-                    <Text style={styles.updateTitle} numberOfLines={1}>
-                      تحديث جديد: {updateInfo.latestVersion}!
-                    </Text>
-                    <Text
-                      style={styles.updateDesc}
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {updateInfo.changelog || "اضافات جديدة وتحسينات عامة"}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.updateBtn}>
-                  <Text style={styles.updateBtnText}>تحديث</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          )}
-          <View style={{ height: Spacing.sm }} />
-
-          <View style={styles.headerTop}>
-            <View style={styles.greetingBox}>
-              <Text
-                style={styles.greeting}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {new Date().getHours() < 12 ? "صباح الخير" : "مساء الخير"}،{" "}
-                {user?.name ?? "أخي"}
-              </Text>
-              <Text style={styles.date}>
-                {new Date().toLocaleDateString("ar-EG", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                })}
-              </Text>
-            </View>
-            <View style={styles.leftHeader}>
-              <View style={styles.userBadge}>
-                <Text style={styles.userTitle}>{user?.title ?? "مبتدئ"}</Text>
-                <View style={styles.xpRow}>
-                  <Text style={styles.xpText}>{user?.totalXP ?? 0}</Text>
-                  <Ionicons name="star" size={10} color={Colors.gold} />
-                </View>
-              </View>
+                <Ionicons
+                  name="settings-outline"
+                  size={20}
+                  color={Colors.textSecondary}
+                />
+              </TouchableOpacity>
             </View>
           </View>
 
-          {/* Quote */}
-          <View style={styles.quoteBox}>
-            <Ionicons
-              name="chatbubble-ellipses-outline"
-              size={16}
-              color={Colors.primary}
-              style={{ marginTop: 1 }}
-            />
+          <View style={styles.greetingSection}>
+            <View>
+              <Text style={styles.greetingText}>
+                {new Date().getHours() < 12 ? "صباح النور" : "مساء الخير"}،
+              </Text>
+              <Text style={styles.userName}>{user?.name ?? "يا حامل القرآن"}</Text>
+            </View>
+            <View style={styles.xpBadge}>
+                <Ionicons name="sparkles" size={12} color={Colors.gold} />
+                <Text style={styles.xpBadgeText}>{user?.totalXP ?? 0} نقطة</Text>
+            </View>
+          </View>
+
+          <View style={styles.quoteCard}>
+            <View style={styles.quoteLine} />
             <Text style={styles.quoteText}>{getMotivationalMessage()}</Text>
           </View>
         </Animated.View>
 
-        {/* App Explanation Banner */}
+        {updateInfo && blockType && (
+          <VersionOverlay
+            type={blockType}
+            info={updateInfo}
+            onDismiss={() => setBlockType(null)}
+            onRefresh={checkVersion}
+          />
+        )}
+
+        {/* Improved Stats Overview Grid */}
+        <View style={styles.statsOverview}>
+            <View style={styles.mainStatCard}>
+                <Text style={styles.mainStatLabel}>تقدمك الكلي</Text>
+                <Text style={styles.mainStatValue}>{Math.round((memorizedCount / targetPagesCount) * 100)}%</Text>
+                <View style={styles.progressBarBg}>
+                    <View style={[styles.progressBarFill, { width: `${(memorizedCount / targetPagesCount) * 100}%` }]} />
+                </View>
+                <Text style={styles.mainStatSub}>{memorizedCount} صفحة متممة</Text>
+            </View>
+            
+            <View style={styles.sideStatsCol}>
+                <View style={styles.sideStatCard}>
+                    <Ionicons name="flame" size={18} color={Colors.gold} />
+                    <View>
+                        <Text style={styles.sideStatValue}>{streak.currentStreak}</Text>
+                        <Text style={styles.sideStatLabel}>يوم متواصل</Text>
+                    </View>
+                </View>
+                <View style={styles.sideStatCard}>
+                    <Ionicons name="calendar-outline" size={18} color={Colors.primary} />
+                    <View>
+                        <Text style={styles.sideStatValue}>
+                            {finishDate.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' })}
+                        </Text>
+                        <Text style={styles.sideStatLabel}>الختم المتوقع</Text>
+                    </View>
+                </View>
+            </View>
+        </View>
+
+        {/* Explanation Banner - Redesigned */}
         <TouchableOpacity
-          style={styles.explanationBanner}
+          style={styles.bannerLink}
           onPress={() => router.push("/explanation" as any)}
         >
-          <View style={styles.explanationContent}>
-            <View style={styles.explanationIcon}>
-              <Ionicons
-                name="information-circle-outline"
-                size={22}
-                color={Colors.primary}
-              />
+          <View style={styles.bannerInner}>
+            <View style={styles.bannerIconBox}>
+                <Ionicons name="bulb-outline" size={20} color={Colors.primary} />
             </View>
-            <View style={{ flex: 1, alignItems: "flex-start" }}>
-              <Text style={styles.explanationTitle}>شرح التطبيق</Text>
-              <Text style={styles.explanationDesc}>
-                تعرف على كيفية استخدام نظام خماسية الحفظ...
-              </Text>
-            </View>
-            <Ionicons
-              name="chevron-back"
-              size={18}
-              color={Colors.textTertiary}
-            />
+            <Text style={styles.bannerText}>دليل البدء: كيف تعمل مفاتيح تثبيت القرآن؟</Text>
+            <Ionicons name="chevron-back" size={16} color={Colors.textTertiary} />
           </View>
         </TouchableOpacity>
 
-        {/* Daily Fortress Progress Panel */}
-        {state.settings.showDailyProgressOnDashboard && (
-          <Animated.View style={[styles.statsPanel, { opacity: fadeAnim }]}>
-            <View style={styles.statsRow}>
-              <View style={styles.statCard}>
-                <View style={[styles.statIconBox, { backgroundColor: `${Colors.primary}15` }]}>
-                  <Ionicons name="shield-checkmark-outline" size={20} color={Colors.primary} />
-                </View>
-                <View style={styles.statInfo}>
-                  <Text style={styles.statLabel}>مراحل اليوم</Text>
-                  <Text style={styles.statValue}>{completedHousons} / {totalHousonsCount}</Text>
-                </View>
-              </View>
-
-              <View style={styles.statCard}>
-                <View style={[styles.statIconBox, { backgroundColor: `${Colors.gold}15` }]}>
-                  <Ionicons name="sparkles-outline" size={20} color={Colors.gold} />
-                </View>
-                <View style={styles.statInfo}>
-                  <Text style={styles.statLabel}>إنجاز اليوم</Text>
-                  <Text style={styles.statValue}>{Math.round(dailyCompletionPct * 100)}%</Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={[styles.statsRow, { marginTop: Spacing.sm }]}>
-              <View style={styles.statCard}>
-                <View style={[styles.statIconBox, { backgroundColor: `${Colors.blue}15` }]}>
-                  <Ionicons name="book-outline" size={20} color={Colors.blue} />
-                </View>
-                <View style={styles.statInfo}>
-                  <Text style={styles.statLabel}>الختم المتوقع</Text>
-                  <Text style={styles.statValue} numberOfLines={1}>
-                    {finishDate.toLocaleDateString("ar-EG", { day: 'numeric', month: "short" })}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.statCard}>
-                <View style={[styles.statIconBox, { backgroundColor: `${Colors.warning}15` }]}>
-                  <Ionicons name="time-outline" size={20} color={Colors.warning} />
-                </View>
-                <View style={styles.statInfo}>
-                  <Text style={styles.statLabel}>أيام الاستمرارية</Text>
-                  <Text style={styles.statValue}>{streak.currentStreak} يوم</Text>
-                </View>
-              </View>
-            </View>
-          </Animated.View>
-        )}
-
-        <StreakBadge
-          currentStreak={streak.currentStreak}
-          longestStreak={streak.longestStreak}
-        />
-
-        {/* Dynamic Modules Section */}
+        {/* Navigation Sections */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>منهج خماسية الحفظ</Text>
-          <View style={styles.sectionBadge}>
-            <Text style={styles.sectionBadgeText}>{MODULES.length} أقسام</Text>
+          <Text style={styles.sectionTitle}>منهج الحفظ</Text>
+          <View style={styles.pillBadge}>
+            <Text style={styles.pillText}>{completedHousons}/5 أتممت</Text>
           </View>
         </View>
 
@@ -351,18 +244,17 @@ export default function DashboardScreen() {
           ))}
         </View>
 
-        {/* All Done Message */}
-        {completedHousons >= totalHousonsCount && (
-          <View style={styles.allDoneBox}>
-            <Ionicons name="medal-outline" size={40} color={Colors.primary} />
-            <Text style={styles.allDoneTitle}>أحسنت! أتممت مراحل اليوم</Text>
-            <Text style={styles.allDoneSubtitle}>
-              لقد أتممت نظام خماسية الحفظ لليوم بنجاح
-            </Text>
+        {completedHousons >= 5 && (
+          <View style={styles.completionMessage}>
+             <View style={styles.completionIcon}>
+                <Ionicons name="checkmark-done" size={24} color="#FFF" />
+             </View>
+             <Text style={styles.completionTitle}>هنيئاً لك إكمال ورد اليوم!</Text>
+             <Text style={styles.completionDesc}>لقد أتممت جميع مراحل مفاتيح تثبيت القرآن لهذا اليوم.</Text>
           </View>
         )}
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: 120 }} />
       </ScrollView>
     </View>
   );
@@ -370,419 +262,184 @@ export default function DashboardScreen() {
 
 const getStyles = (Colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: Colors.background,
-    },
-    orb1: {
+    container: { flex: 1, backgroundColor: Colors.background },
+    backgroundAccent: {
       position: "absolute",
-      width: 280,
-      height: 280,
-      borderRadius: 140,
-      backgroundColor: `${Colors.primary}06`,
-      top: -60,
-      right: -80,
+      width: width * 1.2,
+      height: 300,
+      backgroundColor: `${Colors.primary}05`,
+      borderRadius: width,
+      top: -100,
+      left: -width * 0.1,
     },
-    orb2: {
-      position: "absolute",
-      width: 180,
-      height: 180,
-      borderRadius: 90,
-      backgroundColor: `${Colors.blue}04`,
-      bottom: 200,
-      left: -60,
-    },
-    scroll: {
-      paddingHorizontal: Spacing.lg,
-      paddingTop: 56,
-      gap: Spacing.md,
-    },
-    header: {
-      marginBottom: Spacing.xs,
-    },
-    headerTop: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-      marginBottom: Spacing.base,
-    },
-    leftHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.sm,
-    },
-    greetingBox: {
-      flex: 1,
-      alignItems: "flex-start",
-    },
-    settingsBtn: {
-      width: 32,
-      height: 32,
-      borderRadius: 10,
-      backgroundColor: Colors.surface,
-      alignItems: "center",
-      justifyContent: "center",
-      borderWidth: 1,
-      borderColor: Colors.borderLight,
-    },
-    updateBanner: {
-      marginTop: Spacing.md,
-      borderRadius: BorderRadius.lg,
-      overflow: "hidden",
-      ...Shadow.sm,
-    },
-    updateGradient: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: Spacing.lg,
-      height: 64,
-    },
-    updateInfo: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.sm,
-      flex: 1,
-      marginRight: Spacing.sm,
-    },
-    updateTexts: {
-      flex: 1,
-    },
-    updateTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.sm,
-      fontWeight: Typography.bold,
-      color: "#FFF",
-    },
-    updateDesc: {
-      fontFamily: Typography.body, fontSize: 10,
-      color: "rgba(255,255,255,0.8)",
-    },
-    updateBtn: {
-      backgroundColor: "#FFF",
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 12,
-      flexShrink: 0,
-    },
-    updateBtnText: {
-      fontFamily: Typography.heading, fontSize: 10,
-      fontWeight: Typography.bold,
-      color: Colors.primary,
-    },
-    userBadge: {
-      alignItems: "center",
-      gap: 3,
-    },
-    userTitle: {
-      fontFamily: Typography.body, fontSize: Typography.xs,
-      color: Colors.gold,
-      fontWeight: Typography.semibold,
-      backgroundColor: Colors.goldMuted,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: 2,
-      borderRadius: BorderRadius.full,
-      borderWidth: 1,
-      borderColor: `${Colors.gold}15`,
-      overflow: "hidden",
-    },
-    xpRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 3,
-    },
-    xpText: {
-      fontFamily: Typography.body, fontSize: 10,
-      color: Colors.textTertiary,
-    },
-    greeting: {
-      fontFamily: Typography.heading, fontSize: Typography.xl,
-      color: Colors.textPrimary,
-      textAlign: "left",
-      width: "100%",
-    },
-    date: {
-      fontFamily: Typography.body, fontSize: Typography.sm,
-      color: Colors.textTertiary,
-      textAlign: "left",
-      marginTop: 2,
-    },
-    quoteBox: {
-      flexDirection: "row",
-      alignItems: "flex-start",
-      backgroundColor: Colors.primarySubtle,
-      borderRadius: BorderRadius.md,
-      borderWidth: 1,
-      borderColor: `${Colors.primary}0D`,
-      padding: Spacing.md,
-      gap: Spacing.sm,
-    },
-    quoteText: {
-      flex: 1,
-      fontFamily: Typography.body, fontSize: Typography.sm,
-      color: Colors.primary,
-      lineHeight: Typography.sm * 1.7,
-      textAlign: "left",
-      opacity: 0.85,
-    },
+    scroll: { paddingHorizontal: Spacing.xl, paddingTop: 60, gap: Spacing.lg },
 
-    // Explanation Banner
-    explanationBanner: {
-      backgroundColor: Colors.glass,
-      borderRadius: BorderRadius.lg,
-      borderWidth: 1,
-      borderColor: Colors.glassBorder,
-      padding: Spacing.md,
-      marginBottom: Spacing.sm,
-    },
-    explanationContent: {
+    header: { marginBottom: Spacing.md },
+    topRow: {
       flexDirection: "row",
+      justifyContent: "space-between",
       alignItems: "center",
-      gap: Spacing.md,
+      marginBottom: Spacing.xl,
     },
-    explanationIcon: {
+    headerLogo: { width: 100, height: 32 },
+    headerActions: { flexDirection: "row", gap: Spacing.md },
+    iconBtn: {
       width: 40,
       height: 40,
-      borderRadius: BorderRadius.md,
-      backgroundColor: Colors.primarySubtle,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    explanationTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.md,
-      fontWeight: Typography.semibold,
-      color: Colors.textPrimary,
-      marginBottom: 2,
-      textAlign: "left",
-    },
-    explanationDesc: {
-      fontFamily: Typography.body, fontSize: Typography.xs,
-      color: Colors.textSecondary,
-      textAlign: "left",
-    },
-
-    // Stats Panel
-    statsPanel: {
-      gap: Spacing.sm,
-    },
-    statsRow: {
-      flexDirection: "row",
-      gap: Spacing.sm,
-    },
-    statCard: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
+      borderRadius: 14,
       backgroundColor: Colors.glass,
-      borderRadius: BorderRadius.lg,
-      padding: Spacing.md,
       borderWidth: 1,
       borderColor: Colors.glassBorder,
-      gap: Spacing.sm,
-    },
-    statIconBox: {
-      width: 38,
-      height: 38,
-      borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
     },
-    statInfo: {
-      flex: 1,
-      alignItems: "flex-start",
+
+    greetingSection: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-end",
+      marginBottom: Spacing.lg,
     },
-    statLabel: {
-      fontFamily: Typography.body, fontSize: 10,
+    greetingText: {
+      fontFamily: Typography.body,
+      fontSize: 16,
       color: Colors.textSecondary,
-      fontWeight: "500",
     },
-    statValue: {
-      fontFamily: Typography.heading, fontSize: Typography.sm,
+    userName: {
+      fontFamily: Typography.heading,
+      fontSize: 24,
       fontWeight: "bold",
       color: Colors.textPrimary,
       marginTop: 2,
+      textAlign: "left",
+    },
+    xpBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: `${Colors.gold}15`,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        gap: 6,
+        marginBottom: 4,
+    },
+    xpBadgeText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: Colors.gold,
     },
 
-    // Overlay Styles (Update / Disabled)
-    overlayContainer: {
-      justifyContent: "center",
-      alignItems: "center",
-      padding: Spacing.xl * 2,
+    quoteCard: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 12,
+        paddingVertical: Spacing.md,
     },
-    overlayContent: {
-      alignItems: "center",
-      width: "100%",
+    quoteLine: {
+        width: 3,
+        height: '100%',
+        backgroundColor: Colors.primary,
+        borderRadius: 2,
     },
-    overlayIconBox: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: Spacing.xl,
-    },
-    overlayIconBoxWhite: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
-      backgroundColor: "#FFF",
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: Spacing.xl,
-    },
-    overlayTitle: {
-      fontFamily: Typography.heading, fontSize: 24,
-      fontWeight: "bold",
-      color: Colors.textPrimary,
-      textAlign: "center",
-      marginBottom: Spacing.md,
-    },
-    overlayDesc: {
-      fontFamily: Typography.body, fontSize: 14,
-      color: Colors.textSecondary,
-      textAlign: "center",
-      lineHeight: 22,
-      marginBottom: Spacing.xl,
-    },
-    overlayVersion: {
-      fontFamily: Typography.heading, fontSize: 16,
-      fontWeight: "600",
-      marginBottom: Spacing.xl,
-    },
-    overlayUpdateBtn: {
-      backgroundColor: "#FFF",
-      paddingHorizontal: 40,
-      paddingVertical: 16,
-      borderRadius: 30,
-      ...Shadow.md,
-    },
-    overlayUpdateBtnText: {
-      fontFamily: Typography.heading, fontSize: 16,
-      fontWeight: "bold",
-      color: Colors.primary,
-    },
-    overlayHint: {
-      fontFamily: Typography.body, fontSize: 12,
-      color: Colors.textTertiary,
-      marginTop: Spacing.xl,
-      textAlign: "center",
+    quoteText: {
+        fontFamily: Typography.body,
+        fontSize: 13,
+        color: Colors.textSecondary,
+        lineHeight: 20,
+        textAlign: 'left',
     },
 
-    // Section
+    statsOverview: {
+        flexDirection: 'row',
+        gap: Spacing.md,
+        marginBottom: Spacing.sm,
+    },
+    mainStatCard: {
+        flex: 1.2,
+        backgroundColor: Colors.surfaceElevated,
+        borderRadius: 24,
+        padding: Spacing.lg,
+        borderWidth: 1.5,
+        borderColor: Colors.primary,
+    },
+    mainStatLabel: { color: Colors.textSecondary, fontSize: 12, marginBottom: 4, textAlign: 'left' },
+    mainStatValue: { color: Colors.primary, fontSize: 32, fontWeight: '900', marginBottom: 12, textAlign: 'left' },
+    progressBarBg: { height: 8, backgroundColor: Colors.border, borderRadius: 4, marginBottom: 8 },
+    progressBarFill: { height: '100%', backgroundColor: Colors.primary, borderRadius: 4 },
+    mainStatSub: { color: Colors.textTertiary, fontSize: 11, textAlign: 'left' },
+
+    sideStatsCol: { flex: 1, gap: Spacing.md },
+    sideStatCard: {
+        flex: 1,
+        backgroundColor: Colors.surface,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        borderRadius: 20,
+        padding: Spacing.md,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    sideStatValue: { fontSize: 16, fontWeight: 'bold', color: Colors.textPrimary, textAlign: 'left' },
+    sideStatLabel: { fontSize: 9, color: Colors.textSecondary, textAlign: 'left' },
+
+    bannerLink: {
+        backgroundColor: Colors.surface,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        padding: Spacing.md,
+    },
+    bannerInner: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    bannerIconBox: {
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        backgroundColor: `${Colors.primary}10`,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    bannerText: { flex: 1, fontSize: 13, color: Colors.textSecondary, textAlign: 'left' },
+
     sectionHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 2,
-      marginTop: Spacing.xs,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: Spacing.md,
     },
-    sectionTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.md,
-      fontWeight: Typography.semibold,
-      color: Colors.textPrimary,
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', color: Colors.textPrimary, textAlign: 'left' },
+    pillBadge: { 
+        backgroundColor: `${Colors.primary}10`, 
+        paddingHorizontal: 10, 
+        paddingVertical: 4, 
+        borderRadius: 12 
     },
-    sectionBadge: {
-      backgroundColor: Colors.primaryMuted,
-      borderRadius: BorderRadius.full,
-      borderWidth: 1,
-      borderColor: `${Colors.primary}15`,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: 2,
-    },
-    sectionBadgeText: {
-      color: Colors.primary,
-      fontFamily: Typography.heading, fontSize: Typography.xs,
-      fontWeight: Typography.semibold,
-    },
+    pillText: { fontSize: 11, fontWeight: 'bold', color: Colors.primary },
+
     modulesGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      justifyContent: "space-between",
-      gap: Spacing.sm,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
     },
-    allDoneBox: {
-      backgroundColor: Colors.primarySubtle,
-      borderRadius: BorderRadius.xl,
-      borderWidth: 1,
-      borderColor: `${Colors.primary}15`,
-      padding: Spacing.xl,
-      alignItems: "center",
-      gap: Spacing.sm,
-      marginTop: Spacing.sm,
+
+    completionMessage: {
+        backgroundColor: Colors.surfaceElevated,
+        borderRadius: 20,
+        padding: Spacing.lg,
+        alignItems: 'center',
+        marginTop: Spacing.md,
+        borderWidth: 1.5,
+        borderColor: Colors.success,
     },
-    allDoneTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.lg,
-      fontWeight: Typography.semibold,
-      color: Colors.primary,
-      textAlign: "center",
+    completionIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: `${Colors.success}15`,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10,
     },
-    allDoneSubtitle: {
-      fontFamily: Typography.body, fontSize: Typography.sm,
-      color: Colors.textSecondary,
-      textAlign: "center",
-    },
-    brandingHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: Spacing.md,
-    },
-    headerLogoBox: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.xs,
-    },
-    logoImageHeader: {
-      width: 48,
-      height: 48,
-    },
-    brandingText: {
-      fontFamily: Typography.heading, fontSize: Typography.sm,
-      fontWeight: Typography.bold,
-      color: Colors.textPrimary,
-      letterSpacing: 0.5,
-    },
-    communityCard: {
-      backgroundColor: Colors.glass,
-      borderRadius: BorderRadius.lg,
-      padding: Spacing.lg,
-      borderWidth: 1,
-      borderColor: Colors.glassBorder,
-      marginTop: Spacing.sm,
-    },
-    communityHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: Spacing.sm,
-      marginBottom: Spacing.md,
-    },
-    communityTitle: {
-      fontFamily: Typography.heading, fontSize: Typography.sm,
-      fontWeight: Typography.semibold,
-      color: Colors.textSecondary,
-    },
-    communityRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    communityItem: {
-      flex: 1,
-      alignItems: "center",
-    },
-    communityValue: {
-      fontFamily: Typography.heading, fontSize: Typography.md,
-      fontWeight: Typography.bold,
-      color: Colors.primary,
-    },
-    communityLabel: {
-      fontFamily: Typography.body, fontSize: 10,
-      color: Colors.textTertiary,
-      marginTop: 2,
-    },
-    communityDivider: {
-      width: 1,
-      height: 20,
-      backgroundColor: Colors.border,
-      opacity: 0.5,
-    },
+    completionTitle: { color: Colors.success, fontSize: 16, fontWeight: 'bold', marginBottom: 4 },
+    completionDesc: { color: Colors.textSecondary, fontSize: 12, textAlign: 'center' },
   });

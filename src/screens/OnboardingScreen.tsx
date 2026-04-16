@@ -185,7 +185,7 @@ export default function OnboardingScreen() {
           disabled={step === 0}
         >
           <Ionicons
-            name="chevron-forward"
+            name="chevron-back"
             size={20}
             color={Colors.textSecondary}
           />
@@ -229,7 +229,7 @@ export default function OnboardingScreen() {
                 />
               </View>
               <Text style={styles.stepTitle}>مرحباً بك في</Text>
-              <Text style={styles.appName}>خماسية الحفظ</Text>
+              <Text style={styles.appName}>مفاتيح تثبيت القرآن</Text>
               <Text style={styles.appSubtitle}></Text>
 
               <View style={styles.inputContainer}>
@@ -240,7 +240,7 @@ export default function OnboardingScreen() {
                   onChangeText={setName}
                   placeholder="أدخل اسمك..."
                   placeholderTextColor={Colors.textTertiary}
-                  textAlign="right"
+                  textAlign="left"
                 />
               </View>
 
@@ -248,7 +248,7 @@ export default function OnboardingScreen() {
                 {[
                   {
                     icon: "shield-checkmark-outline",
-                    text: "نظام خماسية الحفظ المتكامل",
+                    text: "نظام مفاتيح تثبيت القرآن المتكامل",
                   },
                   {
                     icon: "sync-outline",
@@ -650,10 +650,10 @@ const getStyles = (Colors: typeof darkColors) =>
     backButton: {
       width: 40,
       height: 40,
-      backgroundColor: Colors.glass,
+      backgroundColor: Colors.surface,
       borderRadius: BorderRadius.md,
       borderWidth: 1,
-      borderColor: Colors.glassBorder,
+      borderColor: Colors.border,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -725,15 +725,15 @@ const getStyles = (Colors: typeof darkColors) =>
       marginBottom: Spacing.sm,
     },
     input: {
-      backgroundColor: Colors.glass,
+      backgroundColor: Colors.surface,
       borderRadius: BorderRadius.lg,
       borderWidth: 1,
-      borderColor: Colors.glassBorder,
+      borderColor: Colors.border,
       paddingHorizontal: Spacing.base,
       paddingVertical: Spacing.md,
       color: Colors.textPrimary,
       fontFamily: Typography.body, fontSize: Typography.base,
-      textAlign: "right",
+      textAlign: "left",
     },
     featuresList: {
       width: "100%",
@@ -744,10 +744,10 @@ const getStyles = (Colors: typeof darkColors) =>
       flexDirection: "row",
       alignItems: "center",
       gap: Spacing.md,
-      backgroundColor: Colors.glass,
+      backgroundColor: Colors.surface,
       borderRadius: BorderRadius.md,
       borderWidth: 1,
-      borderColor: Colors.glassBorder,
+      borderColor: Colors.border,
       paddingHorizontal: Spacing.base,
       paddingVertical: Spacing.md,
     },
@@ -759,12 +759,12 @@ const getStyles = (Colors: typeof darkColors) =>
     },
     optionCard: {
       width: "100%",
-      flexDirection: "row-reverse",
+      flexDirection: "row",
       alignItems: "center",
-      backgroundColor: Colors.glass,
+      backgroundColor: Colors.surface,
       borderRadius: BorderRadius.lg,
       borderWidth: 1,
-      borderColor: Colors.glassBorder,
+      borderColor: Colors.border,
       paddingHorizontal: Spacing.base,
       paddingVertical: Spacing.md,
       marginBottom: Spacing.sm,

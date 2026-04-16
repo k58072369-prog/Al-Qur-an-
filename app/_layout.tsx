@@ -251,7 +251,7 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
 
         {/* Text Section */}
         <Animated.View style={[styles.textBlock, { opacity: fadeAnim }]}>
-          <Text style={styles.splashTitle}>خماسية الحفظ</Text>
+          <Text style={styles.splashTitle}>مفاتيح تثبيت القرآن</Text>
           <Text style={styles.tagline}>خطة متكاملة لإتقان حفظ القرآن</Text>
         </Animated.View>
 

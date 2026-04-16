@@ -41,7 +41,7 @@ export default function LegalScreen() {
             color={Colors.textSecondary}
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>الشروط والخصوصية</Text>
+        <Text style={styles.headerTitle}>السياسات الرسمية</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -50,55 +50,85 @@ export default function LegalScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>
-            شروط وأحكام الاستخدام (Terms of Service)
+        <View style={styles.infoCard}>
+          <Text style={styles.updateDate}>آخر تحديث: 7 أبريل 2026</Text>
+          <Text style={styles.appName}>تطبيق: مفاتيح تثبيت القرآن</Text>
+          <Text style={styles.developerName}>
+            المطور: مصطفى أحمد (Mustafa Ahmad)
           </Text>
-          <View style={styles.paragraphContainer}>
-            <Text style={styles.paragraph}>
-              يُعد استخدامك لتطبيق "خماسية الحفظ" بمثابة موافقة صريحة على الشروط
-              والأحكام التالية. يرجى قراءتها بعناية قبل البدء:
-            </Text>
-          </View>
-          <BulletPoint text="١. الغرض من التطبيق: تم تطوير هذا التطبيق ليكون أداة مساعدة تقنية ومنهجية لطلاب القرآن الكريم لتنظيم خطط الحفظ والمراجعة وفق نظام خماسية الحفظ." />
-          <BulletPoint text="٢. الملكية الفكرية: جميع حقوق البرمجية، التصاميم، والشعارات خاصة بمطور التطبيق. يُمنع نسخ أو تعديل أو إعادة توزيع البرمجية لأغراض تجارية دون إذن كتابي." />
-          <BulletPoint text="٣. دقة البيانات: نحن نبذل قصارى جهدنا لضمان دقة نصوص القرآن الكريم والمعلومات المنهجية، ومع ذلك فإننا نسألك دائماً مراجعة حفظك على مشايخك المعتمدين، فالتطبيق وسيلة مساعدة وليس بديلاً عن التلقي والمشافهة." />
-          <BulletPoint text="٤. إخلاء المسؤولية: يتم توفير التطبيق 'كما هو' دون أي ضمانات صريحة أو ضمنية. المطور غير مسؤول عن أي فقدان للبيانات المخزنة محلياً نتيجة مسح التطبيق أو تعطل الجهاز." />
-          <BulletPoint text="٥. التحديثات: يحق لنا تحديث التطبيق أو تغيير خصائصه في أي وقت لتحسين تجربة المستخدم أو إصلاح المشكلات التقنية." />
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>١. مقدمة وهوية التطبيق</Text>
+          <Text style={styles.paragraph}>
+            تطبيق "مفاتيح تثبيت القرآن" هو تطبيق مجاني (Free App) مخصص لمساعدة المسلمين
+            على تنظيم حفظ ومراجعة القرآن الكريم. يُقدم هذا التطبيق كخدمة مجانية
+            تهدف لنفع المستخدمين دون مقابل مادي وبأعلى معايير الخصوصية.
+          </Text>
+        </View>
+
+        <View style={[styles.card, { marginTop: Spacing.xl }]}>
+          <Text style={styles.sectionTitle}>٢. جمع البيانات واستخدامها</Text>
+          <Text style={styles.paragraph}>
+            نحن نؤمن بالشفافية المطلقة مع مستخدمينا بشأن البيانات التقنية:
+          </Text>
+          <BulletPoint text="بيانات يقدمها المستخدم: لا نطلب منك أي بيانات شخصية (اسم، هاتف، أو حسابات) لاستخدام التطبيق. كل ما تدخله من خطط حفظ يُخزن محلياً فقط." />
+          <BulletPoint text="بيانات تُجمع تلقائياً: لتحسين أداء التطبيق، قد يتم جمع معلومات تقنية بسيطة عبر خدمات طرف ثالث (Google Play Services) مثل: نوع الجهاز، إصدار نظام التشغيل، ومعرّفات الأجهزة الفريدة (Device ID) لأغراض تقنية بحتة." />
+          <BulletPoint text="الأذونات الحساسة: لا يطلب التطبيق الوصول للكاميرا أو الصور أو جهات الاتصال. الأذونات المطلوبة هي (الإشعارات والاهتزاز) لتعزيز تجربة الاستخدام فقط." />
         </View>
 
         <View style={[styles.card, { marginTop: Spacing.xl }]}>
           <Text style={styles.sectionTitle}>
-            سياسة الخصوصية وحماية البيانات (Privacy Policy)
+            ٣. خدمات الطرف الثالث (Third-Party Services)
           </Text>
-          <View style={styles.paragraphContainer}>
-            <Text style={styles.paragraph}>
-              خصوصيتك هي أولويتنا القصوى، لذا قمنا بتصميم التطبيق ليعمل بأقصى
-              درجات الأمان والخصوصية وفقاً لمعايير المتاجر العالمية (Google Play
-              & App Store):
-            </Text>
-          </View>
-          <BulletPoint text="١. عدم جمع البيانات الشخصية: نحن لا نطلب منك إدخال اسمك الحقيقي، بريدك الإلكتروني، رقم هاتفك، أو أي بيانات تدل على هويتك الشخصية عند بدء الاستخدام." />
-          <BulletPoint text="٢. المعالجة المحلية (Offline Processing): جميع بيانات تقدمك في الحفظ، خططك اليومية، وإحصائياتك تُخزن 'محلياً' على ذاكرة جهازك فقط (AsyncStorage). لا يتم إرسال هذه البيانات إلى أي خوادم خارجية أو قواعد بيانات سحابية." />
-          <BulletPoint text="٣. الشفافية تجاه الأطراف الثالثة: التطبيق لا يحتوي على أدوات تتبع (Trackers) مثل Google Analytics أو Facebook SDK، ولا يتم مشاركة أي معلومات مع طرف ثالث لأغراض إعلانية أو إحصائية." />
-          <BulletPoint text="٤. الصلاحيات والأذونات: يطلب التطبيق إذن 'الإشعارات' فقط لتذكيرك بأورادك اليومية، وإذن 'الاهتزاز' (Haptics) لتحسين التفاعل اللمسي. كلا الإذنين اختياريان ويمكنك إلغاؤهما من الإعدادات في أي وقت." />
-          <BulletPoint text="٥. حماية القصر (Children's Privacy): تطبيقنا آمن تماماً للأطفال (COPPA Compliant)؛ حيث لا يطلب أي معلومات، ولا يحتوي على إعلانات، ولا يوجه المستخدمين لمواقع خارجية غير آمنة." />
-          <BulletPoint text="٦. حذف البيانات: يمكنك حذف المسار بالكامل وجميع بياناتك المخزنة ببساطة من خلال زر 'مسح البيانات' في إعدادات التطبيق أو من خلال حذف التطبيق من جهازك." />
+          <Text style={styles.paragraph}>
+            يستخدم التطبيق خدمات تابعة لأطراف ثالثة لضمان استقرار العمل، ويمكنك
+            مراجعة سياساتهم عبر الروابط التالية:
+          </Text>
+          <BulletPoint text="Google Play Services: لتشغيل التطبيق على أندرويد." />
+          <BulletPoint text="Expo SDK: لتوفير ميزات النظام مثل الاهتزاز والإشعارات." />
+        </View>
+
+        <View style={[styles.card, { marginTop: Spacing.xl }]}>
+          <Text style={styles.sectionTitle}>
+            ٤. حماية بيانات الأطفال (COPPA)
+          </Text>
+          <Text style={styles.paragraph}>
+            تطبيق "مفاتيح تثبيت القرآن" موجه لجميع الفئات العمرية بما في ذلك الأطفال
+            دون سن ١٣ عاماً. نحن نلتزم بقانون حماية خصوصية الأطفال عبر الإنترنت
+            (COPPA)؛ وبناءً عليه: لا نقوم بجمع أي معلومات تعريفية عن الأطفال،
+            ولا يحتوي التطبيق على إعلانات مستهدفة أو محتوى غير لائق.
+          </Text>
+        </View>
+
+        <View style={[styles.card, { marginTop: Spacing.xl }]}>
+          <Text style={styles.sectionTitle}>
+            ٥. حذف البيانات (Data Deletion)
+          </Text>
+          <Text style={styles.paragraph}>
+            بما أن جميع بياناتك مخزنة "محلياً" على جهازك:
+          </Text>
+          <BulletPoint text="يمكنك حذف كافة بياناتك فوراً عبر مسح ذاكرة التطبيق (Clear Data) من إعدادات جهازك." />
+          <BulletPoint text="عند حذف التطبيق من جهازك، يتم مسح كافة السجلات وعمليات الحفظ تلقائياً ولا تتبقى لنا أي نسخة منها." />
+        </View>
+
+        <View style={[styles.card, { marginTop: Spacing.xl }]}>
+          <Text style={styles.sectionTitle}>٦. شروط الخدمة والملكية</Text>
+          <BulletPoint text="حقوق الملكية: جميع أكواد وتصاميم التطبيق هي ملك للمطور. نصوص القرآن الكريم مستمدة من مصادر موثوقة (مجمع الملك فهد)." />
+          <BulletPoint text="التعديلات: قد نقوم بتحديث هذه السياسة دورياً لمواكبة متطلبات المتاجر الرسمية. استمرارك في استخدام التطبيق يعتبر موافقة على النسخة الأحدث." />
         </View>
 
         <View
           style={[
             styles.card,
-            { marginTop: Spacing.xl, marginBottom: Spacing["3xl"] },
+            { marginTop: Spacing.xl, marginBottom: Spacing["5xl"] },
           ]}
         >
-          <Text style={styles.sectionTitle}>التواصل الرسمي والدعم</Text>
-          <View style={styles.paragraphContainer}>
-            <Text style={styles.paragraph}>
-              بصفتنا المطورين الرسميين لهذا العمل، نسعد بتلقي ملاحظاتكم أو
-              بلاغات الأخطاء لضمان استمرار تقديم الأفضل لخدمة كتاب الله:
-            </Text>
-          </View>
+          <Text style={styles.sectionTitle}>٧. التواصل الرسمي</Text>
+          <Text style={styles.paragraph}>
+            للأسئلة أو الاستفسارات القانونية، يرجى مراسلة المطور عبر البريد
+            الإلكتروني الرسمي:
+          </Text>
           <TouchableOpacity style={styles.contactBtn}>
             <Text style={styles.contactBtnText}>
               mustafa.ahmad.work@gmail.com
@@ -148,6 +178,36 @@ const getStyles = (Colors: any) =>
       paddingTop: Spacing.md,
       paddingBottom: Spacing["5xl"],
     },
+    infoCard: {
+      backgroundColor: Colors.primarySubtle,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      marginBottom: Spacing.xl,
+      borderWidth: 1,
+      borderColor: `${Colors.primary}15`,
+    },
+    updateDate: {
+      fontFamily: Typography.heading,
+      fontSize: 10,
+      color: Colors.primary,
+      opacity: 0.8,
+      textAlign: "left",
+    },
+    appName: {
+      fontFamily: Typography.heading,
+      fontSize: 18,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+      marginTop: 4,
+      textAlign: "left",
+    },
+    developerName: {
+      fontFamily: Typography.body,
+      fontSize: 12,
+      color: Colors.textSecondary,
+      marginTop: 2,
+      textAlign: "left",
+    },
     card: {
       backgroundColor: Colors.glass,
       borderRadius: BorderRadius.lg,
@@ -163,15 +223,13 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.md,
       textAlign: "left",
     },
-    paragraphContainer: {
-      marginBottom: Spacing.md,
-    },
     paragraph: {
       fontFamily: Typography.body,
       fontSize: Typography.sm,
       color: Colors.textPrimary,
       lineHeight: Typography.sm * 1.6,
       textAlign: "left",
+      marginBottom: Spacing.sm,
     },
     bulletRow: {
       flexDirection: "row",
