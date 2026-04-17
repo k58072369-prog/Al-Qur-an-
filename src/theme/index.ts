@@ -1,6 +1,6 @@
 import { useAppStore } from "../store/AppStore";
 
-// Design Tokens for مفاتيح تثبيت القرآن (Quran Anchoring Keys)
+// Design Tokens for مفاتيح حفظ القرآن (Quran Anchoring Keys)
 // Refined, minimal, premium dark-first design system
 
 export const darkColors = {

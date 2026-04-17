@@ -483,7 +483,7 @@ export default function SettingsScreen() {
 
         {/* ── Notifications ────────────────────────────────────────────── */}
         <Text style={[styles.sectionTitle, { marginTop: Spacing.xl }]}>
-          تنبيهات مفاتيح تثبيت القرآن
+          تنبيهات مفاتيح حفظ القرآن
         </Text>
 
         {/* Templates */}

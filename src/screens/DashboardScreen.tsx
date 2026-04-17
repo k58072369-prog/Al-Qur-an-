@@ -145,7 +145,7 @@ export default function DashboardScreen() {
           <View style={styles.completionMessage}>
             <View style={styles.completionIcon}><Ionicons name="checkmark-done" size={24} color="#FFF" /></View>
             <Text style={styles.completionTitle}>هنيئاً لك إكمال ورد اليوم!</Text>
-            <Text style={styles.completionDesc}>لقد أتممت جميع مراحل مفاتيح تثبيت القرآن لهذا اليوم.</Text>
+            <Text style={styles.completionDesc}>لقد أتممت جميع مراحل مفاتيح حفظ القرآن لهذا اليوم.</Text>
           </View>
         )}
 

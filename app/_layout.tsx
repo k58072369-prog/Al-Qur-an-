@@ -241,7 +241,7 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
           <View style={styles.outerRing}>
             <View style={styles.innerRing}>
               <Image
-                source={require("../assets/images/logo.png")}
+                source={require("../assets/images/icon.png")}
                 style={styles.logoImageSplash}
                 resizeMode="contain"
               />
@@ -251,7 +251,7 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
 
         {/* Text Section */}
         <Animated.View style={[styles.textBlock, { opacity: fadeAnim }]}>
-          <Text style={styles.splashTitle}>مفاتيح تثبيت القرآن</Text>
+          <Text style={styles.splashTitle}>مفاتيح حفظ القرآن</Text>
           <Text style={styles.tagline}>خطة متكاملة لإتقان حفظ القرآن</Text>
         </Animated.View>
 
@@ -360,9 +360,9 @@ const getStyles = (Colors: any) =>
       alignItems: "center",
       marginTop: 20,
       height: 2,
-      backgroundColor: 'rgba(255,255,255,0.05)',
+      backgroundColor: "rgba(255,255,255,0.05)",
       borderRadius: 2,
-      overflow: 'hidden',
+      overflow: "hidden",
     },
     sleekLineFill: {
       height: "100%",

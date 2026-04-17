@@ -10,7 +10,12 @@ interface ExplanationCardProps {
   color: string;
 }
 
-export function ExplanationCard({ title, content, icon, color }: ExplanationCardProps) {
+export function ExplanationCard({
+  title,
+  content,
+  icon,
+  color,
+}: ExplanationCardProps) {
   const Colors = useTheme();
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
 

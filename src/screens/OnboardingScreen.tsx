@@ -235,7 +235,7 @@ export default function OnboardingScreen() {
                 />
               </View>
               <Text style={styles.stepTitle}>مرحباً بك في</Text>
-              <Text style={styles.appName}>مفاتيح تثبيت القرآن</Text>
+              <Text style={styles.appName}>مفاتيح حفظ القرآن</Text>
               <Text style={styles.appSubtitle}></Text>
 
               <View style={styles.inputContainer}>
@@ -254,7 +254,7 @@ export default function OnboardingScreen() {
                 {[
                   {
                     icon: "shield-checkmark-outline",
-                    text: "نظام مفاتيح تثبيت القرآن المتكامل",
+                    text: "نظام مفاتيح حفظ القرآن المتكامل",
                   },
                   {
                     icon: "sync-outline",

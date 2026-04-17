@@ -52,7 +52,7 @@ export default function LegalScreen() {
       >
         <View style={styles.infoCard}>
           <Text style={styles.updateDate}>آخر تحديث: 7 أبريل 2026</Text>
-          <Text style={styles.appName}>تطبيق: مفاتيح تثبيت القرآن</Text>
+          <Text style={styles.appName}>تطبيق: مفاتيح حفظ القرآن</Text>
           <Text style={styles.developerName}>
             المطور: مصطفى أحمد (Mustafa Ahmad)
           </Text>
@@ -61,7 +61,7 @@ export default function LegalScreen() {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>١. مقدمة وهوية التطبيق</Text>
           <Text style={styles.paragraph}>
-            تطبيق "مفاتيح تثبيت القرآن" هو تطبيق مجاني (Free App) مخصص لمساعدة المسلمين
+            تطبيق "مفاتيح حفظ القرآن" هو تطبيق مجاني (Free App) مخصص لمساعدة المسلمين
             على تنظيم حفظ ومراجعة القرآن الكريم. يُقدم هذا التطبيق كخدمة مجانية
             تهدف لنفع المستخدمين دون مقابل مادي وبأعلى معايير الخصوصية.
           </Text>
@@ -94,7 +94,7 @@ export default function LegalScreen() {
             ٤. حماية بيانات الأطفال (COPPA)
           </Text>
           <Text style={styles.paragraph}>
-            تطبيق "مفاتيح تثبيت القرآن" موجه لجميع الفئات العمرية بما في ذلك الأطفال
+            تطبيق "مفاتيح حفظ القرآن" موجه لجميع الفئات العمرية بما في ذلك الأطفال
             دون سن ١٣ عاماً. نحن نلتزم بقانون حماية خصوصية الأطفال عبر الإنترنت
             (COPPA)؛ وبناءً عليه: لا نقوم بجمع أي معلومات تعريفية عن الأطفال،
             ولا يحتوي التطبيق على إعلانات مستهدفة أو محتوى غير لائق.
