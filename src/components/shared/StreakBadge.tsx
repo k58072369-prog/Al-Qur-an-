@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
+import { BorderRadius, Spacing, Typography, useTheme } from "../../theme";
 
 interface StreakBadgeProps {
   currentStreak: number;

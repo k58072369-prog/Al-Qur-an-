@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Vibration, View } from 'react-native';
-import { getSurahById, SURAHS } from '../data/quranMeta';
-import { BorderRadius, Shadow, Spacing, Typography, useTheme } from '../theme';
-import { TaskSelection } from '../types';
-import { formatTime } from '../utils/helpers';
+import { getSurahById, SURAHS } from '../../data/quranMeta';
+import { BorderRadius, Shadow, Spacing, Typography, useTheme } from '../../theme';
+import { TaskSelection } from '../../types';
+import { formatTime } from '../../utils/helpers';
 
 type TaskTimerProps = {
   initialSeconds: number;

@@ -15,11 +15,11 @@ import { SurahMeta, TOTAL_PAGES } from '../../data/quranMeta';
 import { useSelectionStore } from '../../store/selectionStore';
 
 // Components
-import { SelectionToggle } from '../../components/SelectionToggle';
-import { SurahPicker } from '../../components/SurahPicker';
-import { PageRangePicker } from '../../components/PageRangePicker';
-import { RangeChip } from '../../components/RangeChip';
-import { PrimaryButton } from '../../components/PrimaryButton';
+import { SelectionToggle } from '../../components/shared/SelectionToggle';
+import { SurahPicker } from '../../components/shared/SurahPicker';
+import { PageRangePicker } from '../../components/shared/PageRangePicker';
+import { RangeChip } from '../../components/shared/RangeChip';
+import { PrimaryButton } from '../../components/shared/PrimaryButton';
 import { Ionicons } from '@expo/vector-icons';
 
 type SelectionScreenProps = {

@@ -9,8 +9,8 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, Typography, Spacing, BorderRadius } from '../theme';
-import { SURAHS, SurahMeta } from '../data/quranMeta';
+import { useTheme, Typography, Spacing, BorderRadius } from '../../theme';
+import { SURAHS, SurahMeta } from '../../data/quranMeta';
 
 type SurahPickerProps = {
   selectedSurah: SurahMeta | null;

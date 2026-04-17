@@ -8,7 +8,7 @@ import {
   TextStyle,
   Animated,
 } from 'react-native';
-import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../theme';
+import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../../theme';
 import { Ionicons } from '@expo/vector-icons';
 
 interface PrimaryButtonProps {

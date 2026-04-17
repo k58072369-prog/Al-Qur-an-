@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSelectionStore } from "../store/selectionStore";
-import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../theme";
-import { ModuleInfo } from "../types";
+import { useSelectionStore } from "../../store/selectionStore";
+import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../../theme";
+import { ModuleInfo } from "../../types";
 
 const { width } = Dimensions.get("window");
 

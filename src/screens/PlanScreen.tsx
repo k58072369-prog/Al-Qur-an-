@@ -1340,8 +1340,8 @@ const getStyles = (Colors: any) =>
       fontSize: 14,
       fontWeight: "bold",
     },
-    progressBarBg: { backgroundColor: Colors.border, overflow: "hidden" },
-    progressBarFill: {},
+    progressBarBg: { height: 4, backgroundColor: Colors.border, borderRadius: 2, overflow: "hidden" },
+    progressBarFill: { height: "100%" },
 
     durationRow: {
       flexDirection: "row",
@@ -1356,7 +1356,7 @@ const getStyles = (Colors: any) =>
     },
 
     // ─── Day Row ───────────────────────────────────────────────
-    rowWrap: { flexDirection: "row", marginBottom: 0 },
+    rowWrap: { flexDirection: "row", alignItems: "stretch", marginBottom: 0 },
 
     timelineCol: { width: 40, alignItems: "center" },
     timelineNode: {
@@ -1381,7 +1381,7 @@ const getStyles = (Colors: any) =>
       width: 2,
       flex: 1,
       backgroundColor: Colors.borderLight,
-      marginVertical: 3,
+      marginVertical: 0,
     },
 
     // ─── Day Card ──────────────────────────────────────────────

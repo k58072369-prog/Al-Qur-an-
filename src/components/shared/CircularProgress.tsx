@@ -6,7 +6,7 @@ import {
   Animated,
   ViewStyle,
 } from 'react-native';
-import { useTheme, Colors, Typography } from '../theme';
+import { useTheme, Colors, Typography } from '../../theme';
 
 interface CircularProgressProps {
   percentage: number; // 0 to 1

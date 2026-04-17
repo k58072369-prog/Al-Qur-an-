@@ -14,7 +14,7 @@ import {
   Modal,
 } from "react-native";
 import { SURAHS } from "../data/quranMeta";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { PrimaryButton } from "../components/shared/PrimaryButton";
 import { useAppStore } from "../store/AppStore";
 import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
 import { QURAN_GOALS, UserLevel } from "../types";

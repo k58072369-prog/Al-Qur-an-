@@ -7,8 +7,8 @@ import {
   Animated,
   ViewStyle,
 } from 'react-native';
-import { Fortress } from '../types';
-import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../theme';
+import { Fortress } from '../../types';
+import { useTheme, Typography, Spacing, BorderRadius, Shadow } from '../../theme';
 import { Ionicons } from '@expo/vector-icons';
 
 interface FortressCardProps {

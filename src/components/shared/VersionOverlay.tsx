@@ -10,8 +10,8 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { useTheme, Shadow, Spacing, Typography, BorderRadius } from "../theme";
-import { UpdateInfo } from "../store/UpdateService";
+import { useTheme, Shadow, Spacing, Typography, BorderRadius } from "../../theme";
+import { UpdateInfo } from "../../store/UpdateService";
 
 const { width } = Dimensions.get("window");
 

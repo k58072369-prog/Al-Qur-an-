@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import { useAppStore } from "../../src/store/AppStore";
-import { Typography, useTheme, Shadow, BorderRadius } from "../../src/theme";
+import { Shadow, Typography, useTheme } from "../../src/theme";
 
 // Filled vs outline icons for each tab
 const ICONS: Record<string, { outline: string; filled: string }> = {
@@ -90,48 +90,48 @@ function TabItem({
       style={styles.tabButton}
       activeOpacity={0.8}
     >
-        <Animated.View
-          style={[
-            styles.tabContent,
-            { transform: [{ scale: activeScale }] },
-            isFocused && { marginTop: -24 }
-          ]}
-        >
-          {isFocused ? (
-            <View style={styles.activeCircle}>
-              <Ionicons
-                name={iconName as any}
-                size={24}
-                color="#FFFFFF"
-              />
-              <Text
-                numberOfLines={1}
-                style={[styles.tabText, { color: '#FFFFFF', fontWeight: '900', marginTop: 2 }]}
-              >
-                {title}
-              </Text>
-            </View>
-          ) : (
-            <View style={{ alignItems: 'center' }}>
-              <Ionicons
-                name={iconName as any}
-                size={22}
-                color={Colors.textSecondary}
-              />
-              <Text
-                numberOfLines={1}
-                style={styles.tabText}
-              >
-                {title}
-              </Text>
-            </View>
-          )}
-        </Animated.View>
+      <Animated.View
+        style={[
+          styles.tabContent,
+          { transform: [{ scale: activeScale }] },
+          isFocused && { marginTop: -24 },
+        ]}
+      >
+        {isFocused ? (
+          <View style={styles.activeCircle}>
+            <Ionicons name={iconName as any} size={24} color="#FFFFFF" />
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.tabText,
+                { color: "#FFFFFF", fontWeight: "900", marginTop: 2 },
+              ]}
+            >
+              {title}
+            </Text>
+          </View>
+        ) : (
+          <View style={{ alignItems: "center" }}>
+            <Ionicons
+              name={iconName as any}
+              size={22}
+              color={Colors.textSecondary}
+            />
+            <Text numberOfLines={1} style={styles.tabText}>
+              {title}
+            </Text>
+          </View>
+        )}
+      </Animated.View>
     </TouchableOpacity>
   );
 }
 
-function PremiumTabBar({ state: navState, descriptors, navigation }: BottomTabBarProps) {
+function PremiumTabBar({
+  state: navState,
+  descriptors,
+  navigation,
+}: BottomTabBarProps) {
   const Colors = useTheme();
   const styles = React.useMemo(() => getStyles(Colors), [Colors]);
 
@@ -143,7 +143,7 @@ function PremiumTabBar({ state: navState, descriptors, navigation }: BottomTabBa
           if ((options as any).href === null) return null;
 
           const title =
-             options.title !== undefined ? options.title : route.name;
+            options.title !== undefined ? options.title : route.name;
           const isFocused = navState.index === index;
 
           const onPress = () => {
@@ -206,7 +206,7 @@ const getStyles = (Colors: any) =>
       borderWidth: 1,
       borderColor: Colors.border,
       backgroundColor: Colors.surface,
-      overflow: 'visible',
+      overflow: "visible",
     },
     buttonsRow: {
       ...StyleSheet.absoluteFillObject,
@@ -220,25 +220,25 @@ const getStyles = (Colors: any) =>
       height: "100%",
       alignItems: "center",
       justifyContent: "center",
-      overflow: 'visible',
+      overflow: "visible",
     },
 
     tabContent: {
       alignItems: "center",
       justifyContent: "center",
       gap: 2,
-      width: '100%',
-      height: '100%',
+      width: "100%",
+      height: "100%",
     },
     activeCircle: {
       width: 64,
       height: 64,
       borderRadius: 32,
       backgroundColor: Colors.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 3,
-      borderColor: Colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 0,
+      // borderColor: Colors.surface,
       ...Shadow.md,
     },
 
@@ -261,11 +261,11 @@ const getStyles = (Colors: any) =>
       fontSize: 9,
       color: Colors.textSecondary,
       textAlign: "center",
-      fontWeight: '500',
+      fontWeight: "500",
     },
 
     tabTextActive: {
       color: "#FFFFFF",
-      fontWeight: '900',
+      fontWeight: "900",
     },
   });

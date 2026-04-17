@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useTheme, Typography, Spacing, BorderRadius } from '../theme';
+import { useTheme, Typography, Spacing, BorderRadius } from '../../theme';
 
 type SelectionToggleProps = {
   value: 'surah' | 'page';

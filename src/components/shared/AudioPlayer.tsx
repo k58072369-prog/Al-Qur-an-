@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../theme";
+import { BorderRadius, Shadow, Spacing, Typography, useTheme } from "../../theme";
 
 interface VerseAudio {
   verse_key: string;

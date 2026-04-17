@@ -19,7 +19,7 @@ import {
   View,
 } from "react-native";
 import "../global.css";
-import VersionOverlay from "../src/components/VersionOverlay";
+import VersionOverlay from "../src/components/shared/VersionOverlay";
 import { AppProvider } from "../src/store/AppStore";
 import { UpdateInfo, UpdateService } from "../src/store/UpdateService";
 import { Spacing, Typography, useTheme } from "../src/theme";

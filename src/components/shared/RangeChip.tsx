@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, Typography, Spacing, BorderRadius } from '../theme';
-import { RangeSelection } from '../types';
-import { formatRangeLabel } from '../data/quranMeta';
+import { useTheme, Typography, Spacing, BorderRadius } from '../../theme';
+import { RangeSelection } from '../../types';
+import { formatRangeLabel } from '../../data/quranMeta';
 
 type RangeChipProps = {
   range: RangeSelection;
