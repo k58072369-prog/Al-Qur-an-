@@ -18,7 +18,7 @@ export const ExplanationHero: React.FC<ExplanationHeroProps> = ({ Colors }) => {
           رحلة إتقان القرآن الكريم
         </Text>
         <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
-          نظام ذكي مبني على منهجية الحصون الخمسة لضمان رسوخ حفظك وعدم تفلته
+          نظام ذكي مبني على منهجية المفاتيح الخمسة لضمان رسوخ حفظك وعدم تفلته
         </Text>
       </View>
       

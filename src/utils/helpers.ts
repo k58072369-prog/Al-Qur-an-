@@ -104,6 +104,35 @@ export function generatePlan(
   };
 }
 
+/**
+ * يحسب تاريخ اليوم رقم (dayIndex) في الخطة بناءً على الأيام النشطة
+ * @param startDate تاريخ بداية الخطة ISO
+ * @param dayIndex رقم اليوم في الخطة (0-based)
+ * @param activeDays الأيام النشطة في الأسبوع (0-6)
+ */
+export function getPlanDayDate(
+  startDate: string,
+  dayIndex: number,
+  activeDays: number[]
+): string {
+  const activeSet = new Set(activeDays.length > 0 ? activeDays : [0, 1, 2, 3, 4]);
+  const [y, m, d] = startDate.split('-').map(Number);
+  let current = new Date(y, m - 1, d);
+  let found = 0;
+
+  // We look for the dayIndex-th active day starting from startDate
+  // If dayIndex is 0, we find the first active day >= startDate
+  while (true) {
+    if (activeSet.has(current.getDay())) {
+      if (found === dayIndex) {
+        return `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
+      }
+      found++;
+    }
+    current.setDate(current.getDate() + 1);
+  }
+}
+
 // ─── Spaced Repetition ────────────────────────────────────
 
 export function getNextReviewDate(

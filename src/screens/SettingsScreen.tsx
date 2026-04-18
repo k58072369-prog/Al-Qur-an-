@@ -89,8 +89,8 @@ export default function SettingsScreen() {
   const [planMode, setPlanMode] = useState<"daily" | "weekly">(
     (state.settings as any).planMode ?? "daily",
   );
-  const [weeklyPages, setWeeklyPages] = useState<number>(
-    (state.settings as any).weeklyPages ?? 5,
+  const [dailyPages, setDailyPages] = useState<number>(
+    state.user?.dailyPages ?? 1,
   );
   const [activeDaysOfWeek, setActiveDaysOfWeek] = useState<number[]>(
     (state.settings as any).activeDaysOfWeek ?? [0, 1, 2, 3, 4],
@@ -196,15 +196,11 @@ export default function SettingsScreen() {
       type: "UPDATE_SETTINGS",
       payload: {
         planMode,
-        weeklyPages,
         activeDaysOfWeek,
       } as any,
     });
-    // If weekly: recalculate pagesPerActiveDay and update user dailyPages
-    if (planMode === "weekly" && activeDaysOfWeek.length > 0) {
-      const ppa = Math.max(1, Math.round(weeklyPages / activeDaysOfWeek.length));
-      dispatch({ type: "UPDATE_USER", payload: { dailyPages: ppa } });
-    }
+    // Update user dailyPages
+    dispatch({ type: "UPDATE_USER", payload: { dailyPages } });
     // Then regenerate the plan with current page range settings
     applyPlanChanges();
   };
@@ -379,8 +375,8 @@ export default function SettingsScreen() {
           <PlanModeSelector
             planMode={planMode}
             onModeChange={setPlanMode}
-            weeklyPages={weeklyPages}
-            onWeeklyPagesChange={setWeeklyPages}
+            dailyPages={dailyPages}
+            onDailyPagesChange={setDailyPages}
             activeDaysOfWeek={activeDaysOfWeek}
             onActiveDaysChange={setActiveDaysOfWeek}
           />

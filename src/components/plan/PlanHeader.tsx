@@ -45,7 +45,7 @@ export const PlanHeader = React.memo(function PlanHeader({
 
   // For weekly plan: compute week stats
   const activeDaysCount = activeDaysOfWeek.length || 5;
-  const weeklyPagesVal = plan?.weeklyPages ?? plan?.pagesPerDay ?? 1;
+  const weeklyPagesVal = (plan?.pagesPerDay ?? 1) * activeDaysCount;
 
   const DOW_NAMES = [
     "الأحد",

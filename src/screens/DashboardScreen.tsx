@@ -11,14 +11,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ModuleCard } from "../components/dashboard/ModuleCard";
-import VersionOverlay from "../components/shared/VersionOverlay";
 import { DashboardHeader } from "../components/dashboard/DashboardHeader";
+import { ModuleCard } from "../components/dashboard/ModuleCard";
 import { StatsOverview } from "../components/dashboard/StatsOverview";
+import VersionOverlay from "../components/shared/VersionOverlay";
 import { useAppStore } from "../store/AppStore";
 import { UpdateInfo, UpdateService } from "../store/UpdateService";
 import { useSelectionStore } from "../store/selectionStore";
-import { Spacing, useTheme } from "../theme";
+import { BorderRadius, Spacing, useTheme } from "../theme";
 import { MODULES, TaskSelection } from "../types";
 
 const { width } = Dimensions.get("window");
@@ -31,7 +31,9 @@ export default function DashboardScreen() {
   const { user, streak, plan } = state;
 
   const [updateInfo, setUpdateInfo] = React.useState<UpdateInfo | null>(null);
-  const [blockType, setBlockType] = React.useState<"disabled" | "force_update" | "optional_update" | null>(null);
+  const [blockType, setBlockType] = React.useState<
+    "disabled" | "force_update" | "optional_update" | null
+  >(null);
 
   const checkVersion = React.useCallback(async () => {
     try {
@@ -70,8 +72,17 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
-      Animated.spring(slideAnim, { toValue: 0, friction: 8, tension: 40, useNativeDriver: true }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      }),
     ]).start();
   }, []);
 
@@ -80,12 +91,20 @@ export default function DashboardScreen() {
   };
 
   const todayStr = new Date().toDateString();
-  const dailySelections = taskSelections.filter((s: TaskSelection) => new Date(s.createdAt).toDateString() === todayStr);
-  const completedHousons = dailySelections.filter((s: TaskSelection) => s.isCompleted).length;
-  
+  const dailySelections = taskSelections.filter(
+    (s: TaskSelection) => new Date(s.createdAt).toDateString() === todayStr,
+  );
+  const completedHousons = dailySelections.filter(
+    (s: TaskSelection) => s.isCompleted,
+  ).length;
+
   const memorizedCount = memorizedPages.length;
   const targetPagesCount = plan?.targetPages.length || 604;
-  const daysRemaining = Math.max(1, Math.ceil((targetPagesCount - memorizedCount) / (user?.dailyPages || 1)));
+
+  const daysRemaining = Math.max(
+    1,
+    Math.ceil((targetPagesCount - memorizedCount) / (user?.dailyPages || 1)),
+  );
   const finishDate = new Date();
   finishDate.setDate(finishDate.getDate() + daysRemaining);
 
@@ -94,39 +113,94 @@ export default function DashboardScreen() {
       <StatusBar barStyle="light-content" />
       <View style={styles.backgroundAccent} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        
-        <DashboardHeader user={user} fadeAnim={fadeAnim} slideAnim={slideAnim} Colors={Colors} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scroll}
+      >
+        <DashboardHeader
+          user={user}
+          fadeAnim={fadeAnim}
+          slideAnim={slideAnim}
+          Colors={Colors}
+        />
 
         {updateInfo && blockType && (
-          <VersionOverlay type={blockType} info={updateInfo} onDismiss={() => setBlockType(null)} onRefresh={checkVersion} />
+          <VersionOverlay
+            type={blockType}
+            info={updateInfo}
+            onDismiss={() => setBlockType(null)}
+            onRefresh={checkVersion}
+          />
         )}
 
-        <StatsOverview 
-          memorizedCount={memorizedCount} 
-          targetPagesCount={targetPagesCount} 
-          streak={streak.currentStreak} 
-          finishDate={finishDate} 
-          Colors={Colors} 
+        <StatsOverview
+          memorizedCount={memorizedCount}
+          targetPagesCount={targetPagesCount}
+          streak={streak.currentStreak}
+          finishDate={finishDate}
+          Colors={Colors}
         />
 
         <View style={styles.quickActionsRow}>
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/explanation" as any)}>
-            <View style={[styles.actionIconBox, { backgroundColor: `${Colors.primary}10` }]}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => router.push("/explanation" as any)}
+          >
+            <View
+              style={[
+                styles.actionIconBox,
+                { backgroundColor: `${Colors.primary}10` },
+              ]}
+            >
               <Ionicons name="bulb" size={24} color={Colors.primary} />
             </View>
-            <Text style={[styles.actionTitle, { color: Colors.primary }]}>دليل البدء</Text>
+            <Text style={[styles.actionTitle, { color: Colors.primary }]}>
+              دليل البدء
+            </Text>
             <Text style={styles.actionSub}>كيف يعمل التطبيق؟</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.actionCard, { borderColor: `${Colors.gold}40` }]} onPress={() => router.push("/review" as any)}>
-            <View style={[styles.actionIconBox, { backgroundColor: `${Colors.gold}10` }]}>
+          <TouchableOpacity
+            style={[styles.actionCard, { borderColor: `${Colors.gold}40` }]}
+            onPress={() => router.push("/review" as any)}
+          >
+            <View
+              style={[
+                styles.actionIconBox,
+                { backgroundColor: `${Colors.gold}10` },
+              ]}
+            >
               <Ionicons name="heart" size={24} color={Colors.gold} />
             </View>
-            <Text style={[styles.actionTitle, { color: Colors.gold }]}>فضائل القرآن</Text>
+            <Text style={[styles.actionTitle, { color: Colors.gold }]}>
+              فضائل القرآن
+            </Text>
             <Text style={styles.actionSub}>مقامات وحقائق</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          style={styles.quizActionCard}
+          onPress={() => router.push("/quiz" as any)}
+        >
+          <View style={styles.quizActionIconBox}>
+            <Ionicons name="school" size={24} color={Colors.blue} />
+          </View>
+          <View style={{ flex: 1, marginLeft: Spacing.md }}>
+            <Text
+              style={[
+                styles.actionTitle,
+                { color: Colors.blue, textAlign: "left" },
+              ]}
+            >
+              اختبر حفظك
+            </Text>
+            <Text style={[styles.actionSub, { textAlign: "left" }]}>
+              تسميع ذاتي ذكي لما أتممت حفظه
+            </Text>
+          </View>
+          <Ionicons name="chevron-back" size={18} color={Colors.textTertiary} />
+        </TouchableOpacity>
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>منهج الحفظ</Text>
@@ -137,15 +211,25 @@ export default function DashboardScreen() {
 
         <View style={styles.modulesGrid}>
           {MODULES.map((moduleInfo) => (
-            <ModuleCard key={moduleInfo.id} moduleInfo={moduleInfo} onPress={handleModulePress} />
+            <ModuleCard
+              key={moduleInfo.id}
+              moduleInfo={moduleInfo}
+              onPress={handleModulePress}
+            />
           ))}
         </View>
 
         {completedHousons >= 5 && (
           <View style={styles.completionMessage}>
-            <View style={styles.completionIcon}><Ionicons name="checkmark-done" size={24} color="#FFF" /></View>
-            <Text style={styles.completionTitle}>هنيئاً لك إكمال ورد اليوم!</Text>
-            <Text style={styles.completionDesc}>لقد أتممت جميع مراحل مفاتيح حفظ القرآن لهذا اليوم.</Text>
+            <View style={styles.completionIcon}>
+              <Ionicons name="checkmark-done" size={24} color="#FFF" />
+            </View>
+            <Text style={styles.completionTitle}>
+              هنيئاً لك إكمال ورد اليوم!
+            </Text>
+            <Text style={styles.completionDesc}>
+              لقد أتممت جميع مراحل مفاتيح حفظ القرآن لهذا اليوم.
+            </Text>
           </View>
         )}
 
@@ -158,20 +242,108 @@ export default function DashboardScreen() {
 const getStyles = (Colors: any) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: Colors.background },
-    backgroundAccent: { position: "absolute", width: width * 1.2, height: 300, backgroundColor: `${Colors.primary}05`, borderRadius: width, top: -100, left: -width * 0.1 },
+    backgroundAccent: {
+      position: "absolute",
+      width: width * 1.2,
+      height: 300,
+      backgroundColor: `${Colors.primary}05`,
+      borderRadius: width,
+      top: -100,
+      left: -width * 0.1,
+    },
     scroll: { paddingHorizontal: Spacing.xl, paddingTop: 44, gap: Spacing.lg },
-    quickActionsRow: { flexDirection: "row", gap: Spacing.md, marginBottom: Spacing.xl },
-    actionCard: { flex: 1, backgroundColor: Colors.surface, borderRadius: 20, borderWidth: 1, borderColor: Colors.border, padding: Spacing.lg, alignItems: "center", justifyContent: "center" },
-    actionIconBox: { width: 52, height: 52, borderRadius: 18, alignItems: "center", justifyContent: "center", marginBottom: Spacing.sm },
+    quickActionsRow: {
+      flexDirection: "row",
+      gap: Spacing.md,
+    },
+    actionCard: {
+      flex: 1,
+      backgroundColor: Colors.surface,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: Colors.border,
+      padding: Spacing.lg,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    actionIconBox: {
+      width: 52,
+      height: 52,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: Spacing.sm,
+    },
     actionTitle: { fontSize: 15, fontWeight: "bold", marginBottom: 2 },
     actionSub: { fontSize: 11, color: Colors.textSecondary },
-    sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: Spacing.md },
-    sectionTitle: { fontSize: 18, fontWeight: "bold", color: Colors.textPrimary },
-    pillBadge: { backgroundColor: `${Colors.primary}10`, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+    quizActionCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: Spacing.lg,
+      borderRadius: BorderRadius.xl,
+      backgroundColor: Colors.surface,
+      borderWidth: 1,
+      borderColor: Colors.border,
+    },
+    quizActionIconBox: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      backgroundColor: `${Colors.blue}12`,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    sectionHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: Spacing.md,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+    },
+    pillBadge: {
+      backgroundColor: `${Colors.primary}10`,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
     pillText: { fontSize: 11, fontWeight: "bold", color: Colors.primary },
-    modulesGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-    completionMessage: { backgroundColor: Colors.primaryMuted, borderRadius: 24, padding: Spacing.xl, alignItems: "center", marginTop: Spacing.md, borderWidth: 1.5, borderColor: `${Colors.success}30` },
-    completionIcon: { width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.success, alignItems: "center", justifyContent: "center", marginBottom: 12 },
-    completionTitle: { color: Colors.success, fontSize: 18, fontWeight: "900", marginBottom: 6 },
-    completionDesc: { color: Colors.textSecondary, fontSize: 13, textAlign: "center", lineHeight: 20 },
+    modulesGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+    },
+    completionMessage: {
+      backgroundColor: Colors.primaryMuted,
+      borderRadius: 24,
+      padding: Spacing.xl,
+      alignItems: "center",
+      marginTop: Spacing.md,
+      borderWidth: 1.5,
+      borderColor: `${Colors.success}30`,
+    },
+    completionIcon: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: Colors.success,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 12,
+    },
+    completionTitle: {
+      color: Colors.success,
+      fontSize: 18,
+      fontWeight: "900",
+      marginBottom: 6,
+    },
+    completionDesc: {
+      color: Colors.textSecondary,
+      fontSize: 13,
+      textAlign: "center",
+      lineHeight: 20,
+    },
   });

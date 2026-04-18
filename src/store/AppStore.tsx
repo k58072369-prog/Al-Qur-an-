@@ -85,7 +85,6 @@ const DEFAULT_INITIAL_STATE: AppState = {
     chunksPerPage: 1,
     mushafEdition: "madani_604",
     planMode: "daily",
-    weeklyPages: 5,
     activeDaysOfWeek: [0, 1, 2, 3, 4], // Sun-Thu
   },
 };
@@ -103,6 +102,7 @@ type Action =
         pageNumbers: number[];
         label: string;
         direction: "forward" | "backward";
+        alreadyMemorizedSurahIds?: number[];
       };
     }
   | { type: "TOGGLE_FORTRESS"; payload: { fortressId: FortressId } }
@@ -188,7 +188,7 @@ function appReducer(state: AppState, action: Action): AppState {
 
     case "COMPLETE_ONBOARDING": {
       const cleanState = getInitialState();
-      const { user: userData, pageNumbers, label, direction } = action.payload;
+      const { user: userData, pageNumbers, label, direction, alreadyMemorizedSurahIds } = action.payload;
       const editionId = (cleanState.settings.mushafEdition as string) ?? 'madani_604';
       const editionData = getMushafEdition(editionId as any);
       const plan = generatePlan(
@@ -201,18 +201,33 @@ function appReducer(state: AppState, action: Action): AppState {
       (plan as any).mushafEditionId = editionId;
       (plan as any).planMode = cleanState.settings.planMode ?? 'daily';
       (plan as any).activeDaysOfWeek = cleanState.settings.activeDaysOfWeek ?? [0,1,2,3,4];
-      (plan as any).weeklyPages = cleanState.settings.weeklyPages ?? 5;
+
+      // Identify pages for already memorized surahs
+      const alreadyMemorizedPagesSet = new Set<number>();
+      if (alreadyMemorizedSurahIds && alreadyMemorizedSurahIds.length > 0) {
+        alreadyMemorizedSurahIds.forEach((surahId) => {
+          const range = editionData.surahPages[surahId];
+          if (range) {
+            for (let p = range[0]; p <= range[1]; p++) {
+              alreadyMemorizedPagesSet.add(p);
+            }
+          }
+        });
+      }
+
+      const today = todayISO();
 
       // Build initial page progress for all pages
       const pageProgress: PageProgress[] = [];
       for (let p = 1; p <= editionData.totalPages; p++) {
+        const isMemorized = alreadyMemorizedPagesSet.has(p);
         pageProgress.push({
           pageNumber: p,
-          memorized: false,
-          strength: 1,
-          lastReviewed: "",
-          reviewCount: 0,
-          nextReviewDate: "",
+          memorized: isMemorized,
+          strength: isMemorized ? 1 : 1,
+          lastReviewed: isMemorized ? today : "",
+          reviewCount: isMemorized ? 1 : 0,
+          nextReviewDate: isMemorized ? getNextReviewDate(1, today) : "",
         });
       }
 
@@ -495,7 +510,6 @@ function appReducer(state: AppState, action: Action): AppState {
       (newPlan as any).mushafEditionId = editionId;
       (newPlan as any).planMode = (state.settings as any).planMode ?? 'daily';
       (newPlan as any).activeDaysOfWeek = (state.settings as any).activeDaysOfWeek ?? [0,1,2,3,4];
-      (newPlan as any).weeklyPages = (state.settings as any).weeklyPages ?? 5;
 
       // Ensure pageProgress covers all pages up to editionData.totalPages
       let newPageProgress = [...state.pageProgress];

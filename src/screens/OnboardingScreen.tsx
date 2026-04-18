@@ -18,6 +18,7 @@ import { SURAHS } from "../data/quranMeta";
 import { useAppStore } from "../store/AppStore";
 import { BorderRadius, Spacing, Typography, useTheme } from "../theme";
 import { QURAN_GOALS, UserLevel } from "../types";
+import { toArabicNumerals } from "../utils/helpers";
 
 const { width } = Dimensions.get("window");
 
@@ -55,7 +56,7 @@ const DAILY_PAGES_LABELS: Record<number, string> = {
   5: "٥ صفحات",
 };
 
-const STEPS = ["الترحيب", "مستواك", "هدفك", "طاقتك", "البداية"];
+const STEPS = ["الترحيب", "مستواك", "محفوظك", "هدفك", "طاقتك", "البداية"];
 
 export default function OnboardingScreen() {
   const Colors = useTheme();
@@ -78,6 +79,11 @@ export default function OnboardingScreen() {
     "forward",
   );
   const [surahModalVisible, setSurahModalVisible] = useState(false);
+  const [alreadyMemorizedSurahIds, setAlreadyMemorizedSurahIds] = useState<
+    number[]
+  >([]);
+  const [alreadyMemorizedModalVisible, setAlreadyMemorizedModalVisible] =
+    useState(false);
   const slideAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -164,6 +170,7 @@ export default function OnboardingScreen() {
         pageNumbers: pages,
         label,
         direction: planDirection,
+        alreadyMemorizedSurahIds,
       },
     });
     router.replace("/(tabs)/dashboard" as any);
@@ -337,8 +344,68 @@ export default function OnboardingScreen() {
             </View>
           )}
 
-          {/* STEP 2: Goal/Plan Selection */}
+          {/* STEP 2: Previous Memorization */}
           {step === 2 && (
+            <View style={styles.stepContainer}>
+              <Ionicons
+                name="library-outline"
+                size={48}
+                color={Colors.primary}
+                style={{ marginBottom: Spacing.lg, opacity: 0.85 }}
+              />
+              <Text style={styles.stepTitle}>
+                هل تحفظ شيئاً من القرآن بالفعل؟
+              </Text>
+              <Text style={styles.stepSubtitle}>
+                سنقوم بتخطي هذه السور في خطة الحفظ الجديدة
+              </Text>
+
+              <View
+                style={[styles.card, { width: "100%", padding: Spacing.lg }]}
+              >
+                <TouchableOpacity
+                  style={styles.surahSelectBtn}
+                  onPress={() => setAlreadyMemorizedModalVisible(true)}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <Ionicons name="list" size={18} color={Colors.primary} />
+                    <Text style={styles.surahSelectText}>
+                      {alreadyMemorizedSurahIds.length === 0
+                        ? "اختر السور التي تحفظها"
+                        : `تحفظ حالياً ${alreadyMemorizedSurahIds.length} سورة`}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-back"
+                    size={16}
+                    color={Colors.textTertiary}
+                  />
+                </TouchableOpacity>
+
+                <Text
+                  style={{
+                    fontFamily: Typography.body,
+                    fontSize: 12,
+                    color: Colors.textTertiary,
+                    marginTop: Spacing.sm,
+                    lineHeight: 18,
+                  }}
+                >
+                  ملاحظة: سيتم إضافة الصفحات الخاصة بهذه السور بمستوى المراجعة
+                  التلقائي حتى تستمر في مراجعتها ولن يطلب منك حفظها.
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* STEP 3: Goal/Plan Selection */}
+          {step === 3 && (
             <View style={styles.stepContainer}>
               <Ionicons
                 name="flag-outline"
@@ -498,8 +565,8 @@ export default function OnboardingScreen() {
             </View>
           )}
 
-          {/* STEP 3: Daily Capacity */}
-          {step === 3 && (
+          {/* STEP 4: Daily Capacity */}
+          {step === 4 && (
             <View style={styles.stepContainer}>
               <Ionicons
                 name="flash-outline"
@@ -555,8 +622,8 @@ export default function OnboardingScreen() {
             </View>
           )}
 
-          {/* STEP 4: Ready */}
-          {step === 4 && (
+          {/* STEP 5: Ready */}
+          {step === 5 && (
             <View style={styles.stepContainer}>
               <Ionicons
                 name="shield-checkmark-outline"
@@ -674,7 +741,9 @@ export default function OnboardingScreen() {
                     >
                       {surah.nameAr}
                     </Text>
-                    <Text style={styles.surahNumber}>{surah.id}</Text>
+                    <Text style={styles.surahNumber}>
+                      {toArabicNumerals(surah.id)}
+                    </Text>
                   </TouchableOpacity>
                 );
               })}
@@ -686,6 +755,77 @@ export default function OnboardingScreen() {
                   { backgroundColor: Colors.primary },
                 ]}
                 onPress={() => setSurahModalVisible(false)}
+              >
+                <Text style={{ color: "#FFF", fontWeight: "bold" }}>
+                  تم الاختيار
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Already Memorized Surah Selection Modal (Multi-select) */}
+      <Modal
+        visible={alreadyMemorizedModalVisible}
+        transparent
+        animationType="slide"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { height: "90%", width: "90%" }]}>
+            <Text style={styles.modalTitle}>اختر السور المحفوظة</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {SURAHS.map((surah) => {
+                const isSelected = alreadyMemorizedSurahIds.includes(surah.id);
+                return (
+                  <TouchableOpacity
+                    key={surah.id}
+                    style={[
+                      styles.surahItem,
+                      isSelected && { backgroundColor: `${Colors.primary}10` },
+                    ]}
+                    onPress={() => {
+                      if (isSelected) {
+                        setAlreadyMemorizedSurahIds(
+                          alreadyMemorizedSurahIds.filter(
+                            (id) => id !== surah.id,
+                          ),
+                        );
+                      } else {
+                        setAlreadyMemorizedSurahIds([
+                          ...alreadyMemorizedSurahIds,
+                          surah.id,
+                        ]);
+                      }
+                    }}
+                  >
+                    <Ionicons
+                      name={isSelected ? "checkbox" : "square-outline"}
+                      size={20}
+                      color={isSelected ? Colors.primary : Colors.textTertiary}
+                    />
+                    <Text
+                      style={[
+                        styles.surahNameAr,
+                        isSelected && { color: Colors.primary },
+                      ]}
+                    >
+                      {surah.nameAr}
+                    </Text>
+                    <Text style={styles.surahNumber}>
+                      {toArabicNumerals(surah.id)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[
+                  styles.modalButton,
+                  { backgroundColor: Colors.primary },
+                ]}
+                onPress={() => setAlreadyMemorizedModalVisible(false)}
               >
                 <Text style={{ color: "#FFF", fontWeight: "bold" }}>
                   تم الاختيار
@@ -1188,7 +1328,7 @@ const getStyles = (Colors: typeof darkColors) =>
       fontSize: Typography.base,
       color: Colors.textPrimary,
       fontWeight: Typography.medium,
-      textAlign: "right",
+      textAlign: "left",
       paddingRight: Spacing.md,
     },
     planPreviewBox: {

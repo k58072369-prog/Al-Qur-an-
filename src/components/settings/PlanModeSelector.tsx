@@ -23,8 +23,8 @@ const DAYS_OF_WEEK = [
 type Props = {
   planMode: "daily" | "weekly";
   onModeChange: (mode: "daily" | "weekly") => void;
-  weeklyPages: number;
-  onWeeklyPagesChange: (pages: number) => void;
+  dailyPages: number;
+  onDailyPagesChange: (pages: number) => void;
   activeDaysOfWeek: number[];
   onActiveDaysChange: (days: number[]) => void;
 };
@@ -33,8 +33,8 @@ type Props = {
 export function PlanModeSelector({
   planMode,
   onModeChange,
-  weeklyPages,
-  onWeeklyPagesChange,
+  dailyPages,
+  onDailyPagesChange,
   activeDaysOfWeek,
   onActiveDaysChange,
 }: Props) {
@@ -54,10 +54,8 @@ export function PlanModeSelector({
     }
   };
 
-  const pagesPerActiveDay =
-    activeDaysOfWeek.length > 0
-      ? Math.max(1, Math.round(weeklyPages / activeDaysOfWeek.length))
-      : 1;
+  const pagesPerActiveDay = dailyPages || 1;
+  const totalWeeklyPages = pagesPerActiveDay * activeDaysOfWeek.length;
 
   return (
     <View>
@@ -126,12 +124,12 @@ export function PlanModeSelector({
       {/* ─── Weekly Settings ─── */}
       {planMode === "weekly" && (
         <View style={styles.weeklySection}>
-          {/* Pages Per Week */}
-          <Text style={styles.sectionLabel}>عدد الصفحات في الأسبوع</Text>
+          {/* Pages Per Day */}
+          <Text style={styles.sectionLabel}>عدد الصفحات اليومية (في أيام الحفظ)</Text>
           <View style={styles.stepperRow}>
             <TouchableOpacity
               style={styles.stepperBtn}
-              onPress={() => onWeeklyPagesChange(Math.max(1, weeklyPages - 1))}
+              onPress={() => onDailyPagesChange(Math.max(1, dailyPages - 1))}
               activeOpacity={0.7}
             >
               <Ionicons name="remove" size={18} color={Colors.primary} />
@@ -139,15 +137,15 @@ export function PlanModeSelector({
 
             <View style={styles.stepperValue}>
               <Text style={[styles.stepperNum, { color: Colors.primary }]}>
-                {weeklyPages}
+                {dailyPages}
               </Text>
-              <Text style={styles.stepperUnit}>صفحة/أسبوع</Text>
+              <Text style={styles.stepperUnit}>صفحة/يوم</Text>
             </View>
 
             <TouchableOpacity
               style={styles.stepperBtn}
               onPress={() =>
-                onWeeklyPagesChange(Math.min(21, weeklyPages + 1))
+                onDailyPagesChange(Math.min(20, dailyPages + 1))
               }
               activeOpacity={0.7}
             >
@@ -202,7 +200,7 @@ export function PlanModeSelector({
             <View style={styles.summaryRow}>
               <Ionicons name="book-outline" size={14} color={Colors.primary} />
               <Text style={[styles.summaryText, { color: Colors.primary }]}>
-                {pagesPerActiveDay} صفحة لكل يوم حفظ
+                {totalWeeklyPages} صفحة في الأسبوع
               </Text>
             </View>
             <View style={styles.summaryRow}>

@@ -23,6 +23,8 @@ export type DayItem = {
   isCompleted: boolean;
   completionPct: number;
   tasks: DayTask[];
+  date?: string;
+  isLocked?: boolean;
 };
 
 // ─── Weekly Calendar Types ────────────────────────────────────────────────────

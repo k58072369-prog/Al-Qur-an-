@@ -33,17 +33,20 @@ const MODULE_MAP: Record<string, string> = {
 const TaskRow = ({
   task,
   styles,
+  isLocked,
 }: {
   task: DayTask;
   styles: ReturnType<typeof getStyles>;
+  isLocked?: boolean;
 }) => (
   <TouchableOpacity
-    style={styles.taskRow}
+    style={[styles.taskRow, isLocked && { opacity: 0.6 }]}
     onPress={() => {
+      if (isLocked) return;
       const dest = MODULE_MAP[task.id];
       if (dest) router.push({ pathname: "/module", params: { id: dest } } as any);
     }}
-    activeOpacity={0.7}
+    activeOpacity={isLocked ? 1 : 0.7}
   >
     <View
       style={[styles.taskIconBox, { backgroundColor: `${task.color}12` }]}
@@ -265,7 +268,7 @@ export const PlanDayCard = React.memo(function PlanDayCard({
               <Text style={styles.tasksTitle}>مهام هذا اليوم</Text>
               <View style={styles.tasksList}>
                 {item.tasks.map((task) => (
-                  <TaskRow key={task.id} task={task} styles={styles} />
+                  <TaskRow key={task.id} task={task} styles={styles} isLocked={item.isLocked} />
                 ))}
               </View>
 
@@ -273,13 +276,14 @@ export const PlanDayCard = React.memo(function PlanDayCard({
                 <TouchableOpacity
                   style={[
                     styles.completeBtn,
-                    { backgroundColor: Colors.primary },
+                    { backgroundColor: item.isLocked ? Colors.textTertiary : Colors.primary },
                   ]}
-                  onPress={() => onComplete(item)}
+                  onPress={() => item.isLocked ? null : onComplete(item)}
+                  activeOpacity={item.isLocked ? 1 : 0.7}
                 >
-                  <Ionicons name="checkmark-circle" size={22} color="#FFF" />
+                  <Ionicons name={item.isLocked ? "lock-closed" : "checkmark-circle"} size={22} color="#FFF" />
                   <Text style={styles.completeBtnText}>
-                    إتمام كافة مهام اليوم
+                    {item.isLocked ? "شريط المهام مغلق (يفتح غداً)" : "إتمام كافة مهام اليوم"}
                   </Text>
                 </TouchableOpacity>
               )}

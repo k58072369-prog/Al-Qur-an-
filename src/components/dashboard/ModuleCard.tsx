@@ -62,9 +62,9 @@ export function ModuleCard({ moduleInfo, onPress }: ModuleCardProps) {
         {/* Progress Indicator Badge */}
         <View style={styles.progressBadge}>
           {completionPct === 1 ? (
-            <View style={styles.doneBadge}>
-              <Ionicons name="checkmark-done" size={14} color="#FFF" />
-            </View>
+             <View style={styles.doneBadge}>
+               <Ionicons name="checkmark-done" size={14} color="#FFF" />
+             </View>
           ) : completionPct > 0 ? (
             <View style={[styles.pctPill, { backgroundColor: `${moduleInfo.color}15` }]}>
               <Text style={[styles.pctText, { color: moduleInfo.color }]}>

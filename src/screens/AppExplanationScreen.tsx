@@ -61,11 +61,11 @@ export default function AppExplanationScreen() {
         <PresentationCard Colors={Colors} />
 
         <SectionHeader
-          title="منهجية الحصون الخمسة بالتفصيل"
+          title="منهجية المفاتيح الخمسة بالتفصيل"
           color={Colors.primary}
         />
         <ExplanationCard
-          title="الحصن الأول: الختمة (التلاوة والاستماع)"
+          title="المفتاح الأول: الختمة (التلاوة والاستماع)"
           icon="book-outline"
           color={Colors.fortressRecitation}
           content={
@@ -84,7 +84,7 @@ export default function AppExplanationScreen() {
           }
         />
         <ExplanationCard
-          title="الحصن الثاني: التحضير (3 مستويات للتمكين)"
+          title="المفتاح الثاني: التحضير (3 مستويات للتمكين)"
           icon="timer-outline"
           color={Colors.fortressPreparation}
           content={
@@ -108,19 +108,19 @@ export default function AppExplanationScreen() {
           }
         />
         <ExplanationCard
-          title="الحصن الثالث: الحفظ الجديد (الإيداع الذكي)"
+          title="المفتاح الثالث: الحفظ الجديد (الإيداع الذكي)"
           icon="create-outline"
           color={Colors.fortressMemorization}
           content="مرحلة التركيز الذهني الكامل؛ كرر كل آية 10 مرات ثم اربطها بما قبلها. لا تنتقل لصفحة جديدة إلا إذا أصبحت قادراً على سرد الصفحة الحالية غيباً دون خطأ واحد وبسرعة."
         />
         <ExplanationCard
-          title="الحصن الرابع: مراجعة القريب (التمكين والربط)"
+          title="المفتاح الرابع: مراجعة القريب (التمكين والربط)"
           icon="sync-outline"
           color={Colors.fortressReview}
-          content="مراجعة آخر 20 صفحة (أو آخر جزء) تم حفظها بشكل يومي. هذا الحصن هو صمام الأمان الذي يحول الحفظ من الذاكرة المؤقتة إلى الدائمة ويمنع النسيان السريع."
+          content="مراجعة آخر 20 صفحة (أو آخر جزء) تم حفظها بشكل يومي. هذا المفتاح هو صمام الأمان الذي يحول الحفظ من الذاكرة المؤقتة إلى الدائمة ويمنع النسيان السريع."
         />
         <ExplanationCard
-          title="الحصن الخامس: مراجعة البعيد (التثبيت الأبدي)"
+          title="المفتاح الخامس: مراجعة البعيد (التثبيت الأبدي)"
           icon="layers-outline"
           color={Colors.blue}
           content="مراجعة الأجزاء القديمة المسردة بمعدل جزئين يومياً. الهدف هو الوصول لمرحلة 'السرد الغيبي'؛ حيث تقرأ أجزاءك القديمة بانسيابية تامة كأنك تقرأ الفاتحة."
