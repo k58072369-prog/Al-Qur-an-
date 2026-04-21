@@ -27,6 +27,7 @@ import { AudioPlayer } from "../components/shared/AudioPlayer";
 import { RangeChip } from "../components/shared/RangeChip";
 import { TaskCard } from "../components/shared/TaskCard";
 import { TaskTimer } from "../components/shared/TaskTimer";
+import { InteractiveQuran } from "../components/shared/InteractiveQuran";
 import { SelectionScreen } from "../features/selection/SelectionScreen";
 
 export default function ModuleScreen() {
@@ -40,6 +41,7 @@ export default function ModuleScreen() {
   const [showSelectionModal, setShowSelectionModal] = useState(false);
   const [timerVisible, setTimerVisible] = useState(false);
   const [audioPlayerVisible, setAudioPlayerVisible] = useState(false);
+  const [quranReaderVisible, setQuranReaderVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskSelection | null>(null);
 
   const { plan, pageProgress, settings } = state;
@@ -298,8 +300,13 @@ export default function ModuleScreen() {
 
   const handleStartSession = (task: TaskSelection) => {
     setSelectedTask(task);
-    if (moduleInfo.id === "listening") setAudioPlayerVisible(true);
-    else setTimerVisible(true);
+    if (moduleInfo.id === "listening") {
+      setAudioPlayerVisible(true);
+    } else if (moduleInfo.id === "memorization") {
+      setTimerVisible(true);
+    } else {
+      setQuranReaderVisible(true);
+    }
   };
 
   return (
@@ -563,6 +570,9 @@ export default function ModuleScreen() {
           title={`جلسة ${moduleInfo.nameAr}`}
           initialSeconds={getRecommendedTime(moduleInfo.id)}
           task={selectedTask}
+          showRepetition={moduleInfo.id === "memorization"}
+          showControls={moduleInfo.id === "memorization"}
+          showSetup={moduleInfo.id === "memorization"}
           onFinish={() => {}}
           onClose={() => setTimerVisible(false)}
         />
@@ -573,6 +583,17 @@ export default function ModuleScreen() {
         pages={getPagesFromTask(selectedTask)}
         title={`الاستماع لـ ${moduleInfo.nameAr}`}
         onClose={() => setAudioPlayerVisible(false)}
+      />
+
+      <InteractiveQuran
+        visible={quranReaderVisible}
+        pages={getPagesFromTask(selectedTask)}
+        moduleId={moduleInfo.id}
+        moduleName={moduleInfo.nameAr}
+        onClose={() => setQuranReaderVisible(false)}
+        onComplete={() => {
+           if (selectedTask) handleComplete(selectedTask);
+        }}
       />
     </View>
   );

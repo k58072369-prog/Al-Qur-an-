@@ -12,11 +12,23 @@ type TaskTimerProps = {
   onClose: () => void;
   title: string;
   task?: TaskSelection;
+  showRepetition?: boolean;
+  showControls?: boolean;
+  showSetup?: boolean;
 };
 
 const STROKE_WIDTH = 12;
 
-export function TaskTimer({ initialSeconds, onFinish, onClose, title, task }: TaskTimerProps) {
+export function TaskTimer({ 
+  initialSeconds, 
+  onFinish, 
+  onClose, 
+  title, 
+  task, 
+  showRepetition = true,
+  showControls = true,
+  showSetup = true
+}: TaskTimerProps) {
   const Colors = useTheme();
   const [seconds, setSeconds] = useState(initialSeconds);
   const [isActive, setIsActive] = useState(false);
@@ -148,7 +160,7 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title, task }: Ta
         </View>
 
         {/* Initial Setup Section - Only visible before start */}
-        {!isActive && !isFinished && (
+        {showSetup && !isActive && !isFinished && (
           <View style={styles.setupCard}>
             <Text style={[styles.setupTitle, { color: Colors.textSecondary }]}>إعداد البداية</Text>
             <View style={styles.setupRow}>
@@ -243,7 +255,8 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title, task }: Ta
         </Animated.View>
 
         {/* Dynamic controls for Hifz - Vertical Stack (Reordered) */}
-        <View style={styles.hifzControls}>
+        {showControls && (
+          <View style={styles.hifzControls}>
           {currentAyah && (
             <Text style={[styles.surahName, { color: Colors.primary }]}>
               {getSurahById(currentAyah.surahId)?.nameAr}
@@ -291,23 +304,28 @@ export function TaskTimer({ initialSeconds, onFinish, onClose, title, task }: Ta
                 </View>
              </View>
 
-             <View style={styles.stackDivider} />
+             {showRepetition && (
+               <>
+                 <View style={styles.stackDivider} />
 
-             {/* 3. Repetition Control */}
-             <View style={styles.stackedItem}>
-                <Text style={[styles.hifzLabel, { color: Colors.textTertiary }]}>عدد التكرار</Text>
-                <View style={styles.counterRow}>
-                  <TouchableOpacity onPress={() => setCurrentRep(prev => Math.max(0, prev - 1))} style={styles.largeMiniBtn}>
-                    <Ionicons name="remove-circle-outline" size={24} color={Colors.textPrimary} />
-                  </TouchableOpacity>
-                  <Text style={[styles.hifzValueLarge, { color: Colors.textPrimary }]}>{currentRep}x</Text>
-                  <TouchableOpacity onPress={() => setCurrentRep(prev => prev + 1)} style={styles.largeMiniBtn}>
-                    <Ionicons name="add-circle-outline" size={24} color={Colors.textPrimary} />
-                  </TouchableOpacity>
-                </View>
+                 {/* 3. Repetition Control */}
+                 <View style={styles.stackedItem}>
+                    <Text style={[styles.hifzLabel, { color: Colors.textTertiary }]}>عدد التكرار</Text>
+                    <View style={styles.counterRow}>
+                      <TouchableOpacity onPress={() => setCurrentRep(prev => Math.max(0, prev - 1))} style={styles.largeMiniBtn}>
+                        <Ionicons name="remove-circle-outline" size={24} color={Colors.textPrimary} />
+                      </TouchableOpacity>
+                      <Text style={[styles.hifzValueLarge, { color: Colors.textPrimary }]}>{currentRep}x</Text>
+                      <TouchableOpacity onPress={() => setCurrentRep(prev => prev + 1)} style={styles.largeMiniBtn}>
+                        <Ionicons name="add-circle-outline" size={24} color={Colors.textPrimary} />
+                      </TouchableOpacity>
+                    </View>
+                 </View>
+               </>
+             )}
              </View>
           </View>
-        </View>
+        )}
 
         <View style={styles.controls}>
           {!isFinished ? (

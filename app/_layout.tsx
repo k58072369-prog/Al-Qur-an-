@@ -241,7 +241,7 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
           <View style={styles.outerRing}>
             <View style={styles.innerRing}>
               <Image
-                source={require("../assets/images/icon.png")}
+                source={require("../assets/images/android-icon-foreground.png")}
                 style={styles.logoImageSplash}
                 resizeMode="contain"
               />

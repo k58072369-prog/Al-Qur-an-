@@ -103,6 +103,12 @@ type Action =
         label: string;
         direction: "forward" | "backward";
         alreadyMemorizedSurahIds?: number[];
+        settings?: {
+          planMode: "daily" | "weekly";
+          activeDaysOfWeek: number[];
+          mushafEdition: string;
+          reviewStrategy: "spaced" | "random" | "recency";
+        };
       };
     }
   | { type: "TOGGLE_FORTRESS"; payload: { fortressId: FortressId } }
@@ -199,8 +205,8 @@ function appReducer(state: AppState, action: Action): AppState {
         editionData.surahPages
       );
       (plan as any).mushafEditionId = editionId;
-      (plan as any).planMode = cleanState.settings.planMode ?? 'daily';
-      (plan as any).activeDaysOfWeek = cleanState.settings.activeDaysOfWeek ?? [0,1,2,3,4];
+      (plan as any).planMode = action.payload.settings?.planMode ?? cleanState.settings.planMode ?? 'daily';
+      (plan as any).activeDaysOfWeek = action.payload.settings?.activeDaysOfWeek ?? cleanState.settings.activeDaysOfWeek ?? [0,1,2,3,4,5,6];
 
       // Identify pages for already memorized surahs
       const alreadyMemorizedPagesSet = new Set<number>();
@@ -252,6 +258,11 @@ function appReducer(state: AppState, action: Action): AppState {
         plan,
         pageProgress,
         dailyProgress: [todayProgress],
+        settings: {
+          ...cleanState.settings,
+          planMode: action.payload.settings?.planMode ?? cleanState.settings.planMode,
+          activeDaysOfWeek: action.payload.settings?.activeDaysOfWeek ?? cleanState.settings.activeDaysOfWeek,
+        },
         isOnboarded: true,
         isLoaded: true,
       };
@@ -635,20 +646,36 @@ export function AppProvider({ children }: PropsWithChildren) {
     }
   }, [state]);
 
-  // Legacy hook space removed
+  // When onboarding completes for the first time, clear any stale notification
+  // hash so scheduleFortressReminders() always runs a fresh reschedule.
+  // This prevents the situation where the hash from a previous install / reset
+  // matches the new settings and the service skips scheduling entirely.
+  const prevOnboardedRef = React.useRef(state.isOnboarded);
+  useEffect(() => {
+    const wasOnboarded = prevOnboardedRef.current;
+    prevOnboardedRef.current = state.isOnboarded;
+    if (!wasOnboarded && state.isOnboarded) {
+      // Just transitioned: not-onboarded → onboarded. Clear hash so the
+      // scheduling useEffect below always re-schedules with a clean slate.
+      NotificationService.clearSavedHash();
+    }
+  }, [state.isOnboarded]);
 
   // Schedule / update notifications whenever settings change.
   // – Only fire after the app is fully loaded AND the user is onboarded
   //   (avoids scheduling during the onboarding wizard or on a fresh install).
-  // – Debounced 800 ms to coalesce rapid Redux updates (e.g., template buttons).
+  // – Debounced 1500 ms to coalesce rapid Redux updates (e.g., template buttons
+  //   or rapidly toggling rows in SettingsScreen).
   // – The service itself uses a persistent AsyncStorage hash so it does nothing
   //   if the settings haven't actually changed since the last schedule.
+  // – The scheduling lock inside NotificationService suppresses the instant
+  //   catch-up fires that expo emits when a daily trigger's time has passed.
   useEffect(() => {
     if (!state.isLoaded || !state.isOnboarded) return;
 
     const timer = setTimeout(() => {
       NotificationService.scheduleFortressReminders(state.settings.notifications);
-    }, 800);
+    }, 1500);
 
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps

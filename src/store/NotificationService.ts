@@ -9,7 +9,7 @@ import { NotificationSettings } from '../types';
 
 const NOTIF_HASH_KEY = 'husoon_notif_settings_hash';
 
-// The fixed identifiers we manage — one per fortress
+// One fixed identifier per reminder type
 const FORTRESS_IDS = [
   'fortress_recitation',
   'fortress_listening',
@@ -21,7 +21,20 @@ const FORTRESS_IDS = [
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────
-// Lazy loader — avoids web/Expo Go side-effects
+// Scheduling-lock timestamp
+//
+// expo-notifications fires a daily repeating notification IMMEDIATELY
+// if scheduled after the target time has already passed today.
+// We set this timestamp right before scheduling and use it inside
+// setNotificationHandler to silence any notification that arrives
+// within SCHEDULING_GRACE_MS of a scheduling call.
+// ─────────────────────────────────────────────────────────────────
+
+const SCHEDULING_GRACE_MS = 8_000; // 8-second window after scheduling
+let _schedulingLockUntil = 0;      // epoch ms — 0 means no active lock
+
+// ─────────────────────────────────────────────────────────────────
+// Lazy loader — avoids web/Expo Go side-effects at import time
 // ─────────────────────────────────────────────────────────────────
 
 let _Notifications: any = null;
@@ -30,7 +43,7 @@ function getNotifications(): any | null {
   if (Platform.OS === 'web') return null;
   if (_Notifications) return _Notifications;
 
-  // Silence Expo Go's Android push-token warning (we only use local notifications)
+  // Silence Expo Go's Android push-token warning (local-only app)
   const isGo = Constants.appOwnership === 'expo';
   if (isGo && !(console as any).__notifFilterInstalled) {
     const originalError = console.error;
@@ -48,17 +61,23 @@ function getNotifications(): any | null {
     return null;
   }
 
-  // Set a global handler once — only show notifications that are NOT from the
-  // current session's startup burst (they fire within the first 3 s).
-  const launchTime = Date.now();
+  // Global notification handler — registered once.
+  // Suppress any notification that fires during the scheduling grace window
+  // (these are the "catch-up" fires that expo-notifications emits immediately
+  // when you schedule a daily trigger whose time has already passed today).
   _Notifications.setNotificationHandler({
     handleNotification: async () => {
-      const age = Date.now() - launchTime;
-      const show = age > 3_000; // suppress instant catch-up on app open
+      const now = Date.now();
+      const isInLock = now < _schedulingLockUntil;
+
+      if (isInLock) {
+        // Silently suppressed
+      }
+
       return {
-        shouldShowBanner: show,
-        shouldShowList: show,
-        shouldPlaySound: show,
+        shouldShowBanner: !isInLock,
+        shouldShowList:   !isInLock,
+        shouldPlaySound:  !isInLock,
         shouldSetBadge: false,
       };
     },
@@ -68,7 +87,7 @@ function getNotifications(): any | null {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Simple hash — fast string → number
+// Simple string hash for change-detection
 // ─────────────────────────────────────────────────────────────────
 
 function simpleHash(str: string): string {
@@ -84,6 +103,7 @@ function simpleHash(str: string): string {
 // ─────────────────────────────────────────────────────────────────
 
 export const NotificationService = {
+
   // ── Permissions ────────────────────────────────────────────────
 
   async registerForPushNotificationsAsync(): Promise<void> {
@@ -136,7 +156,7 @@ export const NotificationService = {
     else Linking.openSettings();
   },
 
-  // ── Cancel all managed notifications ───────────────────────────
+  // ── Cancel all managed notifications ──────────────────────────
 
   async cancelAllFortressReminders(): Promise<void> {
     const notifs = getNotifications();
@@ -147,59 +167,72 @@ export const NotificationService = {
       )
     );
     await AsyncStorage.removeItem(NOTIF_HASH_KEY).catch(() => {});
-    console.log('[NotificationService] All fortress reminders cancelled');
+  },
+
+  // ── Clear saved hash (force reschedule on next call) ──────────
+  // Call this after a major state change (e.g., onboarding complete,
+  // full data reset) so the next scheduleFortressReminders() always runs.
+
+  async clearSavedHash(): Promise<void> {
+    await AsyncStorage.removeItem(NOTIF_HASH_KEY).catch(() => {});
   },
 
   // ── Main scheduling entry-point ────────────────────────────────
   //
   // Strategy:
-  //  1. Hash the settings. Compare with last-saved hash from AsyncStorage.
-  //  2. If same → nothing changed, skip.
-  //  3. Cancel ALL existing fortress notifications (ensures clean slate).
-  //  4. Re-schedule only enabled ones.
-  //  5. Persist new hash so the next app launch can skip redundant work.
+  //  1. Hash the current settings; compare with the persisted hash.
+  //     If identical → nothing changed since last run → skip entirely.
+  //  2. Acquire the scheduling lock to suppress the immediate catch-up
+  //     notifications that expo fires when today's trigger time is past.
+  //  3. Cancel all existing fortress notifications (clean slate).
+  //  4. If master switch is off → persist hash + done.
+  //  5. For each enabled fortress: schedule with { hour, minute, repeats: true }.
+  //     The lock window ensures the instant catch-up fires are silenced.
+  //  6. Release lock after SCHEDULING_GRACE_MS and persist the new hash.
   //
   async scheduleFortressReminders(settings: NotificationSettings): Promise<void> {
     if (Platform.OS === 'web') return;
     const notifs = getNotifications();
     if (!notifs) return;
 
-    // Check permissions first — don't bother scheduling without them
+    // Need permission before we can schedule anything
     const { status } = await notifs.getPermissionsAsync();
     if (status !== 'granted') {
-      console.log('[NotificationService] No permission — skipping schedule');
       return;
     }
 
-    // ── 1. De-duplicate with persistent hash ───────────────────
+    // ── 1. De-duplicate via persistent hash ────────────────────
     const newHash = simpleHash(JSON.stringify(settings));
     try {
       const savedHash = await AsyncStorage.getItem(NOTIF_HASH_KEY);
       if (savedHash === newHash) {
-        console.log('[NotificationService] Settings unchanged — skipping');
         return;
       }
     } catch {
-      // AsyncStorage unavailable — proceed anyway
+      // Ignore AsyncStorage errors; just proceed
     }
 
-    console.log('[NotificationService] Settings changed — rescheduling all');
+    // ── 2. Acquire scheduling lock BEFORE cancelling/re-scheduling ─
+    // This ensures setNotificationHandler suppresses any immediate
+    // catch-up fires that expo emits during/after scheduleNotificationAsync.
+    _schedulingLockUntil = Date.now() + SCHEDULING_GRACE_MS;
 
-    // ── 2. Cancel everything (clean slate) ─────────────────────
+    // ── 3. Cancel everything (clean slate) ─────────────────────
     await Promise.all(
       FORTRESS_IDS.map((id) =>
         notifs.cancelScheduledNotificationAsync(id).catch(() => {})
       )
     );
 
-    // ── 3. If master switch is off, stop here ──────────────────
+    // ── 4. Master switch off → persist hash + release lock ─────
     if (!settings.enabled) {
       await AsyncStorage.setItem(NOTIF_HASH_KEY, newHash).catch(() => {});
-      console.log('[NotificationService] Master switch OFF — all cancelled');
+      // No ongoing notifications to catch-up, release lock early
+      _schedulingLockUntil = 0;
       return;
     }
 
-    // ── 4. Define fortress data ────────────────────────────────
+    // ── 5. Define each fortress ────────────────────────────────
     const fortresses = [
       {
         identifier: 'fortress_recitation' as const,
@@ -252,10 +285,10 @@ export const NotificationService = {
       },
     ];
 
-    // ── 5. Schedule each enabled fortress ─────────────────────
+    // ── 6. Schedule each enabled fortress ──────────────────────
     const results = await Promise.allSettled(
       fortresses.map(async (f) => {
-        if (!f.enabled) return; // disabled — already cancelled above
+        if (!f.enabled) return;
 
         const [hours, minutes] = f.time.split(':').map(Number);
         if (isNaN(hours) || isNaN(minutes)) {
@@ -274,6 +307,9 @@ export const NotificationService = {
             channelId: 'husoon_reminders',
           },
           trigger: {
+            // Daily repeating trigger — expo may fire a catch-up immediately
+            // if this time has already passed today, but the scheduling lock
+            // set above will suppress that spurious notification.
             hour: hours,
             minute: minutes,
             repeats: true,
@@ -281,20 +317,27 @@ export const NotificationService = {
             channelId: 'husoon_reminders',
           },
         });
-
-        console.log(`[NotificationService] ✓ Scheduled ${f.identifier} @ ${f.time}`);
       })
     );
 
-    // Log failures without crashing
+    // Log any failures without crashing
     results.forEach((r, i) => {
       if (r.status === 'rejected') {
-        console.warn(`[NotificationService] ✗ Failed to schedule ${fortresses[i].identifier}:`, r.reason);
+        console.warn(
+          `[NotificationService] ✗ Failed: ${fortresses[i].identifier}:`,
+          r.reason,
+        );
       }
     });
 
-    // ── 6. Persist hash so next launch skips if unchanged ─────
+    // ── 7. Persist hash; lock will auto-expire after SCHEDULING_GRACE_MS ─
     await AsyncStorage.setItem(NOTIF_HASH_KEY, newHash).catch(() => {});
-    console.log('[NotificationService] Rescheduling complete');
+
+    // Auto-release the lock after the grace window
+    setTimeout(() => {
+      if (Date.now() >= _schedulingLockUntil) {
+        _schedulingLockUntil = 0;
+      }
+    }, SCHEDULING_GRACE_MS + 500);
   },
 };
