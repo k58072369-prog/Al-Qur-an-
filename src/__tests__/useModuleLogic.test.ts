@@ -52,36 +52,42 @@ describe('useModuleLogic — getPagesFromTask', () => {
 
   it('returns correct pages for a single range', () => {
     const task: TaskSelection = {
-      id: 't1', moduleId: 'memorization' as any,
-      ranges: [{ start: 5, end: 8 }],
-      isCompleted: false, createdAt: '',
+      id: 't1', module: 'memorization',
+      ranges: [{ id: 'r1', type: 'page', start: 5, end: 8 }],
+      isCompleted: false, createdAt: '', timesCompleted: 0,
     };
     expect(getPagesFromTask(task)).toEqual([5, 6, 7, 8]);
   });
 
   it('merges and de-duplicates overlapping ranges', () => {
     const task: TaskSelection = {
-      id: 't2', moduleId: 'review_short' as any,
-      ranges: [{ start: 3, end: 5 }, { start: 5, end: 7 }],
-      isCompleted: false, createdAt: '',
+      id: 't2', module: 'review_short',
+      ranges: [
+        { id: 'r2-1', type: 'page', start: 3, end: 5 },
+        { id: 'r2-2', type: 'page', start: 5, end: 7 }
+      ],
+      isCompleted: false, createdAt: '', timesCompleted: 0,
     };
     expect(getPagesFromTask(task)).toEqual([3, 4, 5, 6, 7]);
   });
 
   it('handles multiple non-adjacent ranges', () => {
     const task: TaskSelection = {
-      id: 't3', moduleId: 'recitation' as any,
-      ranges: [{ start: 1, end: 2 }, { start: 10, end: 11 }],
-      isCompleted: false, createdAt: '',
+      id: 't3', module: 'recitation',
+      ranges: [
+        { id: 'r3-1', type: 'page', start: 1, end: 2 },
+        { id: 'r3-2', type: 'page', start: 10, end: 11 }
+      ],
+      isCompleted: false, createdAt: '', timesCompleted: 0,
     };
     expect(getPagesFromTask(task)).toEqual([1, 2, 10, 11]);
   });
 
   it('handles single-page range', () => {
     const task: TaskSelection = {
-      id: 't4', moduleId: 'memorization' as any,
-      ranges: [{ start: 42, end: 42 }],
-      isCompleted: false, createdAt: '',
+      id: 't4', module: 'memorization',
+      ranges: [{ id: 'r4', type: 'page', start: 42, end: 42 }],
+      isCompleted: false, createdAt: '', timesCompleted: 0,
     };
     expect(getPagesFromTask(task)).toEqual([42]);
   });
