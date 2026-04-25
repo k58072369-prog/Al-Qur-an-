@@ -64,3 +64,79 @@ export function getSurahSegments(
 
   return segments;
 }
+
+export function buildWeeklyCalendar(
+  plan: any,
+  roadmap: any[],
+  settingsActiveDays: number[],
+): any[] {
+  const isDaily = plan?.planMode === 'daily';
+  const activeDows = new Set<number>(
+    isDaily
+      ? [0, 1, 2, 3, 4, 5, 6]
+      : (plan?.activeDaysOfWeek ?? settingsActiveDays ?? [0, 1, 2, 3, 4]),
+  );
+
+  if (activeDows.size === 0) return [];
+
+  // Parse the plan start date — handle timezone-safe parsing
+  const rawDate = plan.startDate ?? new Date().toISOString().split('T')[0];
+  const [y, m, d] = rawDate.split('-').map(Number);
+  const startDate = new Date(y, m - 1, d);
+  const startDow = startDate.getDay(); // 0=Sun..6=Sat
+
+  const groups: any[] = [];
+  let roadmapIdx = 0;
+  let calDay = 0;
+
+  while (roadmapIdx < roadmap.length) {
+    const weekDays: any[] = [];
+    let weekHasActive = false;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < 7; i++) {
+      const dow = (startDow + calDay) % 7;
+
+      const dayDate = new Date(startDate);
+      dayDate.setDate(startDate.getDate() + calDay);
+      dayDate.setHours(0, 0, 0, 0);
+      const isToday = dayDate.getTime() === today.getTime();
+
+      if (activeDows.has(dow) && roadmapIdx < roadmap.length) {
+        weekDays.push({
+          type: 'active',
+          item: roadmap[roadmapIdx],
+          dow,
+          isToday,
+        });
+        roadmapIdx++;
+        weekHasActive = true;
+      } else {
+        weekDays.push({ type: 'rest', dow, isToday });
+      }
+      calDay++;
+    }
+
+    if (!weekHasActive) break; // Safety guard
+
+    const completedCount = weekDays.filter(
+      (d) => d.type === 'active' && d.item.isCompleted,
+    ).length;
+    const totalActiveCount = weekDays.filter((d) => d.type === 'active').length;
+    const isCurrentWeek = weekDays.some(
+      (d) => d.type === 'active' && d.item.isCurrent,
+    );
+
+    groups.push({
+      weekNumber: groups.length + 1,
+      days: weekDays,
+      isCurrentWeek,
+      completedCount,
+      totalActiveCount,
+    });
+  }
+
+  return groups;
+}

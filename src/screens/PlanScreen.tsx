@@ -19,22 +19,14 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { getMushafEdition } from "../data/mushafEditions";
-import { useAppStore } from "../store/AppStore";
-import { useSelectionStore } from "../store/selectionStore";
 import { Spacing, Typography, useTheme } from "../theme";
-import {
-  getMotivationalMessage,
-  toArabicNumerals,
-  todayISO,
-} from "../utils/helpers";
-import { DEV_CONFIG } from "../developerConfig";
+import { getMotivationalMessage } from "../utils/helpers";
 
 // ── Components ────────────────────────────────────────────────────────────────
 import { PlanDayCard } from "../components/plan/PlanDayCard";
 import { PlanHeader } from "../components/plan/PlanHeader";
 import { WeekGroupCard } from "../components/plan/WeekGroupCard";
-import type { DayItem, DayTask, WeekGroup } from "../components/plan/types";
+import type { DayItem, WeekGroup } from "../components/plan/types";
 
 const { width } = Dimensions.get("window");
 
@@ -203,88 +195,7 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
 // ============================================================
 
 // Shared helpers imported from ../utils/planLogic
-import {
-  buildRanges,
-  formatRanges,
-  getSurahSegments,
-} from "../utils/planLogic";
-
-// ─── Build weekly calendar groups ────────────────────────────────────────────
-function buildWeeklyCalendar(
-  plan: any,
-  roadmap: DayItem[],
-  settingsActiveDays: number[],
-): WeekGroup[] {
-  const isDaily = plan?.planMode === "daily";
-  const activeDows = new Set<number>(
-    isDaily
-      ? [0, 1, 2, 3, 4, 5, 6]
-      : (plan?.activeDaysOfWeek ?? settingsActiveDays ?? [0, 1, 2, 3, 4]),
-  );
-
-  if (activeDows.size === 0) return [];
-
-  // Parse the plan start date — handle timezone-safe parsing
-  const rawDate = plan.startDate ?? new Date().toISOString().split("T")[0];
-  const [y, m, d] = rawDate.split("-").map(Number);
-  const startDate = new Date(y, m - 1, d);
-  const startDow = startDate.getDay(); // 0=Sun..6=Sat
-
-  const groups: WeekGroup[] = [];
-  let roadmapIdx = 0;
-  let calDay = 0;
-
-  while (roadmapIdx < roadmap.length) {
-    const weekDays: WeekGroup["days"] = [];
-    let weekHasActive = false;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (let i = 0; i < 7; i++) {
-      const dow = (startDow + calDay) % 7;
-
-      const dayDate = new Date(startDate);
-      dayDate.setDate(startDate.getDate() + calDay);
-      dayDate.setHours(0, 0, 0, 0);
-      const isToday = dayDate.getTime() === today.getTime();
-
-      if (activeDows.has(dow) && roadmapIdx < roadmap.length) {
-        weekDays.push({
-          type: "active",
-          item: roadmap[roadmapIdx],
-          dow,
-          isToday,
-        });
-        roadmapIdx++;
-        weekHasActive = true;
-      } else {
-        weekDays.push({ type: "rest", dow, isToday });
-      }
-      calDay++;
-    }
-
-    if (!weekHasActive) break; // Safety guard
-
-    const completedCount = weekDays.filter(
-      (d) => d.type === "active" && d.item.isCompleted,
-    ).length;
-    const totalActiveCount = weekDays.filter((d) => d.type === "active").length;
-    const isCurrentWeek = weekDays.some(
-      (d) => d.type === "active" && d.item.isCurrent,
-    );
-
-    groups.push({
-      weekNumber: groups.length + 1,
-      days: weekDays,
-      isCurrentWeek,
-      completedCount,
-      totalActiveCount,
-    });
-  }
-
-  return groups;
-}
+import { buildWeeklyCalendar } from "../utils/planLogic";
 
 // ============================================================
 // View Mode Toggle
@@ -350,16 +261,19 @@ const viewToggleStyle = StyleSheet.create({
 // Main Screen
 // ============================================================
 
+import { usePlanScreenLogic } from "../hooks/usePlanScreenLogic";
+
 export default function PlanScreen() {
   const Colors = useTheme();
   const styles = useMemo(() => getStyles(Colors), [Colors]);
-  const { state, dispatch } = useAppStore();
-  const selectionStore = useSelectionStore();
-  const { plan, pageProgress } = state;
-  const reviewStrategy = state.settings.reviewStrategy ?? "spaced";
-  const settingsPlanMode = (state.settings as any).planMode ?? "daily";
-  const settingsActiveDays: number[] = (state.settings as any)
-    .activeDaysOfWeek ?? [0, 1, 2, 3, 4];
+
+  const {
+    plan,
+    roadmap,
+    settingsPlanMode,
+    settingsActiveDays,
+    handleComplete,
+  } = usePlanScreenLogic();
 
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -401,464 +315,21 @@ export default function PlanScreen() {
     setViewMode(settingsPlanMode);
   }, [settingsPlanMode]);
 
-  const edition = useMemo(() => {
-    const editionId =
-      (plan as any)?.mushafEditionId ??
-      (state.settings as any).mushafEdition ??
-      "madani_604";
-    return getMushafEdition(editionId as any);
-  }, [plan, state.settings]);
-
-  // ─── Build flat roadmap (active days only) ─────────────────
-  const roadmap = useMemo(() => {
-    if (!isReady || !plan || !plan.targetPages) return [];
-
-    const memorizedSet = new Set(
-      pageProgress.filter((pg) => pg.memorized).map((pg) => pg.pageNumber),
-    );
-
-    const isDaily = plan?.planMode === "daily";
-    const activeDows = new Set<number>(
-      isDaily
-        ? [0, 1, 2, 3, 4, 5, 6]
-        : (plan?.activeDaysOfWeek ?? settingsActiveDays ?? [0, 1, 2, 3, 4]),
-    );
-    if (activeDows.size === 0) activeDows.add(new Date().getDay());
-
-    const planDates: string[] = [];
-    const _rawDate = plan.startDate ?? new Date().toISOString().split("T")[0];
-    const [y, m, d] = _rawDate.split("-").map(Number);
-    let currentDate = new Date(y, m - 1, d);
-
-    while (planDates.length < plan.totalDays) {
-      if (activeDows.has(currentDate.getDay())) {
-        const _iso = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
-        planDates.push(_iso);
-      }
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    const today = todayISO();
-
-    const days: DayItem[] = [];
-    let foundCurrent = false;
-    let currentFarStartIndex = 0;
-
-    for (let i = 0; i < plan.totalDays; i++) {
-      const startIdx = i * plan.pagesPerDay;
-      const dayPages = plan.targetPages.slice(
-        startIdx,
-        startIdx + plan.pagesPerDay,
-      );
-      if (dayPages.length === 0) continue;
-
-      const ranges = buildRanges(dayPages);
-      const surahSegments = getSurahSegments(dayPages, edition);
-      const surahLabel = surahSegments
-        .map((s) => s.nameAr)
-        .slice(0, 2)
-        .join(" - ");
-
-      const memorizedCount = dayPages.filter((p) => memorizedSet.has(p)).length;
-      const isCompleted = memorizedCount === dayPages.length;
-      let isCurrent = false;
-      if (!isCompleted && !foundCurrent) {
-        isCurrent = true;
-        foundCurrent = true;
-      }
-
-      const mainLabel =
-        surahSegments.length === 1
-          ? `${surahSegments[0].nameAr} — صفحات ${formatRanges(ranges)}`
-          : `${surahSegments.map((s) => s.nameAr).join(" + ")} — صفحات ${formatRanges(ranges)}`;
-
-      const nextDayPages = plan.targetPages.slice(
-        (i + 1) * plan.pagesPerDay,
-        (i + 2) * plan.pagesPerDay,
-      );
-      const nextSegments =
-        nextDayPages.length > 0 ? getSurahSegments(nextDayPages, edition) : [];
-      const nextLabel =
-        nextSegments.length > 0
-          ? nextSegments
-              .map((s) => s.nameAr)
-              .slice(0, 2)
-              .join(" + ") +
-            " — " +
-            formatRanges(buildRanges(nextDayPages))
-          : null;
-
-      const weeklyPages = plan.targetPages.slice(
-        (i + 7) * plan.pagesPerDay,
-        (i + 14) * plan.pagesPerDay,
-      );
-      const weeklyLabel =
-        weeklyPages.length > 0
-          ? getSurahSegments(weeklyPages, edition)
-              .map((s) => s.nameAr)
-              .slice(0, 2)
-              .join(" + ") +
-            " — " +
-            formatRanges(buildRanges(weeklyPages))
-          : null;
-
-      // Review strategy
-      const alreadyDone = plan.targetPages.slice(0, startIdx);
-      let nearPages: number[];
-      let farPages: number[];
-
-      if (reviewStrategy === "spaced") {
-        const NEAR_SIZE = 20;
-        const FAR_SIZE = 40;
-        nearPages =
-          alreadyDone.length > 0
-            ? alreadyDone.slice(Math.max(0, alreadyDone.length - NEAR_SIZE))
-            : [];
-        const olderPages =
-          alreadyDone.length > NEAR_SIZE
-            ? alreadyDone.slice(0, alreadyDone.length - NEAR_SIZE)
-            : [];
-        if (olderPages.length > 0) {
-          if (olderPages.length <= FAR_SIZE) {
-            farPages = [...olderPages];
-          } else {
-            farPages = [];
-            for (let j = 0; j < FAR_SIZE; j++) {
-              farPages.push(
-                olderPages[(currentFarStartIndex + j) % olderPages.length],
-              );
-            }
-            currentFarStartIndex =
-              (currentFarStartIndex + FAR_SIZE) % olderPages.length;
-          }
-        } else {
-          farPages = [];
-        }
-      } else if (reviewStrategy === "random") {
-        const shuffled = [...alreadyDone].sort(
-          () => Math.sin(i * 31 + 7) - 0.5,
-        );
-        nearPages = shuffled.slice(0, Math.min(20, shuffled.length));
-        farPages = shuffled.slice(20, Math.min(60, shuffled.length));
-      } else {
-        nearPages =
-          alreadyDone.length > 0
-            ? alreadyDone.slice(Math.max(0, alreadyDone.length - 20))
-            : [];
-        farPages =
-          alreadyDone.length > 20
-            ? alreadyDone.slice(
-                Math.max(0, alreadyDone.length - 60),
-                alreadyDone.length - 20,
-              )
-            : [];
-      }
-
-      const nearSegments =
-        nearPages.length > 0 ? getSurahSegments(nearPages, edition) : [];
-      const nearLabel =
-        nearSegments.length > 0
-          ? nearSegments
-              .map((s) => s.nameAr)
-              .slice(0, 2)
-              .join(" + ") +
-            " (ص " +
-            formatRanges(buildRanges(nearPages)) +
-            ")"
-          : "لا يوجد (بداية الخطة)";
-
-      const distantSegments =
-        farPages.length > 0 ? getSurahSegments(farPages, edition) : [];
-      const distantLabel =
-        distantSegments.length > 0
-          ? distantSegments
-              .map((s) => s.nameAr)
-              .slice(0, 2)
-              .join(" + ") +
-            " (ص " +
-            formatRanges(buildRanges(farPages)) +
-            ")"
-          : "لا يوجد بعد";
-
-      const wardStart = ((i * 40) % edition.totalPages) + 1;
-      const wardEnd = ((wardStart + 39 - 1) % edition.totalPages) + 1;
-      const wardLabel =
-        wardEnd >= wardStart
-          ? `${toArabicNumerals(wardStart)} - ${toArabicNumerals(wardEnd)}`
-          : `${toArabicNumerals(wardStart)} - ${toArabicNumerals(edition.totalPages)} و ١ - ${toArabicNumerals(wardEnd)}`;
-
-      const listenStart = ((i * 10) % edition.totalPages) + 1;
-      const listenEnd = ((listenStart + 9 - 1) % edition.totalPages) + 1;
-      const listenLabel =
-        listenEnd >= listenStart
-          ? `${toArabicNumerals(listenStart)} - ${toArabicNumerals(listenEnd)}`
-          : `${toArabicNumerals(listenStart)} - ${toArabicNumerals(edition.totalPages)} و ١ - ${toArabicNumerals(listenEnd)}`;
-
-      const strategyLabel =
-        reviewStrategy === "spaced"
-          ? "تكرار متباعد"
-          : reviewStrategy === "random"
-            ? "عشوائي"
-            : "الأحدث أولاً";
-
-      const tasks: DayTask[] = [
-        {
-          id: "mem",
-          label: `الحفظ الجديد: ${mainLabel}`,
-          icon: "book",
-          color: Colors.primary,
-        },
-        {
-          id: "prep_p",
-          label: `التحضير القبلي (١٥ د): قراءة ${mainLabel} بسرعة قبل الحفظ`,
-          icon: "flash-outline",
-          color: Colors.fortressPreparation,
-        },
-        {
-          id: "prep_n",
-          label: nextLabel
-            ? `التحضير الليلي (٣٠ د): قراءة وسماع ${nextLabel}`
-            : "الاستعداد للختم المبارك",
-          icon: "moon",
-          color: Colors.purple,
-        },
-        {
-          id: "prep_w",
-          label: weeklyLabel
-            ? `التحضير الأسبوعي: قراءة ${weeklyLabel}`
-            : "الأسابيع الأخيرة في الختمة",
-          icon: "calendar-outline",
-          color: Colors.fortressRecitation,
-        },
-        {
-          id: "listen",
-          label: `ختمة الاستماع (حزب): ص ${listenLabel}`,
-          icon: "headset",
-          color: Colors.blue,
-        },
-        {
-          id: "rev_s",
-          label: `المراجعة القريبة (${strategyLabel}): ${nearLabel}`,
-          icon: "refresh",
-          color: Colors.success,
-        },
-        {
-          id: "rev_l",
-          label: `المراجعة البعيدة (${strategyLabel}): ${distantLabel}`,
-          icon: "sync",
-          color: Colors.purple,
-        },
-        {
-          id: "recit",
-          label: `ورد التلاوة (جزءين): ص ${wardLabel}`,
-          icon: "eye",
-          color: Colors.red,
-        },
-      ];
-
-      days.push({
-        dayIndex: i + 1,
-        pageNumbers: dayPages,
-        ranges,
-        surahSegments,
-        surahLabel,
-        isCurrent,
-        isCompleted,
-        completionPct: (memorizedCount / dayPages.length) * 100,
-        tasks,
-        date: planDates[i],
-        isLocked: DEV_CONFIG.unlockAllPlans ? false : planDates[i] > today,
-      });
-    }
-
-    return days;
-  }, [
-    isReady,
-    plan,
-    pageProgress,
-    edition,
-    Colors,
-    reviewStrategy,
-    settingsActiveDays,
-  ]);
-
-  // ─── Build weekly calendar (only used in weekly view) ─────
-  const weekGroups = useMemo<WeekGroup[]>(() => {
-    if (viewMode !== "weekly" || !plan || roadmap.length === 0) return [];
-    return buildWeeklyCalendar(plan, roadmap, settingsActiveDays);
-  }, [viewMode, plan, roadmap, settingsActiveDays]);
-
-  const initialScrollIndex = useMemo(() => {
-    if (!roadmap.length) return 0;
-    const idx = roadmap.findIndex((d) => d.isCurrent);
-    return idx > 0 ? idx : 0;
-  }, [roadmap]);
+  const handleDayComplete = useCallback(
+    (item: DayItem) => {
+      handleComplete(item, () => setShowCelebration(true));
+    },
+    [handleComplete],
+  );
 
   const handleToggle = useCallback((day: number) => {
     setExpandedDay((prev) => (prev === day ? null : day));
   }, []);
 
-  const handleComplete = useCallback(
-    (item: DayItem) => {
-      if (!plan) return;
-      dispatch({
-        type: "MARK_PAGES_MEMORIZED",
-        payload: { pages: item.pageNumbers },
-      });
-      dispatch({ type: "COMPLETE_ALL_TODAY" });
-
-      type ModuleId =
-        | "memorization"
-        | "preparation_before"
-        | "preparation_night"
-        | "preparation_weekly"
-        | "recitation"
-        | "listening"
-        | "review_short"
-        | "review_long";
-      const modulesToSync: {
-        moduleId: ModuleId;
-        ranges: { start: number; end: number }[];
-      }[] = [
-        { moduleId: "memorization", ranges: item.ranges },
-        { moduleId: "preparation_before", ranges: item.ranges },
-        {
-          moduleId: "recitation",
-          ranges: [
-            {
-              start: (((item.dayIndex - 1) * 40) % edition.totalPages) + 1,
-              end: (((item.dayIndex - 1) * 40 + 39) % edition.totalPages) + 1,
-            },
-          ],
-        },
-        {
-          moduleId: "listening",
-          ranges: [
-            {
-              start: (((item.dayIndex - 1) * 10) % edition.totalPages) + 1,
-              end: (((item.dayIndex - 1) * 10 + 9) % edition.totalPages) + 1,
-            },
-          ],
-        },
-      ];
-
-      const i = item.dayIndex - 1;
-      const startIdx = i * plan.pagesPerDay;
-      const alreadyDone = plan.targetPages.slice(0, startIdx);
-
-      const nextDayPages = plan.targetPages.slice(
-        (i + 1) * plan.pagesPerDay,
-        (i + 2) * plan.pagesPerDay,
-      );
-      if (nextDayPages.length > 0) {
-        modulesToSync.push({
-          moduleId: "preparation_night",
-          ranges: buildRanges(nextDayPages),
-        });
-      }
-
-      const weeklyPages = plan.targetPages.slice(
-        (i + 7) * plan.pagesPerDay,
-        (i + 14) * plan.pagesPerDay,
-      );
-      if (weeklyPages.length > 0) {
-        modulesToSync.push({
-          moduleId: "preparation_weekly",
-          ranges: buildRanges(weeklyPages),
-        });
-      }
-
-      let nearPages: number[] = [];
-      let farPages: number[] = [];
-
-      if (reviewStrategy === "spaced") {
-        const NEAR_SIZE = 20;
-        const FAR_SIZE = 40;
-        nearPages =
-          alreadyDone.length > 0
-            ? alreadyDone.slice(Math.max(0, alreadyDone.length - NEAR_SIZE))
-            : [];
-        const olderPages =
-          alreadyDone.length > NEAR_SIZE
-            ? alreadyDone.slice(0, alreadyDone.length - NEAR_SIZE)
-            : [];
-        if (olderPages.length > 0) {
-          if (olderPages.length <= FAR_SIZE) {
-            farPages = [...olderPages];
-          } else {
-            let rotatingStart = 0;
-            for (let day = 0; day < i; day++) {
-              const dayAlreadyDone = plan.targetPages.slice(
-                0,
-                day * plan.pagesPerDay,
-              );
-              const dayOlder =
-                dayAlreadyDone.length > NEAR_SIZE
-                  ? dayAlreadyDone.slice(0, dayAlreadyDone.length - NEAR_SIZE)
-                  : [];
-              if (dayOlder.length > FAR_SIZE)
-                rotatingStart = (rotatingStart + FAR_SIZE) % dayOlder.length;
-            }
-            for (let j = 0; j < FAR_SIZE; j++) {
-              farPages.push(
-                olderPages[(rotatingStart + j) % olderPages.length],
-              );
-            }
-          }
-        }
-      } else if (reviewStrategy === "random") {
-        const shuffled = [...alreadyDone].sort(
-          () => Math.sin(i * 31 + 7) - 0.5,
-        );
-        nearPages = shuffled.slice(0, Math.min(20, shuffled.length));
-        farPages = shuffled.slice(20, Math.min(60, shuffled.length));
-      } else {
-        nearPages = alreadyDone.slice(Math.max(0, alreadyDone.length - 20));
-        farPages = alreadyDone.slice(
-          Math.max(0, alreadyDone.length - 60),
-          Math.max(0, alreadyDone.length - 20),
-        );
-      }
-
-      if (nearPages.length > 0)
-        modulesToSync.push({
-          moduleId: "review_short",
-          ranges: buildRanges(nearPages),
-        });
-      if (farPages.length > 0)
-        modulesToSync.push({
-          moduleId: "review_long",
-          ranges: buildRanges(farPages),
-        });
-
-      modulesToSync.forEach((m) => {
-        const existing = selectionStore
-          .getModuleSelections(m.moduleId)
-          .find(
-            (s) =>
-              s.ranges.length === m.ranges.length &&
-              s.ranges.every(
-                (r, i) =>
-                  r.start === m.ranges[i].start && r.end === m.ranges[i].end,
-              ),
-          );
-        if (existing) {
-          if (!existing.isCompleted)
-            selectionStore.completeTaskSelection(existing.id);
-        } else {
-          selectionStore.addTaskSelection(
-            m.moduleId,
-            m.ranges.map((r) => selectionStore.createPageRange(r.start, r.end)),
-          );
-          const latest = selectionStore.getLatestSelection(m.moduleId);
-          if (latest) selectionStore.completeTaskSelection(latest.id);
-        }
-      });
-
-      setShowCelebration(true);
-    },
-    [dispatch, selectionStore, edition, plan, reviewStrategy],
-  );
+  const weekGroups = useMemo<WeekGroup[]>(() => {
+    if (viewMode !== "weekly" || !plan || roadmap.length === 0) return [];
+    return buildWeeklyCalendar(plan, roadmap, settingsActiveDays);
+  }, [viewMode, plan, roadmap, settingsActiveDays]);
 
   // ─── Render items ──────────────────────────────────────────
   const renderDailyItem = useCallback(
@@ -867,12 +338,12 @@ export default function PlanScreen() {
         item={item}
         expanded={expandedDay === item.dayIndex}
         onToggle={handleToggle}
-        onComplete={handleComplete}
+        onComplete={handleDayComplete}
         isLast={index === roadmap.length - 1}
         showTimeline
       />
     ),
-    [expandedDay, handleToggle, handleComplete, roadmap.length],
+    [expandedDay, handleToggle, handleDayComplete, roadmap.length],
   );
 
   const renderWeeklyItem = useCallback(
@@ -881,11 +352,11 @@ export default function PlanScreen() {
         group={item}
         expandedDay={expandedDay}
         onToggle={handleToggle}
-        onComplete={handleComplete}
+        onComplete={handleDayComplete}
         index={index}
       />
     ),
-    [expandedDay, handleToggle, handleComplete],
+    [expandedDay, handleToggle, handleDayComplete],
   );
 
   // ─── Empty / Loading guards ───────────────────────────────

@@ -64,6 +64,8 @@ export function generatePlan(
   const addedPages = new Set<number>();
 
   sortedSurahs.forEach((surah) => {
+    // IMPORTANT: Even in backward mode (Nas -> Fatiha), the pages WITHIN
+    // a single Surah must be memorized forward (e.g. 582 then 583 for An-Naba).
     for (let p = surah.startPage; p <= surah.endPage; p++) {
       if (usedPageSet.has(p) && !addedPages.has(p)) {
         result.push(p);

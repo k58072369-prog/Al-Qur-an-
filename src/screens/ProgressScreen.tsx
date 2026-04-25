@@ -14,11 +14,8 @@ import { JUZ_META } from "../data/quranMeta";
 import { useAppStore } from "../store/AppStore";
 import { Spacing, useTheme } from "../theme";
 import { MemorizationStrength } from "../types";
-import {
-  calculateStabilityIndex,
-  getXPProgressToNextLevel,
-  toArabicNumerals,
-} from "../utils/helpers";
+import { toArabicNumerals } from "../utils/helpers";
+import { useProgressLogic } from "../hooks/useProgressLogic";
 
 const { width } = Dimensions.get("window");
 const CIRCLE_SIZE = width * 0.45;
@@ -41,51 +38,22 @@ export default function ProgressScreen() {
     [Colors],
   );
 
-  const { state, getMemorizedPages } = useAppStore();
-  const { user, plan, streak } = state;
-  const memorizedPages = getMemorizedPages();
-  const xpProgress = getXPProgressToNextLevel(user?.totalXP ?? 0);
-  const totalPages = plan ? plan.targetPages.length : 604;
-  const planPct = totalPages > 0 ? memorizedPages.length / totalPages : 0;
-  const totalXP = user?.totalXP ?? 0;
-
-  const juzProgress = JUZ_META.map((juz) => {
-    const pagesInJuz = Array.from(
-      { length: juz.endPage - juz.startPage + 1 },
-      (_, i) => juz.startPage + i,
-    );
-    const memorizedInJuz = pagesInJuz.filter((p) =>
-      memorizedPages.some((mp) => mp.pageNumber === p),
-    );
-    const pct = memorizedInJuz.length / pagesInJuz.length;
-    return { id: juz.id, pct };
-  });
-
-  const strengthDist: Record<MemorizationStrength, number> = {
-    1: 0,
-    2: 0,
-    3: 0,
-    4: 0,
-    5: 0,
-  };
-  memorizedPages.forEach((p) => {
-    strengthDist[p.strength as MemorizationStrength]++;
-  });
-
-  const stabilityIndex = calculateStabilityIndex(
+  const {
+    user,
+    streak,
     memorizedPages,
-    state.taskSelections,
-  );
-  const masteredCount = strengthDist[5] + strengthDist[4];
-  const weakCount = strengthDist[1] + strengthDist[2];
-
-  const remainingCount = totalPages - memorizedPages.length;
-  const daysRemaining = Math.max(
-    1,
-    Math.ceil(remainingCount / (user?.dailyPages || 1)),
-  );
-  const finishDate = new Date();
-  finishDate.setDate(finishDate.getDate() + daysRemaining);
+    xpProgress,
+    totalXP,
+    planPct,
+    juzProgress,
+    stabilityIndex,
+    masteredCount,
+    weakCount,
+    remainingCount,
+    daysRemaining,
+    finishDate,
+    getJuzStability
+  } = useProgressLogic();
 
   return (
     <View style={styles.container}>
@@ -266,15 +234,7 @@ export default function ProgressScreen() {
             {juzProgress
               .filter((j) => j.pct > 0)
               .map((j) => {
-                const pagesInJuz = memorizedPages.filter(
-                  (p) =>
-                    p.pageNumber >= JUZ_META[j.id - 1].startPage &&
-                    p.pageNumber <= JUZ_META[j.id - 1].endPage,
-                );
-                const juzStability = calculateStabilityIndex(
-                  pagesInJuz,
-                  state.taskSelections,
-                );
+                const juzStability = getJuzStability(j.id);
                 return (
                   <View key={j.id} style={styles.juzMiniCard}>
                     <Text style={styles.juzMiniName}>
