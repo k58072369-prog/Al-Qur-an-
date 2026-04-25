@@ -6,6 +6,7 @@ import {
   Dimensions,
   Modal,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -311,6 +312,11 @@ export default function ModuleScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar 
+        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
+        translucent 
+        backgroundColor="transparent" 
+      />
       {/* Background Glow */}
       <View
         style={[styles.bgGlow, { backgroundColor: `${moduleInfo.color}08` }]}

@@ -296,7 +296,11 @@ export default function SettingsScreen() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar 
+        barStyle={state.themeMode === "dark" ? "light-content" : "dark-content"} 
+        translucent 
+        backgroundColor="transparent" 
+      />
 
       {/* Header */}
       <View style={styles.header}>

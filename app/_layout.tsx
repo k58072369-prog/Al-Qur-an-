@@ -76,7 +76,7 @@ export default function RootLayout() {
           alignItems: "center",
         }}
       >
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       </View>
     );
   }
@@ -140,6 +140,8 @@ function MainLayout({
         barStyle={
           Colors.background === "#07090F" ? "light-content" : "dark-content"
         }
+        translucent
+        backgroundColor="transparent"
       />
       <Stack
         screenOptions={{

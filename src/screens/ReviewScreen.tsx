@@ -87,7 +87,11 @@ export default function ReviewScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar 
+        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
+        translucent 
+        backgroundColor="transparent" 
+      />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

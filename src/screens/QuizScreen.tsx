@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Dimensions,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -94,6 +95,11 @@ export default function QuizScreen() {
   if (memorizedPages.length === 0) {
     return (
       <View style={styles.container}>
+        <StatusBar 
+          barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
+          translucent 
+          backgroundColor="transparent" 
+        />
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => router.back()}
@@ -129,6 +135,11 @@ export default function QuizScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar 
+        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
+        translucent 
+        backgroundColor="transparent" 
+      />
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>

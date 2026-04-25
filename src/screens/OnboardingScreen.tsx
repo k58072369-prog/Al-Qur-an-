@@ -183,7 +183,11 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar 
+        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
+        translucent 
+        backgroundColor="transparent" 
+      />
       <View style={StyleSheet.absoluteFill} />
 
       {/* Subtle decorative orbs */}

@@ -914,7 +914,11 @@ export default function PlanScreen() {
   if (!isReady) {
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
+      <StatusBar 
+        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
+        translucent 
+        backgroundColor="transparent" 
+      />
         <Animated.View
           entering={FadeIn.duration(600)}
           style={styles.loadingContainer}
@@ -956,7 +960,11 @@ export default function PlanScreen() {
   if (viewMode === "weekly") {
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
+      <StatusBar 
+        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
+        translucent 
+        backgroundColor="transparent" 
+      />
         <FlatList
           data={weekGroups}
           renderItem={renderWeeklyItem}
@@ -979,7 +987,11 @@ export default function PlanScreen() {
   // ─── Daily view (default) ─────────────────────────────────
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar 
+        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
+        translucent 
+        backgroundColor="transparent" 
+      />
       <FlatList
         data={roadmap}
         renderItem={renderDailyItem}
