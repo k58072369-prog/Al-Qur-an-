@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useReducer,
 } from "react";
+import { getMushafEdition } from "../data/mushafEditions";
 import {
   AppState,
   DailyProgress,
@@ -28,7 +29,6 @@ import {
   strengthAfterReview,
   todayISO,
 } from "../utils/helpers";
-import { getMushafEdition } from "../data/mushafEditions";
 import { NotificationService } from "./NotificationService";
 // Storage Key ──────────────────────────────────────────
 const STORAGE_KEY = "husoon_app_state";
@@ -89,7 +89,8 @@ const DEFAULT_INITIAL_STATE: AppState = {
   },
 };
 
-const getInitialState = (): AppState => JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+const getInitialState = (): AppState =>
+  JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
 const initialState = getInitialState();
 
 // ─── Action Types ─────────────────────────────────────────
@@ -153,16 +154,16 @@ function appReducer(state: AppState, action: Action): AppState {
           plan.direction || "forward",
         );
       }
-      const mergedSettings = { 
-        ...DEFAULT_INITIAL_STATE.settings, 
-        ...(action.payload.settings || {}) 
+      const mergedSettings = {
+        ...DEFAULT_INITIAL_STATE.settings,
+        ...(action.payload.settings || {}),
       };
-      
+
       // Ensure the nested notifications object is correctly merged too
       if (action.payload.settings?.notifications) {
         mergedSettings.notifications = {
           ...DEFAULT_INITIAL_STATE.settings.notifications,
-          ...action.payload.settings.notifications
+          ...action.payload.settings.notifications,
         };
       }
 
@@ -173,7 +174,7 @@ function appReducer(state: AppState, action: Action): AppState {
           updatedStreak.currentStreak,
           updatedStreak.longestStreak,
           updatedStreak.lastActiveDate,
-          false
+          false,
         );
         updatedStreak = {
           currentStreak: rawStreak.current,
@@ -194,19 +195,31 @@ function appReducer(state: AppState, action: Action): AppState {
 
     case "COMPLETE_ONBOARDING": {
       const cleanState = getInitialState();
-      const { user: userData, pageNumbers, label, direction, alreadyMemorizedSurahIds } = action.payload;
-      const editionId = (cleanState.settings.mushafEdition as string) ?? 'madani_604';
+      const {
+        user: userData,
+        pageNumbers,
+        label,
+        direction,
+        alreadyMemorizedSurahIds,
+      } = action.payload;
+      const editionId =
+        (cleanState.settings.mushafEdition as string) ?? "madani_604";
       const editionData = getMushafEdition(editionId as any);
       const plan = generatePlan(
         pageNumbers,
         userData.dailyPages,
         label,
         direction,
-        editionData.surahPages
+        editionData.surahPages,
       );
       (plan as any).mushafEditionId = editionId;
-      (plan as any).planMode = action.payload.settings?.planMode ?? cleanState.settings.planMode ?? 'daily';
-      (plan as any).activeDaysOfWeek = action.payload.settings?.activeDaysOfWeek ?? cleanState.settings.activeDaysOfWeek ?? [0,1,2,3,4,5,6];
+      (plan as any).planMode =
+        action.payload.settings?.planMode ??
+        cleanState.settings.planMode ??
+        "daily";
+      (plan as any).activeDaysOfWeek = action.payload.settings
+        ?.activeDaysOfWeek ??
+        cleanState.settings.activeDaysOfWeek ?? [0, 1, 2, 3, 4, 5, 6];
 
       // Identify pages for already memorized surahs
       const alreadyMemorizedPagesSet = new Set<number>();
@@ -260,8 +273,11 @@ function appReducer(state: AppState, action: Action): AppState {
         dailyProgress: [todayProgress],
         settings: {
           ...cleanState.settings,
-          planMode: action.payload.settings?.planMode ?? cleanState.settings.planMode,
-          activeDaysOfWeek: action.payload.settings?.activeDaysOfWeek ?? cleanState.settings.activeDaysOfWeek,
+          planMode:
+            action.payload.settings?.planMode ?? cleanState.settings.planMode,
+          activeDaysOfWeek:
+            action.payload.settings?.activeDaysOfWeek ??
+            cleanState.settings.activeDaysOfWeek,
         },
         isOnboarded: true,
         isLoaded: true,
@@ -516,12 +532,19 @@ function appReducer(state: AppState, action: Action): AppState {
     case "REGENERATE_PLAN": {
       const { pageNumbers, label, direction } = action.payload;
       const pagesPerDay = state.user?.dailyPages ?? 1;
-      const editionId = (state.settings as any).mushafEdition ?? 'madani_604';
+      const editionId = (state.settings as any).mushafEdition ?? "madani_604";
       const editionData = getMushafEdition(editionId as any);
-      const newPlan = generatePlan(pageNumbers, pagesPerDay, label, direction, editionData.surahPages);
+      const newPlan = generatePlan(
+        pageNumbers,
+        pagesPerDay,
+        label,
+        direction,
+        editionData.surahPages,
+      );
       (newPlan as any).mushafEditionId = editionId;
-      (newPlan as any).planMode = (state.settings as any).planMode ?? 'daily';
-      (newPlan as any).activeDaysOfWeek = (state.settings as any).activeDaysOfWeek ?? [0,1,2,3,4];
+      (newPlan as any).planMode = (state.settings as any).planMode ?? "daily";
+      (newPlan as any).activeDaysOfWeek = (state.settings as any)
+        .activeDaysOfWeek ?? [0, 1, 2, 3, 4];
 
       // Ensure pageProgress covers all pages up to editionData.totalPages
       let newPageProgress = [...state.pageProgress];
@@ -674,11 +697,13 @@ export function AppProvider({ children }: PropsWithChildren) {
     if (!state.isLoaded || !state.isOnboarded) return;
 
     const timer = setTimeout(() => {
-      NotificationService.scheduleFortressReminders(state.settings.notifications);
+      NotificationService.scheduleFortressReminders(
+        state.settings.notifications,
+      );
     }, 1500);
 
     return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.isLoaded,
     state.isOnboarded,

@@ -8,6 +8,8 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ViewStyle,
+  TextStyle,
 } from "react-native";
 import { DeveloperCard } from "../components/explanation/DeveloperCard";
 import { ExplanationHero } from "../components/explanation/ExplanationHero";
@@ -100,12 +102,12 @@ export default function AppExplanationScreen() {
               </Text>
               <Text style={styles.subParagraph}>
                 • <Text style={styles.bold}>التحضير الليلي:</Text> قراءة الصفحة
-                المقررة غداً 15 مرة قبل النوم مباشرة؛ العقل الباطن سيقوم
+                المقررة غداً قبل النوم مباشرة؛ العقل الباطن سيقوم
                 بتثبيتها ومعالجتها أثناء نومك!
               </Text>
               <Text style={styles.subParagraph}>
                 • <Text style={styles.bold}>التحضير القبلي:</Text> قراءة نفس
-                الصفحة 15 مرة قبل بدء الحفظ الفعلي لتهيئة الذاكرة القريبة وجعل
+                الصفحة قبل بدء الحفظ الفعلي لتهيئة الذاكرة القريبة وجعل
                 الحفظ يجري بيسر.
               </Text>
             </View>
@@ -158,10 +160,16 @@ export default function AppExplanationScreen() {
           title="1. التزم بعدّادات التكرار والتايمر"
           icon="stopwatch-outline"
           color={Colors.secondary}
-          content="التطبيق يوفر عدادات دقيقة؛ لا تكتفِ بالحفظ الظاهري، بل كرر حتى يصل العداد للرقم المطلوب لضمان 'جودة التكرار' وليس الكم فقط."
+          content="التطبيق يوفر عدادات دقيقة؛ لا تكتفِ بالحفظ الظاهري، بل كرر حتى تنهي الورد المطلوب لضمان 'جودة التكرار' وليس الكم فقط."
         />
         <ExplanationCard
-          title="2. التقييم الذاتي الصادق"
+          title="2. عداد التكرارات التفاعلي"
+          icon="add-circle-outline"
+          color={Colors.primary}
+          content="داخل شاشة المؤقت (Timer)، ستجد عداداً يدوياً للتكرارات. استخدمه لضبط عدد مرات قراءة الآية الواحدة أو الصفحة؛ حيث يساعدك هذا العدّ الذهني على زيادة التركيز وضمان عدم شرود الذهن أثناء التكرار."
+        />
+        <ExplanationCard
+          title="3. التقييم الذاتي الصادق"
           icon="checkmark-done-circle-outline"
           color={Colors.success}
           content="بعد تسميع كل ورد، كن صادقاً في تقييم حفظك. إذا كان حفظك مهتزاً، التطبيق سيقترح عليك مراجعة هذه الصفحة قريباً لتقويتها."
@@ -217,15 +225,38 @@ export default function AppExplanationScreen() {
             content:
               "دعم كامل لمصحف المدينة القديم والجديد، الشمرلي، والباكستاني لضمان راحتك البصرية أثناء المتابعة.",
           },
-        ].map((item, i) => (
+        ].map((feat, idx) => (
           <ExplanationCard
-            key={i}
-            title={item.title}
-            icon={item.icon}
-            color={item.color}
-            content={item.content}
+            key={idx}
+            title={feat.title}
+            icon={feat.icon}
+            color={feat.color}
+            content={feat.content}
           />
         ))}
+
+        <SectionHeader title="ميزان الرسوخ (مستويات الحفظ)" color={Colors.primary} />
+        <View style={styles.stabilityGuide}>
+          <Text style={styles.subParagraph}>
+            ينقسم حفظك في التطبيق إلى 5 مستويات ذكية تتأثر بأدائك في الاختبارات والمراجعات الدورية:
+          </Text>
+          <View style={styles.levelRow}>
+            <View style={[styles.levelDot, { backgroundColor: Colors.red }]} />
+            <Text style={styles.levelText}><Text style={styles.bold}>المستوى 1 (ضعيف):</Text> حفظ جديد أو مهتز يحتاج مراجعة مكثفة فورية.</Text>
+          </View>
+          <View style={styles.levelRow}>
+            <View style={[styles.levelDot, { backgroundColor: Colors.gold }]} />
+            <Text style={styles.levelText}><Text style={styles.bold}>المستوى 2-3 (متوسط):</Text> حفظ بدأ يستقر ولكنه يحتاج لربط الآيات ببعضها.</Text>
+          </View>
+          <View style={styles.levelRow}>
+            <View style={[styles.levelDot, { backgroundColor: Colors.primary }]} />
+            <Text style={styles.levelText}><Text style={styles.bold}>المستوى 4 (قوي):</Text> حفظ راسخ يمكنك سرده بطلاقة مع قليل من الجهد.</Text>
+          </View>
+          <View style={styles.levelRow}>
+            <View style={[styles.levelDot, { backgroundColor: Colors.success }]} />
+            <Text style={styles.levelText}><Text style={styles.bold}>المستوى 5 (متين):</Text> الحفظ الأبدي؛ صفحات تقرؤها عن ظهر قلب كالفاتحة.</Text>
+          </View>
+        </View>
 
         <TimeManagementCard Colors={Colors} />
         <DeveloperCard Colors={Colors} />
@@ -289,7 +320,10 @@ const getStyles = (Colors: any) =>
       textAlign: "center",
       paddingHorizontal: Spacing.md,
     },
-    bold: { fontWeight: Typography.bold, color: Colors.textPrimary },
+    bold: {
+      fontWeight: "bold",
+      color: Colors.textPrimary,
+    },
     subParagraph: {
       fontFamily: Typography.body,
       fontSize: 13,
@@ -297,5 +331,31 @@ const getStyles = (Colors: any) =>
       lineHeight: 20,
       textAlign: "left",
       marginBottom: Spacing.xs,
-    },
+    } as TextStyle,
+    stabilityGuide: {
+      backgroundColor: Colors.surfaceElevated,
+      borderRadius: BorderRadius.lg,
+      padding: Spacing.lg,
+      marginBottom: Spacing.xl,
+      borderWidth: 1,
+      borderColor: Colors.border,
+    } as ViewStyle,
+    levelRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      marginBottom: 10,
+    } as ViewStyle,
+    levelDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+    } as ViewStyle,
+    levelText: {
+      flex: 1,
+      fontSize: 13,
+      color: Colors.textSecondary,
+      lineHeight: 20,
+      textAlign: "left",
+    } as TextStyle,
   });

@@ -19,9 +19,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import type { MushafEdition } from "../data/mushafEditions";
 import { getMushafEdition } from "../data/mushafEditions";
-import { SURAHS } from "../data/quranMeta";
 import { useAppStore } from "../store/AppStore";
 import { useSelectionStore } from "../store/selectionStore";
 import { Spacing, Typography, useTheme } from "../theme";
@@ -30,17 +28,13 @@ import {
   toArabicNumerals,
   todayISO,
 } from "../utils/helpers";
+import { DEV_CONFIG } from "../developerConfig";
 
 // ── Components ────────────────────────────────────────────────────────────────
 import { PlanDayCard } from "../components/plan/PlanDayCard";
 import { PlanHeader } from "../components/plan/PlanHeader";
 import { WeekGroupCard } from "../components/plan/WeekGroupCard";
-import type {
-  DayItem,
-  DayTask,
-  SurahSegment,
-  WeekGroup,
-} from "../components/plan/types";
+import type { DayItem, DayTask, WeekGroup } from "../components/plan/types";
 
 const { width } = Dimensions.get("window");
 
@@ -209,7 +203,11 @@ const CelebrationOverlay = ({ onComplete }: { onComplete: () => void }) => {
 // ============================================================
 
 // Shared helpers imported from ../utils/planLogic
-import { buildRanges, formatRanges, getSurahSegments } from "../utils/planLogic";
+import {
+  buildRanges,
+  formatRanges,
+  getSurahSegments,
+} from "../utils/planLogic";
 
 // ─── Build weekly calendar groups ────────────────────────────────────────────
 function buildWeeklyCalendar(
@@ -221,7 +219,7 @@ function buildWeeklyCalendar(
   const activeDows = new Set<number>(
     isDaily
       ? [0, 1, 2, 3, 4, 5, 6]
-      : plan?.activeDaysOfWeek ?? settingsActiveDays ?? [0, 1, 2, 3, 4],
+      : (plan?.activeDaysOfWeek ?? settingsActiveDays ?? [0, 1, 2, 3, 4]),
   );
 
   if (activeDows.size === 0) return [];
@@ -423,7 +421,7 @@ export default function PlanScreen() {
     const activeDows = new Set<number>(
       isDaily
         ? [0, 1, 2, 3, 4, 5, 6]
-        : plan?.activeDaysOfWeek ?? settingsActiveDays ?? [0, 1, 2, 3, 4],
+        : (plan?.activeDaysOfWeek ?? settingsActiveDays ?? [0, 1, 2, 3, 4]),
     );
     if (activeDows.size === 0) activeDows.add(new Date().getDay());
 
@@ -669,7 +667,7 @@ export default function PlanScreen() {
         completionPct: (memorizedCount / dayPages.length) * 100,
         tasks,
         date: planDates[i],
-        isLocked: planDates[i] > today,
+        isLocked: DEV_CONFIG.unlockAllPlans ? false : planDates[i] > today,
       });
     }
 
@@ -914,11 +912,13 @@ export default function PlanScreen() {
   if (!isReady) {
     return (
       <View style={styles.container}>
-      <StatusBar 
-        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
-        translucent 
-        backgroundColor="transparent" 
-      />
+        <StatusBar
+          barStyle={
+            Colors.background === "#07090F" ? "light-content" : "dark-content"
+          }
+          translucent
+          backgroundColor="transparent"
+        />
         <Animated.View
           entering={FadeIn.duration(600)}
           style={styles.loadingContainer}
@@ -960,11 +960,13 @@ export default function PlanScreen() {
   if (viewMode === "weekly") {
     return (
       <View style={styles.container}>
-      <StatusBar 
-        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
-        translucent 
-        backgroundColor="transparent" 
-      />
+        <StatusBar
+          barStyle={
+            Colors.background === "#07090F" ? "light-content" : "dark-content"
+          }
+          translucent
+          backgroundColor="transparent"
+        />
         <FlatList
           data={weekGroups}
           renderItem={renderWeeklyItem}
@@ -987,10 +989,12 @@ export default function PlanScreen() {
   // ─── Daily view (default) ─────────────────────────────────
   return (
     <View style={styles.container}>
-      <StatusBar 
-        barStyle={Colors.background === "#07090F" ? "light-content" : "dark-content"} 
-        translucent 
-        backgroundColor="transparent" 
+      <StatusBar
+        barStyle={
+          Colors.background === "#07090F" ? "light-content" : "dark-content"
+        }
+        translucent
+        backgroundColor="transparent"
       />
       <FlatList
         data={roadmap}
