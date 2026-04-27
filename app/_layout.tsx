@@ -19,6 +19,7 @@ import {
   View,
 } from "react-native";
 import "../global.css";
+import FatihaPlayer from "../src/components/shared/FatihaPlayer";
 import VersionOverlay from "../src/components/shared/VersionOverlay";
 import { AppProvider } from "../src/store/AppStore";
 import { UpdateInfo, UpdateService } from "../src/store/UpdateService";
@@ -150,6 +151,7 @@ function MainLayout({
           contentStyle: { backgroundColor: "transparent" },
         }}
       />
+      {!showCustomSplash && <FatihaPlayer />}
       {showCustomSplash && <CustomSplashScreen onFinish={onFinish} />}
 
       {updateInfo && blockType && (
@@ -240,25 +242,21 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
             },
           ]}
         >
-          <View style={styles.outerRing}>
-            <View style={styles.innerRing}>
-              <Image
-                source={require("../assets/images/android-icon-foreground.png")}
-                style={styles.logoImageSplash}
-                resizeMode="contain"
-              />
-            </View>
-          </View>
+          <Image
+            source={require("../assets/images/motqn_logo.png")}
+            style={styles.logoImageSplash}
+            resizeMode="contain"
+          />
         </Animated.View>
 
-        {/* Text Section */}
+        {/* Dedication: ongoing charity for the developer's late father */}
         <Animated.View style={[styles.textBlock, { opacity: fadeAnim }]}>
-          <Text style={styles.splashTitle}>MOTQN</Text>
-          <Text style={styles.tagline}>خطة متكاملة لإتقان حفظ القرآن</Text>
-          {/* Dedication: ongoing charity for the developer's late father */}
+          <View style={styles.dedicationDivider} />
+          <Text style={styles.dedicationLabel}>صدقة جارية</Text>
           <Text style={styles.dedicationText}>
-            صدقه جاريه علي روح والدي المهندس ايمن مبروك ريان
+            على روح والدي المهندس أيمن مبروك ريان
           </Text>
+          <Text style={styles.dedicationDua}>تقبّل الله منه ورحمه</Text>
         </Animated.View>
 
         {/* Progress Bar Section */}
@@ -315,62 +313,49 @@ const getStyles = (Colors: any) =>
       paddingHorizontal: 40,
     },
     logoContainer: {
-      marginBottom: Spacing.xl,
-    },
-    outerRing: {
-      width: 220,
-      height: 220,
-      borderRadius: 110,
-      borderWidth: 1,
-      borderColor: `${Colors.primary}15`,
+      marginBottom: Spacing.lg,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: `${Colors.primary}03`,
-    },
-    innerRing: {
-      width: 180,
-      height: 180,
-      borderRadius: 90,
-      backgroundColor: Colors.surface,
-      borderWidth: 1.5,
-      borderColor: `${Colors.primary}30`,
-      alignItems: "center",
-      justifyContent: "center",
-      shadowColor: Colors.primary,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.15,
-      shadowRadius: 20,
-      elevation: 5,
     },
     textBlock: {
       alignItems: "center",
       marginBottom: 40,
+      paddingVertical: 14,
+      paddingHorizontal: 22,
+      borderRadius: 16,
+      backgroundColor: `${Colors.gold}10`,
+      borderWidth: 1,
+      borderColor: `${Colors.gold}30`,
     },
-    splashTitle: {
+    dedicationDivider: {
+      width: 32,
+      height: 2,
+      backgroundColor: Colors.gold,
+      borderRadius: 2,
+      opacity: 0.6,
+      marginBottom: 8,
+    },
+    dedicationLabel: {
       fontFamily: "Tajawal_700Bold",
-      fontSize: Typography["3xl"],
-      fontWeight: Typography.extrabold,
-      color: Colors.textPrimary,
-      textAlign: "center",
-      letterSpacing: 1,
-    },
-    tagline: {
-      fontFamily: "Tajawal_400Regular",
-      fontSize: Typography.base,
-      color: Colors.textSecondary,
-      marginTop: 8,
-      textAlign: "center",
-      opacity: 0.8,
+      fontSize: 12,
+      fontWeight: "800",
+      letterSpacing: 2,
+      color: Colors.gold,
+      marginBottom: 6,
     },
     dedicationText: {
       fontFamily: "Tajawal_400Regular",
-      fontSize: 12,
-      color: Colors.gold,
-      marginTop: 14,
+      fontSize: 13,
+      color: Colors.textPrimary,
       textAlign: "center",
+      lineHeight: 20,
+    },
+    dedicationDua: {
+      fontFamily: "Tajawal_400Regular",
+      fontSize: 11,
+      color: Colors.gold,
+      marginTop: 6,
       opacity: 0.9,
-      lineHeight: 18,
-      letterSpacing: 0.3,
     },
     loadingContainer: {
       alignItems: "center",
@@ -398,7 +383,7 @@ const getStyles = (Colors: any) =>
       marginBottom: 8,
     },
     logoImageSplash: {
-      width: 120,
-      height: 120,
+      width: 240,
+      height: 240,
     },
   });

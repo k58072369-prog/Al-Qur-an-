@@ -41,16 +41,19 @@ export function DashboardHeader({
         <View style={{ width: 50 }} />
         <View style={styles.brandBlock}>
           <Image
-            source={require("../../../assets/images/logo.png")}
+            source={require("../../../assets/images/motqn_logo.png")}
             style={styles.headerLogo}
             resizeMode="contain"
           />
-          {/* App name displayed under the logo */}
-          <Text style={styles.appName}>MOTQN</Text>
-          {/* Dedication text shown under the app name on the main page */}
-          <Text style={styles.dedicationText}>
-            صدقه جاريه علي روح والدي{"\n"}المهندس ايمن مبروك ريان
-          </Text>
+          {/* Dedication card — shown clearly as ongoing charity for the developer's late father */}
+          <View style={styles.dedicationCard}>
+            <View style={styles.dedicationDivider} />
+            <Text style={styles.dedicationLabel}>صدقة جارية</Text>
+            <Text style={styles.dedicationText}>
+              على روح والدي{"\n"}المهندس أيمن مبروك ريان
+            </Text>
+            <Text style={styles.dedicationDua}>تقبّل الله منه ورحمه</Text>
+          </View>
         </View>
         <View style={styles.headerActions}>
           <TouchableOpacity
@@ -102,27 +105,51 @@ const getStyles = (Colors: any) =>
       alignItems: "center",
       marginBottom: Spacing.lg,
     },
-    headerLogo: { width: 75, height: 75 },
+    headerLogo: { width: 110, height: 110 },
     brandBlock: {
       alignItems: "center",
       justifyContent: "center",
       flex: 1,
     },
-    appName: {
+    dedicationCard: {
+      marginTop: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 14,
+      backgroundColor: `${Colors.gold}10`,
+      borderWidth: 1,
+      borderColor: `${Colors.gold}30`,
+      alignItems: "center",
+      maxWidth: 260,
+    },
+    dedicationDivider: {
+      width: 28,
+      height: 2,
+      backgroundColor: Colors.gold,
+      borderRadius: 2,
+      opacity: 0.6,
+      marginBottom: 6,
+    },
+    dedicationLabel: {
       fontFamily: Typography.heading,
-      fontSize: 20,
+      fontSize: 11,
       fontWeight: "800",
-      color: Colors.textPrimary,
-      marginTop: 4,
-      letterSpacing: 2,
+      letterSpacing: 1.5,
+      color: Colors.gold,
+      marginBottom: 4,
     },
     dedicationText: {
       fontFamily: Typography.body,
+      fontSize: 12,
+      color: Colors.textPrimary,
+      textAlign: "center",
+      lineHeight: 18,
+    },
+    dedicationDua: {
+      fontFamily: Typography.body,
       fontSize: 10,
       color: Colors.gold,
-      marginTop: 6,
-      textAlign: "center",
-      lineHeight: 14,
+      marginTop: 4,
       opacity: 0.85,
     },
     headerActions: { flexDirection: "row", gap: Spacing.md },
