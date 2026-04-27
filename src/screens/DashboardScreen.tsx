@@ -212,42 +212,6 @@ export default function DashboardScreen() {
           <Ionicons name="chevron-back" size={18} color={Colors.textTertiary} />
         </TouchableOpacity>
 
-        {/* Quick access to MOTQN.ai chat assistant */}
-        <TouchableOpacity
-          style={[
-            styles.quizActionCard,
-            { borderColor: `${Colors.primary}40` },
-          ]}
-          onPress={() => router.push("/(tabs)/chat" as any)}
-        >
-          <View
-            style={[
-              styles.quizActionIconBox,
-              { backgroundColor: `${Colors.primary}10` },
-            ]}
-          >
-            <Ionicons
-              name="chatbubbles"
-              size={24}
-              color={Colors.primary}
-            />
-          </View>
-          <View style={{ flex: 1, marginLeft: Spacing.md }}>
-            <Text
-              style={[
-                styles.actionTitle,
-                { color: Colors.primary, textAlign: "left" },
-              ]}
-            >
-              MOTQN.ai · شات
-            </Text>
-            <Text style={[styles.actionSub, { textAlign: "left" }]}>
-              اسأل مساعدك الذكي عن القرآن والحفظ
-            </Text>
-          </View>
-          <Ionicons name="chevron-back" size={18} color={Colors.textTertiary} />
-        </TouchableOpacity>
-
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>منهج الحفظ</Text>
           <View style={styles.pillBadge}>
