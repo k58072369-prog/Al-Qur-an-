@@ -56,7 +56,9 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+  const inputRef = useRef<TextInput>(null);
 
   const aiRef = useRef<GoogleGenAI | null>(null);
   if (!aiRef.current && GEMINI_API_KEY) {
@@ -68,9 +70,30 @@ export default function ChatScreen() {
       scrollRef.current?.scrollToEnd({ animated: true })
     );
 
+  const handleStart = () => {
+    if (state.settings.hapticsEnabled) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+    setHasStarted(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const sendMessage = async (rawText: string) => {
+    const text = rawText.trim();
+    if (!text || isLoading) return;
+    if (!hasStarted) setHasStarted(true);
+    await runSend(text);
+  };
+
   const handleSend = async () => {
     const text = input.trim();
     if (!text || isLoading) return;
+    setInput("");
+    await runSend(text);
+  };
+
+  const runSend = async (text: string) => {
+    if (!text) return;
 
     if (!aiRef.current) {
       setMessages((prev) => [
@@ -105,7 +128,6 @@ export default function ChatScreen() {
     };
 
     setMessages((prev) => [...prev, userMessage, assistantMessage]);
-    setInput("");
     setIsLoading(true);
     scrollToEnd();
 
@@ -209,7 +231,12 @@ export default function ChatScreen() {
           showsVerticalScrollIndicator={false}
         >
           {messages.length === 0 ? (
-            <EmptyState Colors={Colors} />
+            <EmptyState
+              Colors={Colors}
+              hasStarted={hasStarted}
+              onStart={handleStart}
+              onPickSuggestion={(s) => sendMessage(s)}
+            />
           ) : (
             messages.map((m) => (
               <Bubble key={m.id} message={m} Colors={Colors} />
@@ -226,25 +253,28 @@ export default function ChatScreen() {
         {/* Input */}
         <View style={styles.inputBar}>
           <TextInput
+            ref={inputRef}
             style={styles.input}
             value={input}
             onChangeText={setInput}
-            placeholder="اكتب رسالتك هنا…"
+            placeholder={
+              hasStarted ? "اكتب رسالتك هنا…" : "اضغط 'ابدأ الدردشة' للبدء"
+            }
             placeholderTextColor={Colors.textTertiary}
             multiline
             maxLength={4000}
             textAlign="right"
             writingDirection="rtl"
-            editable={!isLoading}
+            editable={hasStarted && !isLoading}
             onSubmitEditing={handleSend}
           />
           <TouchableOpacity
             style={[
               styles.sendBtn,
-              (!input.trim() || isLoading) && { opacity: 0.5 },
+              (!input.trim() || isLoading || !hasStarted) && { opacity: 0.5 },
             ]}
             onPress={handleSend}
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || !hasStarted}
             accessibilityLabel="إرسال"
           >
             <Ionicons name="paper-plane" size={18} color="#fff" />
@@ -255,7 +285,17 @@ export default function ChatScreen() {
   );
 }
 
-function EmptyState({ Colors }: { Colors: any }) {
+function EmptyState({
+  Colors,
+  hasStarted,
+  onStart,
+  onPickSuggestion,
+}: {
+  Colors: any;
+  hasStarted: boolean;
+  onStart: () => void;
+  onPickSuggestion: (text: string) => void;
+}) {
   const styles = getStyles(Colors);
   const suggestions = [
     "اقترح لي خطة مراجعة لجزء عمَّ خلال أسبوع",
@@ -272,16 +312,46 @@ function EmptyState({ Colors }: { Colors: any }) {
           resizeMode="contain"
         />
       </View>
-      <Text style={styles.emptyTitle}>كيف يمكنني مساعدتك اليوم؟</Text>
+      <Text style={styles.emptyTitle}>
+        {hasStarted ? "كيف يمكنني مساعدتك اليوم؟" : "أهلاً بك في MOTQN.ai"}
+      </Text>
       <Text style={styles.emptySubtitle}>
-        اسأل MOTQN.ai أي شيء عن القرآن، الحفظ، أو خطط المراجعة.
+        {hasStarted
+          ? "اسأل MOTQN.ai أي شيء عن القرآن، الحفظ، أو خطط المراجعة."
+          : "مساعدك الذكي للقرآن والحفظ. اضغط الزر بالأسفل لبدء محادثتك."}
+      </Text>
+
+      {!hasStarted && (
+        <TouchableOpacity
+          style={styles.startBtn}
+          onPress={onStart}
+          accessibilityLabel="ابدأ الدردشة"
+          activeOpacity={0.85}
+        >
+          <Ionicons name="chatbubbles" size={20} color="#fff" />
+          <Text style={styles.startBtnText}>ابدأ الدردشة</Text>
+        </TouchableOpacity>
+      )}
+
+      <Text style={styles.suggestHeader}>
+        {hasStarted ? "جرب أحد الأسئلة:" : "أمثلة على ما يمكنك سؤاله:"}
       </Text>
       <View style={styles.suggestList}>
         {suggestions.map((s) => (
-          <View key={s} style={styles.suggestionChip}>
+          <TouchableOpacity
+            key={s}
+            style={styles.suggestionChip}
+            onPress={() => onPickSuggestion(s)}
+            activeOpacity={0.7}
+          >
             <Ionicons name="sparkles" size={12} color={Colors.gold} />
             <Text style={styles.suggestionText}>{s}</Text>
-          </View>
+            <Ionicons
+              name="arrow-back"
+              size={14}
+              color={Colors.textTertiary}
+            />
+          </TouchableOpacity>
         ))}
       </View>
     </View>
@@ -400,7 +470,7 @@ const getStyles = (Colors: any) =>
     scroll: { flex: 1 },
     scrollContent: {
       padding: Spacing.lg,
-      paddingBottom: 120,
+      paddingBottom: 180,
     },
 
     bubbleRow: {
@@ -516,6 +586,36 @@ const getStyles = (Colors: any) =>
       paddingHorizontal: Spacing.lg,
       lineHeight: 20,
     },
+    startBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+      backgroundColor: Colors.primary,
+      paddingHorizontal: Spacing.xl,
+      paddingVertical: 14,
+      borderRadius: 28,
+      marginTop: Spacing.md,
+      marginBottom: Spacing.lg,
+      ...Shadow.md,
+    },
+    startBtnText: {
+      color: "#fff",
+      fontFamily: Typography.heading,
+      fontSize: 16,
+      fontWeight: "800",
+      letterSpacing: 0.3,
+    },
+    suggestHeader: {
+      fontFamily: Typography.body,
+      fontSize: 12,
+      color: Colors.textTertiary,
+      textAlign: "right",
+      width: "100%",
+      paddingHorizontal: Spacing.md,
+      marginTop: Spacing.sm,
+      marginBottom: Spacing.sm,
+    },
     suggestList: {
       gap: 8,
       width: "100%",
@@ -526,7 +626,7 @@ const getStyles = (Colors: any) =>
       alignItems: "center",
       gap: 8,
       paddingHorizontal: Spacing.md,
-      paddingVertical: 10,
+      paddingVertical: 12,
       backgroundColor: Colors.surface,
       borderWidth: 1,
       borderColor: Colors.border,
@@ -544,7 +644,7 @@ const getStyles = (Colors: any) =>
       position: "absolute",
       left: Spacing.lg,
       right: Spacing.lg,
-      bottom: Platform.OS === "ios" ? 30 : 20,
+      bottom: Platform.OS === "ios" ? 100 : 90,
       flexDirection: "row",
       alignItems: "flex-end",
       gap: 8,
