@@ -253,8 +253,12 @@ function CustomSplashScreen({ onFinish }: { onFinish: () => void }) {
 
         {/* Text Section */}
         <Animated.View style={[styles.textBlock, { opacity: fadeAnim }]}>
-          <Text style={styles.splashTitle}>مفاتيح حفظ القرآن</Text>
+          <Text style={styles.splashTitle}>MOTQN</Text>
           <Text style={styles.tagline}>خطة متكاملة لإتقان حفظ القرآن</Text>
+          {/* Dedication: ongoing charity for the developer's late father */}
+          <Text style={styles.dedicationText}>
+            صدقه جاريه علي روح والدي المهندس ايمن مبروك ريان
+          </Text>
         </Animated.View>
 
         {/* Progress Bar Section */}
@@ -357,6 +361,16 @@ const getStyles = (Colors: any) =>
       marginTop: 8,
       textAlign: "center",
       opacity: 0.8,
+    },
+    dedicationText: {
+      fontFamily: "Tajawal_400Regular",
+      fontSize: 12,
+      color: Colors.gold,
+      marginTop: 14,
+      textAlign: "center",
+      opacity: 0.9,
+      lineHeight: 18,
+      letterSpacing: 0.3,
     },
     loadingContainer: {
       alignItems: "center",

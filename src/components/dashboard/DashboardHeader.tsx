@@ -39,11 +39,19 @@ export function DashboardHeader({
     >
       <View style={styles.topRow}>
         <View style={{ width: 50 }} />
-        <Image
-          source={require("../../../assets/images/logo.png")}
-          style={styles.headerLogo}
-          resizeMode="contain"
-        />
+        <View style={styles.brandBlock}>
+          <Image
+            source={require("../../../assets/images/logo.png")}
+            style={styles.headerLogo}
+            resizeMode="contain"
+          />
+          {/* App name displayed under the logo */}
+          <Text style={styles.appName}>MOTQN</Text>
+          {/* Dedication text shown under the app name on the main page */}
+          <Text style={styles.dedicationText}>
+            صدقه جاريه علي روح والدي{"\n"}المهندس ايمن مبروك ريان
+          </Text>
+        </View>
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.iconBtn}
@@ -95,6 +103,28 @@ const getStyles = (Colors: any) =>
       marginBottom: Spacing.lg,
     },
     headerLogo: { width: 75, height: 75 },
+    brandBlock: {
+      alignItems: "center",
+      justifyContent: "center",
+      flex: 1,
+    },
+    appName: {
+      fontFamily: Typography.heading,
+      fontSize: 20,
+      fontWeight: "800",
+      color: Colors.textPrimary,
+      marginTop: 4,
+      letterSpacing: 2,
+    },
+    dedicationText: {
+      fontFamily: Typography.body,
+      fontSize: 10,
+      color: Colors.gold,
+      marginTop: 6,
+      textAlign: "center",
+      lineHeight: 14,
+      opacity: 0.85,
+    },
     headerActions: { flexDirection: "row", gap: Spacing.md },
     iconBtn: {
       width: 40,

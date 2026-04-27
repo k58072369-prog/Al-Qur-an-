@@ -23,6 +23,8 @@ const ICONS: Record<string, { outline: string; filled: string }> = {
   },
   review: { outline: "heart-outline", filled: "heart" },
   progress: { outline: "stats-chart-outline", filled: "stats-chart" },
+  // New "شات" (Chat) tab — uses a chat bubble icon.
+  chat: { outline: "chatbubbles-outline", filled: "chatbubbles" },
 };
 
 function TabItem({
@@ -189,6 +191,8 @@ export default function TabsLayout() {
       <Tabs.Screen name="progress" options={{ title: "التقدم" }} />
       <Tabs.Screen name="dashboard" options={{ title: "الرئيسية" }} />
       <Tabs.Screen name="memorization" options={{ title: "الخطة" }} />
+      {/* New "شات" tab — entry point to MOTQN.ai assistant */}
+      <Tabs.Screen name="chat" options={{ title: "شات" }} />
     </Tabs>
   );
 }
