@@ -191,7 +191,7 @@ export default function ChatScreen() {
         <View style={styles.brandRow}>
           <View style={styles.logoBubble}>
             <Image
-              source={require("../../assets/images/logo.png")}
+              source={require("../../assets/images/logo_transparent.png")}
               style={styles.logoImg}
               resizeMode="contain"
             />
@@ -307,8 +307,8 @@ function EmptyState({
     <View style={styles.emptyWrap}>
       <View style={styles.emptyLogoCircle}>
         <Image
-          source={require("../../assets/images/logo.png")}
-          style={{ width: 70, height: 70 }}
+          source={require("../../assets/images/logo_transparent.png")}
+          style={styles.emptyLogoImg}
           resizeMode="contain"
         />
       </View>
@@ -421,17 +421,17 @@ const getStyles = (Colors: any) =>
       gap: Spacing.md,
     },
     logoBubble: {
-      width: 44,
-      height: 44,
-      borderRadius: 14,
-      backgroundColor: Colors.glass,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: `${Colors.primary}14`,
       borderWidth: 1,
-      borderColor: Colors.glassBorder,
+      borderColor: `${Colors.primary}33`,
       alignItems: "center",
       justifyContent: "center",
       overflow: "hidden",
     },
-    logoImg: { width: 36, height: 36 },
+    logoImg: { width: 30, height: 30 },
     title: {
       fontFamily: Typography.heading,
       fontSize: 20,
@@ -556,18 +556,22 @@ const getStyles = (Colors: any) =>
     emptyWrap: {
       alignItems: "center",
       justifyContent: "center",
-      paddingTop: 40,
+      paddingTop: 32,
     },
     emptyLogoCircle: {
-      width: 110,
-      height: 110,
-      borderRadius: 55,
-      backgroundColor: Colors.glass,
+      width: 88,
+      height: 88,
+      borderRadius: 44,
+      backgroundColor: `${Colors.primary}10`,
       borderWidth: 1,
-      borderColor: Colors.glassBorder,
+      borderColor: `${Colors.primary}22`,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: Spacing.lg,
+      marginBottom: Spacing.md,
+    },
+    emptyLogoImg: {
+      width: 64,
+      height: 64,
     },
     emptyTitle: {
       fontFamily: Typography.heading,
